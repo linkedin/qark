@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <title>QARK Report</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <!-- Chart.js for charts -->
+    <script src="js/Chart.js/Chart.js"></script>
+    <!--[if lt IE 9]>
+    <script src="js/html5.js"></script>
+
+    <![endif]-->
+    <link href="css/styles.css" rel="stylesheet">
+</head>
+<body>
+<div class="navbar navbar-inverse navbar-fixed-top gradient">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="#">QARK</a>
+    </div>
+    <div class="collapse navbar-collapse">
+        <!--
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="#">Home</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#contact">Contact</a></li>
+          </ul>
+        -->
+    </div>
+    <!--/.nav-collapse -->
+</div>
+<!--/.navbar -->
+
+<div class="row-offcanvas row-offcanvas-left">
+    <div id="sidebar" class="sidebar-offcanvas">
+        <div class="gradient2 col-md-12">
+            <h3>Information</h3>
+            <ul class="nav nav-pills nav-stacked">
+                <li class="active"><a href="#dashboard" data-toggle="tab">Dashboard</a></li>
+                <li><a href="#manifest" data-toggle="tab">Manifest</a></li>
+                <li><a href="#appcomponents" data-toggle="tab">App Components</a></li>
+                <li><a href="#webviews" data-toggle="tab">Web Views</a></li>
+                <li><a href="#x509" data-toggle="tab">X.509 Issues</a></li>
+                <li><a href="#filepermission" data-toggle="tab">File Permissions</a></li>
+                <li><a href="#crypto" data-toggle="tab">Crypto bugs</a></li>
+                <li><a href="#pendingintent" data-toggle="tab">Pending Intents</a></li>
+                <li><a href="#adbcommands" data-toggle="tab">ADB Commands</a></li>
+                <li><a href="#parsingerrors" data-toggle="tab">Parsing Errors</a></li>
+                <li><a href="#osbugs" data-toggle="tab">OS bugs</a></li>
+                <li><a href="#references" data-toggle="tab">References</a></li>
+                <li><a href="#about" data-toggle="tab">About</a></li>
+            </ul>
+        </div>
+    </div>
+    <div id="main">
+        <div class="col-md-12">
+            <p class="visible-xs">
+                <button type="button" class="btn btn-primary btn-xs" data-toggle="offcanvas"><i
+                        class="glyphicon glyphicon-chevron-left"></i></button>
+            </p>
+            <br>
+
+            <div class="tab-content">
+
+                <div id="dashboard" class="tab-pane active">
+                    <div class="row">
+                        <div class="col-md-12">
+
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-12 col-sm-12">
+                            <div class="well">
+
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <h2><strong>STATIC CODE ANALYSIS RESULT</strong></h2>
+
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-12 col-sm-12">
+                            <div class="">
+
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <h6>
+                                            <strong>SOURCE:</strong>
+                                            <strong><span id="apkpath"></span></strong>
+
+                                        </h6>
+                                        <h6>
+                                            <strong>TOTAL FILES:</strong>
+                                            <strong><span id="totalfiles"></span></strong>
+
+                                        </h6>
+                                        <h6>
+                                            <strong>JAVA FILES:</strong>
+                                            <strong><span id="javafiles"></span></strong>
+
+                                        </h6>
+                                        <h6>
+                                            <strong><span id="restorestats"></span>
+                                            </strong>
+                                        </h6>
+
+                                    </div>
+
+                                    <div class="col-lg-6">
+
+
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-12 col-sm-12">
+                            <div class="well">
+
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="container-fluid">
+
+                                            <div class="row">
+                                                <div class="col-xs-3 col-md-3">
+
+                                                    <div class="panel status panel-danger">
+                                                        <div class="panel-heading">
+                                                            <h1 id="vulnerability_count" class="panel-title text-center"></h1>
+                                                        </div>
+                                                        <div class="panel-body text-center">
+                                                            <strong>Potential Vulnerabilities</strong>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                                <div class="col-xs-6 col-md-3">
+
+                                                    <div class="panel status panel-warning">
+                                                        <div class="panel-heading">
+                                                            <h1 id="warning_count" class="panel-title text-center"></h1>
+                                                        </div>
+                                                        <div class="panel-body text-center">
+                                                            <strong>Warnings</strong>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                                <div class="col-xs-6 col-md-3">
+
+                                                    <div class="panel status panel-success">
+                                                        <div class="panel-heading">
+                                                            <h1 id="information_count" class="panel-title text-center"></h1>
+                                                        </div>
+                                                        <div class="panel-body text-center">
+                                                            <strong>Informational</strong>
+                                                        </div>
+                                                    </div>
+
+
+                                                </div>
+                                                <div class="col-xs-6 col-md-3">
+
+                                                    <div class="panel status panel-info">
+                                                        <div class="panel-heading">
+                                                            <h1 id="debug_count" class="panel-title text-center"></h1>
+                                                        </div>
+                                                        <div class="panel-body text-center">
+                                                            <strong>Debug</strong>
+                                                        </div>
+                                                    </div>
+
+
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+                </div>
+
+                <div id="manifest" class="tab-pane">
+                    <div class="row">
+                        <div class="col-md-12">
+
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-12 col-sm-12">
+                            <div class="">
+                                <div class="row">
+                                    <div id="manifest-issues" class="col-lg-12">
+                                        <pre id="rawmanifest"></pre>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+
+
+
+                <div id="appcomponents" class="tab-pane">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <!--<div class="well">-->
+                                <!--<p>-->
+                                    <!--Issues related to Application Components.-->
+                                <!--</p>-->
+                            <!--</div>-->
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-12 col-sm-12">
+                            <div class="">
+
+                                <div class="row">
+                                    <div id="appcomponent-issues" class="col-lg-12">
+
+
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+
+
+
+                <div id="webviews" class="tab-pane">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="well">
+                                <p>
+                                    A View that displays web pages. This class is the basis upon which you can roll your
+                                    own web browser or simply display some online content within your Activity. It uses
+                                    the WebKit rendering engine to display web pages and includes methods to navigate
+                                    forward and backward through a history, zoom in and out, perform text searches and
+                                    more. WebViews may be implemented using the "Android/AOSP" (WebViewClient) or 
+                                    Chrome (WebChromeClient) browsers.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-12 col-sm-12">
+                            <div>
+
+                                <div class="row">
+                                    <div>
+
+
+                                        <div class="container-fluid">
+                                            <div class="row-fluid">
+
+
+                                                <div id="webview-issues-list">
+
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+
+
+
+                <div id="x509" class="tab-pane">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="well">
+                                <p>
+                                    This is a list of all the findings related to Certificate validation.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-12 col-sm-12">
+                            <div>
+
+                                <div class="row">
+                                    <div>
+
+
+                                        <div class="container-fluid">
+                                            <div class="row-fluid">
+
+
+                                                <div id="x509-issues-list">
+
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                
+
+                <div id="filepermission" class="tab-pane">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="well">
+                                <p>
+                                    This section lists any issues related to File permissions.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-10 col-sm-10">
+                            <div>
+
+                                <div class="row">
+                                    <div>
+
+
+                                        <div class="container-fluid">
+                                            <div class="row-fluid">
+
+
+                                                <div id="filepermission-issues-list">
+
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div id="pendingintent" class="tab-pane">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="well">
+                                <p>
+                                    This section lists any issues related to pending intents.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-12 col-sm-12">
+                            <div>
+
+                                <div class="row">
+                                    <div>
+
+
+                                        <div class="container-fluid">
+                                            <div class="row-fluid">
+
+
+                                                <div id="pendingintent-issues-list">
+
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+
+                <div id="crypto" class="tab-pane">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="well">
+                                <p>
+                                    This section lists any issues related to crypto vulnerabilities in the application
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-10 col-sm-10">
+                            <div>
+
+                                <div class="row">
+                                    <div>
+
+
+                                        <div class="container-fluid">
+                                            <div class="row-fluid">
+
+
+                                                <div id="crypto-issues-list">
+
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+
+                <div id="adbcommands" class="tab-pane">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="well">
+                                <p>
+                                    Until we perfect this, for manually testing, run the following command to see all the options and their meanings: <kbd>adb shell am </kbd>. Make sure to update qark frequently to get all the enhancements! You'll also find some good examples here: <a href="http://xgouchet.fr/android/index.php?article42/launch-intents-using-adb">http://xgouchet.fr/android/index.php?article42/launch-intents-using-adb</a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-12 col-sm-12">
+                            <div>
+
+                                <div class="row">
+                                    <div>
+
+
+                                        <div class="container-fluid">
+                                            <div class="row-fluid">
+
+
+                                                <div id="adbcommands-issues-list">
+
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+
+                <div id="parsingerrors" class="tab-pane">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="well">
+                                <p>
+                                    Until we perfect this, please review these files manually. Doe to parsing errors, it is possible that an issue may not have been reported correctly.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-12 col-sm-12">
+                            <div>
+
+                                <div class="row">
+                                    <div>
+
+
+                                        <div class="container-fluid">
+                                            <div class="row-fluid">
+
+
+                                                <div id="issues-list">
+                                                <span id="parsingerror-issues-list">
+
+                                                </span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+
+                <div id="osbugs" class="tab-pane">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="well">
+                                <p>
+                                    This section is related to any operating system related issues. This information was
+                                    identified from the application's manifest and we encourage you to understand the type
+                                    of vulnerabilities that live ourside your application's sandbox but may affect your
+                                     application in some way or the other.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-8 col-sm-8">
+                            <div class="well">
+
+                                <div class="row">
+                                    <div class="col-lg-8">
+                                        <h2>OS Version specific bugs</h2>
+
+                                        <p class="text-justify"></p>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-sm-4">
+                            <div class="well">
+                                <p></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+
+                <div id="references" class="tab-pane">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="">
+                                <p>
+                                    This is a list of resources you may refer to understand more about android security
+                                     in general and also how specific programming mistakes or insecure-by-default settings may manifest themselves into
+                                     vulnerabilities. We are currently hand picking credible resources to add to the list. Please check for updates to get a revised list of references.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-12 col-sm-12">
+                            <div class="">
+
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <h2>List of resources</h2>
+                                        <br><br>
+                                        <ul><li><p class="">For general Android security information: <a href="http://developer.android.com/training/articles/security-tips.html">http://developer.android.com/training/articles/security-tips.html</a></li>
+
+<li>
+For information on proper TLS implementation: <a href="http://developer.android.com/training/articles/security-ssl.html">http://developer.android.com/training/articles/security-ssl.html</a></li>
+<li>
+A great guide to Android security, from the Japanese Smartphone Security Association: <a href="https://www.jssec.org/report/android_securecoding_en_20140801.html">https://www.jssec.org/report/android_securecoding_en_20140801.html</a></li>
+                                        </p>
+                                            </ul>
+                                        <br><br><br>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div id="about" class="tab-pane">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="">
+                                <h2>
+                                    <strong>QUICK ANDROID REVIEW KIT</strong>
+                                </h2>
+                                <strong>
+                                    Version 0.9
+                                </strong>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-12 col-sm-12">
+                            <div class="">
+
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <br><br><br>
+                                        <h4><strong>Source:</strong></h4>
+
+                                        <p class="">Github: <a href="https://www.github.com/linkedin/qark">https://www.github.com/linkedin/qark</a>
+<br/>
+<h4><strong>Authors:</strong></h4><strong>Anthony Trummer: </strong><a href="https://www.linkedin.com/in/tonytrummer">https://www.linkedin.com/in/tonytrummer</a>
+<br/>
+<strong>Tushar Dalvi: </strong><a href="https://www.linkedin.com/in/tdalvi">https://www.linkedin.com/in/tdalvi</a>
+                                        </p>
+                                        <br/><br/>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-xs-12">
+                        <div class="well">
+                            <p>
+                                QARK Version 0.9
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--/row-offcanvas -->
+
+</div>
+<!-- /.modal -->
+<!-- script references -->
+<script src="js/jquery-2.1.4.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/scripts.js"></script>
+<link rel="stylesheet" href="js/highlight/styles/magula.css">
+<script src="js/highlight/highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+</body>
+</html>

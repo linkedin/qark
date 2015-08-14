@@ -1,0 +1,23 @@
+<html>
+<head>
+<style>
+  body {background-color:black}
+</style>
+</head>
+
+<body>
+<script>
+document.write("<p style=\"color:red\">Javascript is enabled, which allows for XSS (Cross-site scripting).</p><br>");
+document.write("<p style=\"color:red\">If this is required for operation, you can still take defensive measures to prevent session theft:</p>");
+document.write("<p style=\"color:red\">1. Do not open third-party sites in this WebView</p></br>");
+document.write("<p style=\"color:red\">2. Do not open pages which contain user-controlled data</p></br>");
+document.write("<p style=\"color:red\">3. Ensure cookies have HTTPOnly flag configured and/or do not make them available to this WebView</p></br>");
+document.write("<p style=\"color:red\">If there are any vulnerable coookies, they will be listed here: "+document.cookie+"</p>");
+document.write("<p style=\"color:red\">If you need to verify alerts are enabled, for PoCs click the button below. This only works for Chrome WebViews, not WebViews that use the AOSP &quot;Android&quot; browser. </p>")
+document.write("<button onclick = \"setTimeout(function(){alert('Alert Enabled')},100)\">Click Here</button>")
+</script>
+
+
+<noscript><p style="color:green"><b>This WebView does not appear to support JavaScript!<b></p></noscript>
+</body>
+</html>

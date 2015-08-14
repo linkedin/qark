@@ -1,0 +1,22 @@
+<resources>
+    <string-array name="exportedReceivers"></string-array>
+    <string-array name="exportedServices"></string-array>
+    <string-array name="exportedContentProviders"></string-array>
+    <string-array name="exportedActivities"></string-array>
+    <string-array name="exportedBroadcasts"></string-array>
+    <string-array name="webViewTests">
+        <item>"JS_AOSP"</item>
+        <item>"JS_CHROME"</item>
+        <item>"FS_AOSP"</item>
+        <item>"FS_CHROME"</item>
+        <item>"BU_AOSP"</item>
+        <item>"BU_CHROME"</item>
+        <item>"SOP_AOSP"</item>
+        <item>"SOP_CHROME"</item>
+        <item>"IFRAME_AOSP</item>
+        <item>"IFRAME_CHROME</item>
+    </string-array>
+    <string-array name="pendingIntents">
+        <item>"Coming Soon.."</item>
+    </string-array>
+</resources>

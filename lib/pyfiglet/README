@@ -1,0 +1,136 @@
+All of the documentation and the majority of the work done was by
+    Christopher Jones (cjones@insub.org).
+Packaged by Peter Waller <peter.waller@gmail.com>,
+various enhancements by Stefano Rivera <stefano@rivera.za.net>.
+
+                        _|_|  _|            _|              _|
+_|_|_|    _|    _|    _|            _|_|_|  _|    _|_|    _|_|_|_|
+_|    _|  _|    _|  _|_|_|_|  _|  _|    _|  _|  _|_|_|_|    _|
+_|    _|  _|    _|    _|      _|  _|    _|  _|  _|          _|
+_|_|_|      _|_|_|    _|      _|    _|_|_|  _|    _|_|_|      _|_|
+_|              _|                      _|
+_|          _|_|                    _|_|
+
+
+SYNOPSIS
+
+	pyfiglet is a full port of FIGlet (http://www.figlet.org/) into pure
+	python. It takes ASCII text and renders it in ASCII art fonts (like
+	the title above, which is the 'block' font).
+
+FAQ
+
+	Q. Why? WHY?!
+	A. I was bored. Really bored.
+
+	Q. What the hell does this do that FIGlet doesn't?
+	A. Not much, except allow your font collection to live
+           in one big zipfile. The point of this code is to embed
+           dynamic figlet rendering in Python without having to
+           execute an external program, although it operates on the
+           commandline as well.  See below for USAGE details. You can
+           think of this as a python FIGlet driver.
+
+	Q. Does this support kerning/smushing like FIGlet?
+	A. Yes, yes it does. Output should be identical to FIGlet. If
+           not, this is a bug, which you should report to me!
+
+	Q. Can I use/modify/redstribute this code?
+	A. Yes, under the terms of the GPL (see LICENSE below).
+
+	Q. I improved this code, what should I do with it?
+	A. You can mail patches to <cjones@insub.org>. Particularly bugfixes.
+           If you make changes to the kerning/mushing/rendering portion, PLEASE
+           test it throroughly. The code is fragile and complex.
+
+
+USAGE
+
+	You can use pyfiglet in one of two ways. First, it operates on the
+	commandline as C figlet does and supports most of the same options.
+	Run with --help to see a full list of tweaks.  Mostly you will only
+	use -f to change the font. It defaults to standard.flf.
+
+	tools/pyfiglet 'text to render'
+
+	Pyfiglet is also a library that can be used in python code:
+
+	from pyfiglet import Figlet
+	f = Figlet(font='slant')
+	print f.renderText('text to render')
+
+
+AUTHOR
+
+	pyfiglet is a *port* of FIGlet, and much of the code is directly translated
+	from the C source. I optimized some bits where I could, but because the smushing
+	and kerning code is so incredibly complex, it was safer and easier to port the logic
+	almost exactly.  Therefore, I can't really take much credit for authorship, just
+	translation. The original authors of FIGlet are listed on their website  at
+	http://www.figlet.org/.
+
+	The Python port was done by Christopher Jones <cjones@insub.org> (http://gruntle.org/).
+	It is currently maintained by Peter Waller (p@pwaller.net, github:pwaller)
+
+THANKS
+
+	github:stefanor for various bug fixes and improvements and the debian packaging.
+
+	Thanks to anyone who contributed an issue or code on github!
+
+LICENSE
+
+	Copyright (C) 2007 Christopher Jones <cjones@insub.org>
+
+	This program is free software; you can redistribute it and/or
+	modify it under the terms of the GNU General Public License
+	as published by the Free Software Foundation; either version 2
+	of the License, or (at your option) any later version.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
+
+	(see LICENSE for full details)
+
+CHANGELOG
+
+	2015-05-27 0.7.4
+
+	    #43 Don't leak file handles
+
+	2015-04-14 0.7.3
+
+	    #41 Add newline and text wrapping support
+
+	2014-09-14 0.7.2
+
+		#35 Add this CHANGELOG
+		#36 Bug fix for #34 (broken --reverse and --flip)
+			(reported "character mapping must return integer, None or unicode")
+
+	2014-07-27 0.7.1
+
+		#29 Fix for UTF8 regression
+		#31 Add __main__ entry point
+		#32 Pep8 the code and minor refactoring
+		#33 Trove classifiers update
+
+	2014-06-02 0.7
+
+		#9 	Add --list_fonts and --info_font
+		#10 Add tools/pyfiglet_example for listing all fonts
+		#11 Fix the pyfiglet command (had bad python path)
+		#12 Pyflakes fixes
+		#13 Configure Travis Continuous Integration
+		#17 Documentation usage sample fix
+		#19 Enable pyfiglet to use extended ASCII chars
+		#20 Add two cyrillic fonts
+		#21 Python 3 support
+		#27 Code improvements
+		#28 Human readable font list (-l)

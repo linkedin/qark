@@ -1,0 +1,29 @@
+<html>
+<head>
+<style>
+  body {background-color:black}
+</style>
+</head>
+<body>
+<script>
+if(document.domain)
+{
+	document.write("The base domain for this WebView is set to " + document.domain);
+	if (document.domain!=window.location.hostname)
+	{
+		document.write("<p style=\"color:red\">The BaseURL property appears to override the actual domain loaded in this WebView</p> <br>");
+	}
+	else
+	{
+		document.write("<p style=\"color:gold\">Something is odd here, the results are inconclusive</p>b")
+	}
+}
+else
+{
+	document.write("<p style=\"color:green\">This file appears to be running in the <b>file</b> context, as document.domain is not set</p> <br>");
+	document.write("<p style=\"color:green\">If the BaseURL were set, the document.domain would be set to it's value</p>")
+}
+</script>
+
+</body>
+</html>

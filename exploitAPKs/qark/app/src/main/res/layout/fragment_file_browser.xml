@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
+    android:padding="3dp" >
+
+    <!--
+    android:layout_weight="1"
+    android:layout_weight="1"
+    android:layout_height="wrap_content"
+    android:layout_width="fill_parent"
+    android:layout_width="fill_parent"
+    android:layout_gravity="top"
+    android:background = "#f00"
+    android:background = "#0f0"
+    
+    -->
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="0dp"
+        android:gravity="top"
+        android:orientation="horizontal"
+        android:padding="0dp" >
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="0dp"
+            android:layout_weight="1"
+            android:gravity="top"
+            android:orientation="horizontal"
+            android:padding="0dp" >
+
+            <Button
+                android:id="@+id/upDirectoryButton"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top"
+                android:layout_margin="0dp"
+                android:layout_weight="1"
+                android:padding="0dp"
+                android:drawableLeft="@drawable/dir_up"
+                android:text="Up" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="0dp"
+            android:layout_weight="1"
+            android:gravity="top"
+            android:orientation="horizontal"
+            android:padding="0dp" >
+
+            <Button
+                android:id="@+id/selectCurrentDirectoryButton"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top"
+                android:gravity = "center|center_vertical"
+                android:layout_margin="0dp"
+                android:layout_weight="1"
+                android:padding="0dp"
+                android:text="Select" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/currentDirectoryTextView"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Current folder: \n/THis/is/a/long/path/to/test/if/this/will/span/multiple/lines" />
+
+    <ListView
+        android:id="@+id/fileListView"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_marginTop="5dp"
+        android:layout_weight="1" />
+
+</LinearLayout>

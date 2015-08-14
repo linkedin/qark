@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+    <menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+        <group android:checkableBehavior="single">
+            <item
+                android:id="@+id/nav_broadcast_intent_sniffer"
+                android:icon="@drawable/ic_visibility_black_24dp"
+                android:title="@string/nav_title_intent_sniffer" />
+            <item
+                android:id="@+id/nav_exported_components"
+                android:icon="@drawable/ic_launch_black_24dp"
+                android:title="@string/nav_title_exported_components" />
+            <item
+                android:id="@+id/nav_tap_jacking"
+                android:icon="@drawable/ic_mouse_black_24dp"
+                android:title="@string/nav_title_tap_jacking" />
+            <item
+                android:id="@+id/nav_web_view_tests"
+                android:icon="@drawable/web_view"
+                android:title="@string/nav_title_web_view_tests" />
+            <item
+                android:id="@+id/nav_file_browser"
+                android:icon="@drawable/ic_folder_black_24dp"
+                android:title="@string/nav_title_file_browser" />
+            <item
+                android:id="@+id/nav_custom_intent"
+                android:icon="@drawable/custom_intent"
+                android:title="@string/nav_title_custom_intent" />
+        </group>
+    </menu>

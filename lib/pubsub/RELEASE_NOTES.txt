@@ -1,0 +1,71 @@
+For PyPubSub v3.3.0
+^^^^^^^^^^^^^^^^^^^^^
+
+* cleanup low-level API: exception classes, moved some out of pub module that did not 
+  belong there (clutter), move couple modules, 
+* completed the reference documentation
+* support installation via pip
+* follow some guidelines in some PEPs such as PEP 396 and PEP 8
+* support Python 2.6, 2.7, and 3.2 to 3.4a4 but drop support for Python <= 2.5
+
+For PyPubSub v3.2.0
+^^^^^^^^^^^^^^^^^^^
+
+This is a minor release for small improvements made (see docs/CHANGELOG.txt) 
+based on feedback from user community. In particular an XML reader for 
+topic specification contributed by Josh English. Also cleaned up the 
+documentation, updated the examples folder (available in source distribution
+as well as `online`_). 
+
+.. _online: https://sourceforge.net/p/pubsub/code/HEAD/tree/
+
+Only 3 changes to API (function names): 
+
+* renamed pub.getDefaultRootAllTopics to pub.getDefaultTopicTreeRoot
+* removed pub.importTopicTree: use pub.addTopicDefnProvider(source, format)
+* renamed pub.exportTopicTree to pub.exportTopicTreeSpec
+
+Oliver Schoenborn
+September 2013
+
+
+PyPubSub 3.1.2
+^^^^^^^^^^^^^^^^
+
+This is a minor release for small improvements made (see docs/CHANGELOG.txt) 
+based on feedback from user community. Also extended the documentation. See 
+pubsub.sourceforge.net for installation and usage. See the examples folder for 
+some useful examples. 
+
+Oliver Schoenborn
+Nov 2011
+
+
+PyPubSub 3.1.1b1
+^^^^^^^^^^^^^^^^^^
+
+Docs updated. 
+
+Oliver Schoenborn
+May 2010
+
+
+For PyPubSub v3.1.0b1
+^^^^^^^^^^^^^^^^^^^^^^
+
+Major cleanup of the API since 3.0 and better support 
+for the legacy wxPython code. Defining a topic tree 
+via a text file has been improved drastically, making it
+simpler to document topic messages and payload data
+required or optional. More examples have been added, 
+and the messaging protocols clarified. 
+
+The included docs are not yet updated, that's what I'm 
+working on now and will lead to the 3.1.1b1 release. 
+I'm also working on an add-on module that would allow 
+two applications to communicate over the network using 
+pubsub-type messaging (with topics, etc). The design 
+is almost complete. 
+
+Oliver Schoenborn
+Jan 2010
