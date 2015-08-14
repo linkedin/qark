@@ -15,20 +15,20 @@ describe the copyrights, license, and restrictions which apply to that code.
 The following pieces of software have additional or alternate copyrights,
 licenses, and/or restrictions:
 
-Program                  Directory			    Type
--------                  ---------			    ---------
-axmlparserpy		    /lib/axmlparserpy 	    (GNU LGPL)
-Beautiful Soup 4	    /lib/bs4		        (MIT)
-dex2jar			        /lib/dex2jar		    (Apache 2.0)
-ASM			            /lib/dex2jar/asm	    (custom)
-Commons-IO		        /lib/dex2jar/		    (Apache 2.0)
-dx			            /lib/dex2jar/		    (Apache 2.0)
-Jasmin			        /lib/dex2jar/		    (custom)
-jQuery			        /lib/jquery/		    (MIT)
-plyj			        /lib/plyj		        (BSD)
-procyon			        /lib/procyon/		    (Apache 2.0)
-pyfiglet                /lib/pyfiglet/          (GNU GPL)
-pubsub                  /lib/pubsub/            (BSD)
-progressbar             /lib/progressbar/       (GNU LGPL)
-colorama                /lib/colorama/          (BSD)
-blessings               /lib/blessings/         (BSD)
+Program                     Directory               Type
+-------                     ---------               ---------
+axmlparserpy                /lib/axmlparserpy       (GNU LGPL)
+Beautiful Soup 4            /lib/bs4                (MIT)
+dex2jar                     /lib/dex2jar            (Apache 2.0)
+ASM                         /lib/dex2jar/asm        (custom)
+Commons-IO                  /lib/dex2jar/           (Apache 2.0)
+dx                          /lib/dex2jar/           (Apache 2.0)
+Jasmin                      /lib/dex2jar/           (custom)
+jQuery                      /lib/jquery/            (MIT)
+plyj                        /lib/plyj               (BSD)
+procyon                     /lib/procyon/           (Apache 2.0)
+pyfiglet                    /lib/pyfiglet/          (GNU GPL)
+pubsub                      /lib/pubsub/            (BSD)
+progressbar                 /lib/progressbar/       (GNU LGPL)
+colorama                    /lib/colorama/          (BSD)
+blessings                   /lib/blessings/         (BSD)
