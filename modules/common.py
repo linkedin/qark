@@ -430,8 +430,9 @@ def tree(l):
 
 def normalizeActivityNames(activityList,package_name):
 	for d in range(0,len(activityList)):
-		if not re.match(r''+str(package_name),str(activityList[d])):
+		if re.match(r'\..*',str(activityList[d])):
 			activityList[d]=str(package_name)+str(activityList[d])
+	return activityList
 
 def check_export(tag,output):
 	"""

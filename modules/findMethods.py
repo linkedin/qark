@@ -168,7 +168,7 @@ def find_entry(tree, comp_type):
 		elif comp_type == 'receiver':
 			entry = ['onReceive']
 		elif comp_type == 'service':
-			entry = ['onCreate', 'onBind', 'onStartCommand']
+			entry = ['onCreate', 'onBind', 'onStartCommand', 'onHandleIntent']
 		#TODO - The provider is a unicorn and needs more work
 		elif comp_type == 'provider':
 			entry = ['onReceive']

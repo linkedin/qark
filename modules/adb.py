@@ -6,6 +6,7 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.'''
 
 from modules import common,intents,report
+import re
 
 def showAdbCommands(component,compType,packageName):
 	#Print ADB commands for exploitation
@@ -29,11 +30,17 @@ def showAdbCommands(component,compType,packageName):
 							extras_list+=intents.find_extras(str(c[1]),common.sourceDirectory)
 							if len(extras_list)>0:
 								for t in extras_list:
-									command = "adb shell am start -a \"" + c[0] + "\" -n \""+packageName+str(c[1])+"\""+" --es "+str(t)
+									if re.match(r'^\..*',str(c[1])):
+										command = "adb shell am start -a \"" + c[0] + "\" -n \""+packageName+"/"+packageName+str(c[1])+"\""+" --es "+str(t)+" \"EXTRA_VALUE_IN_QUOTES\""
+									else:
+										command = "adb shell am start -a \"" + c[0] + "\" -n \""+packageName+"/"+str(c[1])+"\""+" --es "+str(t)+" \"EXTRA_VALUE_IN_QUOTES\""
 									print command
 									report.write_adb_commands("adbcommands-issues-list", common.Severity.VULNERABILITY, command, None, "activity")
 							else:
-								command = "adb shell am start -a \"" + c[0] + "\" -n \""+packageName+"/"+packageName+str(c[1])+"\""
+								if re.match(r'^\..*',str(c[1])):
+									command = "adb shell am start -a \"" + c[0] + "\" -n \""+packageName+"/"+packageName+str(c[1])+"\""
+								else:
+									command = "adb shell am start -a \"" + c[0] + "\" -n \""+packageName+"/"+str(c[1])+"\""
 								print command
 								report.write_adb_commands("adbcommands-issues-list", common.Severity.VULNERABILITY, command, None, "activity")
 				else:
@@ -41,7 +48,10 @@ def showAdbCommands(component,compType,packageName):
 					extras_list=[]
 					extras_list+=intents.find_extras(str(component),common.sourceDirectory)
 					if len(extras_list)>0:
-						command =  "adb shell am start -n \""+packageName+"/"+packageName+component+"\""
+						if re.match(r'^\..*',str(component)):
+							command =  "adb shell am start -n \""+packageName+"/"+packageName+component+"\""
+						else:
+							command =  "adb shell am start -n \""+packageName+"/"+component+"\""
 						print command
 						extras = []
 						for e in extras_list:
@@ -49,7 +59,10 @@ def showAdbCommands(component,compType,packageName):
 							print "Possible extras to send: " + str(e)
 						report.write_adb_commands("adbcommands-issues-list", common.Severity.VULNERABILITY, command, extras, "activity")
 					else:
-						command =  "adb shell am start -n \""+packageName+"/"+packageName+component+"\""
+						if re.match(r'^\..*',str(component)):
+							command =  "adb shell am start -n \""+packageName+"/"+packageName+component+"\""
+						else:
+							command =  "adb shell am start -n \""+packageName+"/"+component+"\""
 						print command
 						report.write_adb_commands("adbcommands-issues-list", common.Severity.VULNERABILITY, command, None, "activity")
 	elif str(compType)=='service':
@@ -67,11 +80,17 @@ def showAdbCommands(component,compType,packageName):
 							extras_list+=intents.find_extras(str(c[1]),common.sourceDirectory)
 							if len(extras_list)>0:
 								for t in extras_list:
-									command =  "adb shell am startservice " +packageName+"/"+str(c[1])+" --es "+str(t)
+									if re.match(r'^\..*',str(c[1])):
+										command =  "adb shell am startservice " +packageName+"/"+packageName+str(c[1])+" --es "+str(t)
+									else:
+										command =  "adb shell am startservice " +packageName+"/"+str(c[1])+" --es "+str(t)
 									print command
 									report.write_adb_commands("adbcommands-issues-list", common.Severity.VULNERABILITY, command, None, "service")
 							else:
-								command =  "adb shell am startservice " +packageName+"/"+str(c[1])
+								if re.match(r'^\..*',str(c[1])):
+									command =  "adb shell am startservice " +packageName+"/"+packageName+str(c[1])
+								else:	
+									command =  "adb shell am startservice " +packageName+"/"+str(c[1])
 								print command
 								report.write_adb_commands("adbcommands-issues-list", common.Severity.VULNERABILITY, command, None, "service")
 	elif str(compType)=='receiver':
