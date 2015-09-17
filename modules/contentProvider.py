@@ -76,7 +76,7 @@ def find_content_providers():
     tmp_list2=common.dedup(tmp_list2)
     return tmp_list2
 
-def contentProviderUriPermissions():
+def content_provider_uri_permissions():
     cpName=""
     #TODO - Need to rectify this with the exported/non-exported providers
     for node in common.xmldoc.getElementsByTagName('provider'):

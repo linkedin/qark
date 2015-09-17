@@ -15,7 +15,7 @@ import ConfigParser
 from xml.dom import minidom
 from lib.BeautifulSoup import BeautifulSoup
 from distutils.version import StrictVersion
-from modules.unpackAPK import unpack, findManifestInUnpackedAPK
+from modules.unpackAPK import unpack, find_manifest_in_unpacked_apk
 import plistlib
 from modules import common
 from urllib2 import HTTPError
@@ -25,7 +25,7 @@ import logging
 common.logger = logging.getLogger()
 logger = logging.getLogger(__name__)
 
-def findGradle():
+def find_gradle():
 	version=0
 	files=[]
 	for (dirpath,dirname, filenames) in os.walk(common.sourceDirectory):
@@ -43,7 +43,7 @@ def findGradle():
 					version=version.findall(str(m[0]))[0]
 	return version
 
-def determineMinSDK():
+def determine_min_sdk():
 	"""
 	Determines the minimum SDK version supported by the vulnerable application\n
 	As a fallback, it allows the user to search Google PlayStore to identify the minimum SDK version if the data is unavailable in manifest.xml
@@ -65,7 +65,7 @@ def determineMinSDK():
 
 	if common.minSdkVersion==0:
 		if common.source_or_apk==2:
-			common.minSdkVersion=findGradle()
+			common.minSdkVersion=find_gradle()
 			if common.minSdkVersion==0:
 				common.logger.info("We were unable to find the minimum SDK version in your source.")
 				determineSdk='m'

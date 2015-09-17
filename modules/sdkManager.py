@@ -7,7 +7,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.'''
 
 
 from modules import common
-import os
+import os, platform
 import urllib2
 import sys
 import zipfile
@@ -16,12 +16,12 @@ import subprocess
 import shlex
 import stat
 from subprocess import Popen, PIPE, STDOUT
-import re,shutil
+import re,shutil, tarfile
 
 common.logger = logging.getLogger()
 logger = logging.getLogger(__name__)
 
-def isAndroidSDKInstalled():
+def is_android_sdk_installed():
     """
     Verify if Android SDK is installed and available for use by QARK
     """
@@ -32,7 +32,7 @@ def isAndroidSDKInstalled():
     else:
         return False
 
-def getAndroidSDKManager():
+def get_android_sdk_manager():
     """
     Gets the location of SDK manager through CLI while in interactive mode, or via settings.properties if running headlessly
     """
@@ -40,23 +40,44 @@ def getAndroidSDKManager():
     print common.term.cyan
     choice=raw_input(common.config.get('qarkhelper','GET_ANDROID_SDK_MANAGER_PROMPT'))
     if str(choice).lower()=='y':
-        downloadSDK()
+        download_sdk()
     else:
         AndroidSDKPath=raw_input(common.config.get('qarkhelper','ANDROID_SDK_MANAGER_PATH_PROMPT'))
-        common.writeKey('AndroidSDKPath', AndroidSDKPath)
-        while not (os.path.exists(common.getConfig('AndroidSDKPath') + "/tools")):
+        if not str(AndroidSDKPath).endswith("/"):
+            AndroidSDKPath = str(AndroidSDKPath).strip() + "/"
+        #common.writeKey('AndroidSDKPath', AndroidSDKPath)
+        while not (os.path.exists(AndroidSDKPath + "tools")):
             logger.error(str(common.config.get('qarkhelper','ANDROID_SDK_MANAGER_PATH_PROMPT_AGAIN')).decode('string-escape'))
             print common.term.cyan
             AndroidSDKPath=raw_input(common.config.get('qarkhelper','ANDROID_SDK_MANAGER_PATH_PROMPT'))
-            common.writeKey('AndroidSDKPath', AndroidSDKPath)
+            if not str(AndroidSDKPath).endswith("/"):
+                AndroidSDKPath = str(AndroidSDKPath).strip() + "/"
+        common.writeKey('AndroidSDKPath', AndroidSDKPath)
+        common.AndroidSDKPath = AndroidSDKPath
     common.logger.debug("Located SDK")
-    
-def downloadSDK():
+
+def extract(tar_url, extract_path):
+    print tar_url
+    tar = tarfile.open(tar_url, 'r')
+    for item in tar:
+        tar.extract(item, extract_path)
+        if item.name.find(".tgz") != -1 or item.name.find(".tar") != -1:
+            extract(item.name, "./" + item.name[:item.name.rfind('/')])
+
+def download_sdk():
     """
     Download the SDK from Google
     """
-    url = " https://dl.google.com/android/android-sdk_r24.0.2-macosx.zip"
-    
+
+    url = ""
+    url_macosx = "https://dl.google.com/android/android-sdk_r24.0.2-macosx.zip"
+    url_linux = "https://dl.google.com/android/android-sdk_r24.3.4-linux.tgz"
+
+    if sys.platform == "linux2":
+        url = url_linux
+    else:
+        url = url_macosx
+
     file_name = url.split('/')[-1]
     u = urllib2.urlopen(url)
     f = open(common.getConfig("rootDir") + "/" + file_name, 'wb')
@@ -81,22 +102,31 @@ def downloadSDK():
     androidSDKZIP = f.name
     print common.term.cyan + str(common.config.get('qarkhelper','FILE_DOWNLOADED_TO')) + androidSDKZIP.decode('string-escape').format(t=common.term)
     print common.term.cyan + str(common.config.get('qarkhelper','UNPACKING')) + androidSDKZIP.decode('string-escape').format(t=common.term)
-    zf = zipfile.ZipFile(androidSDKZIP)
-    for filename in [ zf.namelist()]:
+    if sys.platform == "linux2":
         try:
             if not os.path.exists(androidSDKZIP.rsplit(".",1)[0]):
                 os.makedirs(androidSDKZIP.rsplit(".",1)[0])
-            zf.extractall(androidSDKZIP.rsplit(".",1)[0] + "/", zf.namelist(), )
-        except KeyError:
-            logger.error('Oops!! %s doesnt look like a valid APK', filename)
-        else:
-            logger.info('Done')
+            extract(androidSDKZIP, androidSDKZIP.rsplit(".",1)[0])
+        except Exception as e:
+            logger.error(e.message)
+        common.writeKey('AndroidSDKPath', androidSDKZIP.rsplit(".",1)[0] + "/android-sdk-linux/")
+    else:
+        zf = zipfile.ZipFile(androidSDKZIP)
+        for filename in [ zf.namelist()]:
+            try:
+                if not os.path.exists(androidSDKZIP.rsplit(".",1)[0]):
+                    os.makedirs(androidSDKZIP.rsplit(".",1)[0])
+                zf.extractall(androidSDKZIP.rsplit(".",1)[0] + "/", zf.namelist(), )
+            except Exception as e:
+                logger.error(e.message)
+            else:
+                logger.info('Done')
+        common.writeKey('AndroidSDKPath', androidSDKZIP.rsplit(".",1)[0] + "/android-sdk-macosx/")
     #We dont need the ZIP file anymore
     os.remove(androidSDKZIP)
-    common.writeKey('AndroidSDKPath', androidSDKZIP.rsplit(".",1)[0] + "/android-sdk-macosx/")
-    runSDKManager()
+    run_sdk_manager()
     
-def runSDKManager():
+def run_sdk_manager():
     """
     Runs the SDK manager
     """
@@ -140,8 +170,8 @@ def runSDKManager():
 
 
 
-#buildAPK takes in all paths relative to the '/build/' folder in QARK
-def buildAPK(path):
+#build_apk takes in all paths relative to the '/build/' folder in QARK
+def build_apk(path):
     """
     Builds the APK when path the the source is available
     """

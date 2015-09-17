@@ -20,7 +20,7 @@ def start(path):
 	return
 
 
-def findLayout(path):
+def find_layout(path):
 	foundButtons=[]
 	foundButtons.append([])
 	for (dirpath, dirnames, filenames) in os.walk(path):
@@ -78,7 +78,7 @@ def findLayout(path):
 		print "No buttons found in xml layouts"
 	return
 
-def findJavaButtons(xmlFile,buttonId):
+def find_java_buttons(xmlFile,buttonId):
 	# Need find all the Buttons declared in the Java classes
 	global tree
 	global currentFile

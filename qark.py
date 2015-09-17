@@ -21,9 +21,9 @@ from xml.dom import minidom
 import lib.axmlparserpy.axmlprinter as axmlprinter
 from modules.IssueType import IssueType, IssueSeverity
 import traceback
-from modules import common,intents,webviews, report, unpackAPK
+from modules import common,findExtras,webviews, report, unpackAPK
 
-from modules.DetermineMinSDK import determineMinSDK
+from modules.DetermineMinSDK import determine_min_sdk
 from modules import sdkManager
 from modules import createSploit
 from modules import createExploit
@@ -35,7 +35,7 @@ from modules import findBroadcasts
 from modules import findTapJacking
 from modules import filePermissions
 from modules import exportedPreferenceActivity
-from modules.useCheckPermission import useCheckPermission
+from modules import useCheckPermission
 from modules import cryptoFlaws
 import logging
 import time
@@ -67,7 +67,7 @@ def exit():
 	"""
 	sys.exit()
 
-def clearlines(n):
+def clear_lines(n):
 	"""
    Clear the space before using it
 	"""
@@ -115,42 +115,42 @@ def version():
 	print "Version 0.8"
 	sys.exit()
 
-def showExports(compList,compType):
+def show_exports(compList,compType):
 	try:
 		if len(compList)>0:
 			if compType=='activity':
 				print "==>EXPORTED ACTIVITIES: "
-				for component in enumerate(compList):
-					print str(str(component[0]+1)+str(component[1]))
+				for index,component in enumerate(compList):
+					print str(index)+": "+str(component)
 					try:
-						adb.showAdbCommands(str(component[1]),compType,package_name)
+						adb.show_adb_commands(str(component),compType,package_name)
 					except Exception as e:
-						common.logger.error("Problem running adb.showAdbCommands, for Activities, in qark.py: " + str(e))
+						common.logger.error("Problem running adb.show_adb_commands, for Activities, in qark.py: " + str(e))
 				'''elif compType=='alias':
 					print "==>EXPORTED ACTIVITY ALIASES: "
-					adb.showAdbCommands(component[1],compType,package_name)'''
+					adb.show_adb_commands(component[1],compType,package_name)'''
 			elif compType=='service':
 				print "==>EXPORTED SERVICES: "
-				for component in enumerate(compList):
-					print str(component[0]+1)+str(component[1])
+				for index,component in enumerate(compList):
+					print str(index)+": "+str(component)
 					try:
-						adb.showAdbCommands(str(component[1]),compType,package_name)
+						adb.show_adb_commands(str(component),compType,package_name)
 					except Exception as e:
-						common.logger.error("Problem running adb.showAdbCommands, for Services, in qark.py: " + str(e))
+						common.logger.error("Problem running adb.show_adb_commands, for Services, in qark.py: " + str(e))
 						'''if compType=='provider':
 							print "==>EXPORTED PROVIDERS: "
-							adb.showAdbCommands(component[1],compType,package_name)'''
+							adb.show_adb_commands(component[1],compType,package_name)'''
 			elif compType=='receiver':
 				print "==>EXPORTED RECEIVERS: "
-				for component in enumerate(compList):
-					print str(component[0]+1)+str(component[1])
-				try:
-					adb.showAdbCommands(str(component[1]),compType,package_name)
-				except Exception as e:
-					common.logger.error("Problem running adb.showAdbCommands in qark.py: " + str(e))
+				for index,component in enumerate(compList):
+					print str(index)+": "+str(component)
+					try:
+						adb.show_adb_commands(str(component),compType,package_name)
+					except Exception as e:
+						common.logger.error("Problem running adb.show_adb_commands, for Receivers, in qark.py: " + str(e))
 
 	except Exception as e:
-			common.logger.error("Problem running adb.showAdbCommands in qark.py: " + str(e))
+			common.logger.error("Problem running show_exports in qark.py: " + str(e))
 	return
 
 
@@ -203,7 +203,6 @@ common.args = parser.parse_args()
 if len(sys.argv) > 1:
 	common.interactive_mode = False
 
-
 #######################################
 #Command line argument sanity checks
 if not common.interactive_mode:
@@ -232,6 +231,7 @@ if not common.interactive_mode:
 			if common.args.install is None:
 				common.logger.error("--install flag missing. Possible values 0/1")
 				exit()
+
 if common.args.debuglevel is not None:
 	if int(common.args.debuglevel) in range(10,60):
 		common.logger.setLevel(int(common.args.debuglevel))
@@ -245,25 +245,21 @@ if common.args.version:
 
 if common.args.basesdk is not None:
 	common.writeKey('AndroidSDKPath', str(common.args.basesdk).strip())
+
 #######################################
 #Reset any old report
-
 report.reset()
 common.set_environment_variables()
-
 #Copy the exploit code into a separate temp directory
 if not os.path.exists(common.getConfig("rootDir") + "/build"):
 	shutil.copytree(common.getConfig("rootDir") + "/exploitAPKs", common.getConfig("rootDir") + "/build")
 
-
 common.logger.info(common.config.get('qarkhelper', 'STARTUP'))
 
-
-if not sdkManager.isAndroidSDKInstalled():
-	sdkManager.getAndroidSDKManager()
+if not sdkManager.is_android_sdk_installed():
+	sdkManager.get_android_sdk_manager()
 else:
 	common.logger.info( common.config.get('qarkhelper', 'SDK_INSTALLATION_IDENTIFIED'))
-#sdkManager.buildAPK()
 
 common.minSdkVersion=1
 
@@ -291,7 +287,7 @@ def read_files(filename,rex):
 common.logger.info('Initializing QARK\n')
 common.checkJavaVersion()
 
-def processManifest(manifest):
+def process_manifest(manifest):
 
 	try:
 		common.manifest = os.path.abspath(str(manifest).strip())
@@ -377,15 +373,7 @@ def pull_apk(pathOnDevice):
 		print line,
 	return 'temp/'+str(pathOnDevice).split('/')[-1]
 
-def setAPKSourceDir():
-	#Converting dex files to jar
-	unpackAPK.decompile(common.pathToDEX)
-	if common.pathToUnpackedAPK != "":
-		common.logger.info('Decompiled code found at:%s', common.pathToUnpackedAPK)
-		common.sourceDirectory = common.pathToUnpackedAPK
-	return
-
-def findManifestInSource():
+def find_manifest_in_source():
 	common.logger.info('Finding AndroidManifest.xml')
 	listOfFiles = []
 	manifestPath=''
@@ -402,7 +390,7 @@ def findManifestInSource():
 				if os.path.isdir(common.sourceDirectory):
 					if not common.sourceDirectory.endswith('/'):
 						common.sourceDirectory+='/'
-					manifestPath=findManifestInSource()
+					manifestPath=find_manifest_in_source()
 					common.manifest=manifestPath
 					break
 				else:
@@ -427,7 +415,7 @@ def findManifestInSource():
 		exit()
 	return manifestPath
 
-def reportBadger(identity, objectlist):
+def report_badger(identity, objectlist):
 
 	for item in objectlist:
 		if isinstance(item, ReportIssue):
@@ -500,7 +488,7 @@ if common.source_or_apk==1:
 
 	try:
 		package = defaultdict(list)
-		mf = unpackAPK.findManifestInUnpackedAPK(common.apkPath, common.manifestName)
+		mf = unpackAPK.find_manifest_in_unpacked_apk(common.apkPath, common.manifestName)
 		ap = axmlprinter.AXMLPrinter(open(mf, 'rb').read())
 		manifestInXML = minidom.parseString(ap.getBuff()).toxml()
 		if common.interactive_mode:
@@ -531,7 +519,7 @@ elif common.source_or_apk==2:
 			if os.path.isdir(common.sourceDirectory):
 				if not common.sourceDirectory.endswith('/'):
 					common.sourceDirectory+='/'
-				processManifest(findManifestInSource())
+				process_manifest(find_manifest_in_source())
 				break
 			else:
 				common.logger.error("Not a directory. Please try again")
@@ -546,20 +534,20 @@ else:
 		common.logger.info("You only had 2 options and you still messed up. Let me choose option 2 for you")
 #Only application and manifest elements are required: http://developer.android.com/guide/topics/manifest/manifest-intro.html
 try:
-	determineMinSDK()
+	determine_min_sdk()
 
 	common.print_terminal_header("APP COMPONENT ATTACK SURFACE")
 
 	app = common.xmldoc.getElementsByTagName("application")
 	common.compare(app.length,1,common.config.get('qarkhelper', 'APP_ELEM_ISSUE'), 'true')
 
-	GeneralIssues.verifyAllowBackup(app)
-	GeneralIssues.verifyCustomPermissions()
-	GeneralIssues.verifyDebuggable(app)
+	GeneralIssues.verify_allow_backup(app)
+	GeneralIssues.verify_custom_permissions()
+	GeneralIssues.verify_debuggable(app)
 
 	common.logger.info("Checking provider")
 	prov_priv_list, prov_exp_list, prov_exp_perm_list, prov_prot_broad_list, report_data, results =common.check_export('provider',True)
-	reportBadger("appcomponents", results)
+	report_badger("appcomponents", results)
 	common.print_terminal(report_data)
 
 	common.logger.info("Checking activity")
@@ -572,26 +560,26 @@ try:
 	act_exp_perm_list=common.normalizeActivityNames(act_exp_perm_list,package_name)
 	act_prot_broad_list=common.normalizeActivityNames(act_prot_broad_list,package_name)
 
-	reportBadger("appcomponents", results)
+	report_badger("appcomponents", results)
 	common.print_terminal(report_data)
 
 	common.logger.info("Checking activity-alias")
 	#TODO - Normalize activity alias names?
 	actalias_priv_list, actalias_exp_list, actalias_exp_perm_list,actalias_prot_broad_list=[],[],[],[]
 	actalias_priv_list, actalias_exp_list, actalias_exp_perm_list,actalias_prot_broad_list, report_data, results=common.check_export('activity-alias',True)
-	reportBadger("appcomponents", results)
+	report_badger("appcomponents", results)
 	common.print_terminal(report_data)
 
 	common.logger.info("Checking services")
 	serv_priv_list, serv_exp_list, serv_exp_perm_list,serv_prot_broad_list=[],[],[],[]
 	serv_priv_list, serv_exp_list, serv_exp_perm_list,serv_prot_broad_list, report_data, results=common.check_export('service',True)
-	reportBadger("appcomponents", results)
+	report_badger("appcomponents", results)
 	common.print_terminal(report_data)
 
 	common.logger.info("Checking receivers")
 	rec_priv_list, rec_exp_list, rec_exp_perm_list,rec_prot_broad_list=[],[],[],[]
 	rec_priv_list, rec_exp_list, rec_exp_perm_list,rec_prot_broad_list, report_data, results=common.check_export('receiver',True)
-	reportBadger("appcomponents", results)
+	report_badger("appcomponents", results)
 	common.print_terminal(report_data)
 
 except Exception as e:
@@ -630,6 +618,9 @@ else:
 #find all java files
 common.java_files=common.find_java(common.sourceDirectory)
 
+#find all R.java files
+common.xml_files=common.find_xml(common.sourceDirectory)
+
 if common.interactive_mode:
 	stop_point = raw_input("Press ENTER key to begin Static Code Analysis")
 #Regex to look for collection of deviceID
@@ -660,12 +651,12 @@ common.keyFiles=common.findKeys(common.sourceDirectory)
 '''
 #Look for improper use of checkCallingPermission, rather than enforceCallingPermission
 try:
-	useCheckPermission()
+	use_check_permission()
 except Exception as e:
 	common.logger.error("Unable to run checks for improper use of checkCallingPermission: " + str(e))
 '''
 
-clearlines(14)
+clear_lines(14)
 height = common.term.height
 
 try:
@@ -705,8 +696,7 @@ try:
 	thread4.join()
 	thread5.join()
 
-	clearlines(5)
-
+	clear_lines(5)
 	try:
 	#Start looking for stuff potentially vulnerable to malicious apps
 		if len(prov_exp_list)>0:
@@ -863,7 +853,7 @@ if common.minSdkVersion >8:
 	common.logger.debug("Beginning TapJacking testing")
 	findTapJacking.start(common.sourceDirectory)
 else:
-	common.logger.error("Since the minSdkVersion is less that 9, it is likely this application is vulnerable to TapJacking. QARK made no attempt to confirm, as the protection would have to be custom code, which is difficult for QARK to examine and understand properly. This vulnerability allows a malicious application to lay on top of this app, while letting the key strokes pass through to the application below. This can cause users to take unwanted actions, within the victim application, similar to Clickjacking on websites. Please select the appropriate options in the exploitation menus to verify manually using QARK's exploit APK. Note: The QARK proof-of-concept is transparent, but in real-world attacks, it would likely not be. This is done solely to aid in testing. For more information: https://media.blackhat.com/ad-12/Niemietz/bh-ad-12-androidmarcus_niemietz-WP.pdf")
+	common.logger.log(common.VULNERABILITY_LEVEL,"Since the minSdkVersion is less that 9, it is likely this application is vulnerable to TapJacking. QARK made no attempt to confirm, as the protection would have to be custom code, which is difficult for QARK to examine and understand properly. This vulnerability allows a malicious application to lay on top of this app, while letting the key strokes pass through to the application below. This can cause users to take unwanted actions, within the victim application, similar to Clickjacking on websites. Please select the appropriate options in the exploitation menus to verify manually using QARK's exploit APK. Note: The QARK proof-of-concept is transparent, but in real-world attacks, it would likely not be. This is done solely to aid in testing. For more information: https://media.blackhat.com/ad-12/Niemietz/bh-ad-12-androidmarcus_niemietz-WP.pdf")
 
 
 ###########
@@ -896,7 +886,7 @@ if len(common.text_scan(common.java_files,cp_imp_rex)) > 1:
 		common.logger.info("The Content Providers above should be manually inspected for injection vulnerabilities.")
 try:
 	#TODO - This is a pain in the ass and incomplete
-	contentProviderUriPermissions()
+	content_provider_uri_permissions()
 except Exception as e:
 	common.logger.error("Unable to parse Content Provider permissions. Error: " + str(e))
 
@@ -920,11 +910,11 @@ try:
 		common.logger.info("Until we perfect this, for manually testing, run the following command to see all the options and their meanings: adb shell am. Make sure to update qark frequently to get all the enhancements! You'll also find some good examples here: http://xgouchet.fr/android/index.php?article42/launch-intents-using-adb")
 		try:
 
-			showExports(prov_exp_list,'provider')
-			showExports(act_exp_list,'activity')
-			showExports(actalias_exp_list,'alias')
-			showExports(serv_exp_list,'service')
-			showExports(rec_exp_list,'receiver')
+			show_exports(prov_exp_list,'provider')
+			show_exports(act_exp_list,'activity')
+			show_exports(actalias_exp_list,'alias')
+			show_exports(serv_exp_list,'service')
+			show_exports(rec_exp_list,'receiver')
 
 			print "\nTo view any sticky broadcasts on the device:"
 			print "adb shell dumpsys activity| grep sticky\n"
@@ -932,7 +922,7 @@ try:
 			common.logger.info("Support for other component types and dynamically adding extras is in the works, please check for updates")
 
 		except Exception as e:
-			common.logger.error("Problem running showExports in qark.py: " + str(e))
+			common.logger.error("Problem running show_exports in qark.py: " + str(e))
 	else:
 		print "Sorry, nothing exploitable via ADB"
 except Exception as e:
@@ -964,11 +954,12 @@ while True:
 if exploit_choice==1:
 	# Exploit all vulnerabilities
 	print "Generating exploit payloads for all vulnerabilities"
+	type_list=['String','StringArray','StringArrayList','Boolean','BooleanArray','Int','Float','Long','LongArray','[]','','IntArray','IntegerArrayList','FloatArray','Double','Char','CharArray','CharSequence','CharSequenceArray','CharSequenceArrayList','Byte','ByteArray', 'Bundle','Short','ShortArray','Serializable','Parcelable','ParcelableArrayList','ParcelableArray','unknownType']
 	shutil.rmtree(common.getConfig("rootDir") +'/build')
-	if str(createSploit.copyTemplate(common.getConfig("rootDir") + '/exploitAPKs/qark/',common.getConfig("rootDir") + '/build/qark')) is not 'ERROR':
+	if str(createSploit.copy_template(common.getConfig("rootDir") + '/exploitAPKs/qark/',common.getConfig("rootDir") + '/build/qark')) is not 'ERROR':
 		common.exploitLocation = common.getConfig("rootDir") + '/build/qark'
 		if len(prov_exp_list)>0:
-			print "ok"
+			common.logger.info("Sorry, we're still working on the providers")
 		if len(act_exp_list)>0:
 			common.normalizeActivityNames(act_exp_list,filters.find_package())
 			for i in act_exp_list:
@@ -976,13 +967,23 @@ if exploit_choice==1:
 				exploit = createExploit.exploitActivity()
 				print str(i)
 				extras_list=[]
-				extras_list+=intents.find_extras(str(i),common.sourceDirectory)
+				entries=common.get_entry_for_component('activity')
+				for n in entries:
+					tmp_extra=findExtras.find_extras(str(i),n)
+					if tmp_extra not in type_list:
+						if tmp_extra not in extras_list:
+							extras_list+=tmp_extra
+				common.dedup(extras_list)
 				if re.match(r'^\..*',str(i)):
 					i=str(package_name)+str(i)
 				exploit.setExportedActivity(str(i))
 				for j in range(0,len(extras_list)):
-					extras_list[j] = extras_list[j].replace('\"','')
-					if (extras_list[j]==" " or extras_list[j]==""):
+					extras_list[j] = str(extras_list[j]).replace('\"','')
+					bad_extras=["\"\"","\" \"","[]"]
+					#if (extras_list[j]==" " or extras_list[j]==""):
+					if extras_list[j] in bad_extras:
+						pass
+					elif extras_list[j] in type_list:
 						pass
 					else:
 						exploit.setExtra(extras_list[j])
@@ -991,7 +992,7 @@ if exploit_choice==1:
 				except Exception as e:
 					common.logger.error("Problems creating exploit (activity): " + str(e))
 		if len(actalias_exp_list)>0:
-			print "ok"
+			common.logger.info("Sorry, we're still working on Activity Aliases")
 		if len(serv_exp_list)>0:
 			for i in range(0, len(serv_exp_list)):
 				exploit = createExploit.exploitService()
@@ -1004,7 +1005,13 @@ if exploit_choice==1:
 				exploit.setIntent(action)
 				print rec_exp_list[i]
 				extras_list=[]
-				extras_list+=intents.find_extras(rec_exp_list[i],common.sourceDirectory)
+				entries=common.get_entry_for_component('receiver')
+				for n in entries:
+					tmp_extra=findExtras.find_extras(rec_exp_list[i],n)
+					if tmp_extra not in type_list:
+						if tmp_extra not in extras_list:
+							extras_list+=tmp_extra
+				common.dedup(extras_list)
 				if len(common.sploitparams)==0:
 					for j in range(0,len(extras_list)):
 						extras_list[j] = extras_list[j].replace('\"','')
@@ -1028,7 +1035,7 @@ if exploit_choice==1:
 					writeExploit.write(exploit)
 				except Exception as e:
 					common.logger.error("Problems creating exploit (receiver): " + str(e))
-		sdkManager.buildAPK('qark')
+		sdkManager.build_apk('qark')
 		if common.interactive_mode:
 			install=raw_input("Do you want to install this to your device? (y/n)").lower()
 		else:

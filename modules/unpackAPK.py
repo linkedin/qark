@@ -84,7 +84,7 @@ def get_apk_info(pathToAPK):
 			package['application-permissions'].append(line.split("'")[1])
 	return package
 
-def findManifestInUnpackedAPK(path, name):
+def find_manifest_in_unpacked_apk(path, name):
 	"""
 	Finds manifest.xml from the unpacked APK
 	"""
@@ -98,7 +98,7 @@ def findManifestInUnpackedAPK(path, name):
 				logger.info('%s found', name)
 				return os.path.join(root, name)
 
-def grep1(path, regex):
+def grep_1(path, regex):
 	"""
 	wrapper around grep functionality
 	"""
@@ -174,9 +174,9 @@ def decompile(path):
 	with common.term.location(0,common.term.height):
 		print ""
 
-	g1 = grep1(dirname, "// Byte code:")
-	g2 = grep1(dirname+"1", "// This method has failed to decompile.")
-	g3 = grep1(dirname+"2", "// This method could not be decompiled.")
+	g1 = grep_1(dirname, "// Byte code:")
+	g2 = grep_1(dirname+"1", "// This method has failed to decompile.")
+	g3 = grep_1(dirname+"2", "// This method could not be decompiled.")
 
 	#print list(set(g1) - set(g2))
 	logger.info("Trying to improve accuracy of the decompiled files")

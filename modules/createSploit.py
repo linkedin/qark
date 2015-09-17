@@ -19,7 +19,7 @@ class exploitType:
     MANIFEST, ACTIVITY, INTENT, PERMISSION, SERVICE, RECEIVER, BROADCAST_INTENT = range(7)
 
 
-def copyTemplate(src,dest):
+def copy_template(src,dest):
     """
     Given a source and destination, copy all files/folders under source to destination\n
     Overwrites destination if any files/folders already exists\n
@@ -36,17 +36,9 @@ def copyTemplate(src,dest):
             print('Directory not copied. Error: %s' % e)
             #TODO - give an option to specify a different dir, if the specified one already exists
             status='ERROR'
-	return status
-    
-def addVulnerable(obj,key,value):
-    """
-    Common method to add a new vulnerability\n
-    Takes common.exploitdata as the object, exploitType enum, string representation of the vulnerable code to be replaced in the exploit template
-    """
-    obj[key].append(value)
-    
+	return status     
 
-def modifyTemplate(path,filename,temp_text,repl_text):
+def modify_template(path,filename,temp_text,repl_text):
     """
     Deprecated code
     """
@@ -64,7 +56,7 @@ def modifyTemplate(path,filename,temp_text,repl_text):
     os.rename(tmp2,tmp)
     return
     
-def modifyTemplate2(filename,placeholder,replacement):
+def modify_template_2(filename,placeholder,replacement):
     """
     Takes a filename,placeholder value to be replaced and the actual replacement value\n
     Uncomments the commented out code from exploit template, replaces the placeholder with actual value and adds this content on the next line to facilitate multiple substitutions
@@ -80,33 +72,3 @@ def modifyTemplate2(filename,placeholder,replacement):
         if flag:
             print line1.replace(placeholder, replacement),
             flag=False
-
-def createUsing(replacementData):
-    """
-    Core of the exploit generation\n
-    Takes in a dictionary with (exploittype,replacement value) data, processes them to find all substitutions, and looks up the config.properties to identify all applicable files that require substution
-    """
-    path = common.getConfig("rootDir") + '/build/qark'
-    data = dict(replacementData)
-    for key,value in data.iteritems():
-        if key==exploitType.BROADCAST_INTENT:
-            exploit_type="BROADCAST_INTENT"
-        elif key==exploitType.ACTIVITY:
-            exploit_type="ACTIVITY"
-        elif key==exploitType.INTENT:
-            exploit_type="INTENT"
-        elif key==exploitType.MANIFEST:
-            exploit_type="MANIFEST"
-        elif key==exploitType.PERMISSION:
-            exploit_type="PERMISSION"
-        elif key==exploitType.RECEIVER:
-            exploit_type="RECEIVER"
-        elif key==exploitType.SERVICE:
-            exploit_type="SERVICE"
-        for instance in value:
-            replacement_keys = dict(common.config.items('exploit'))
-            for type_key,type_value in replacement_keys.iteritems():
-                if exploit_type in str(type_key).upper():
-                    replacement_files = dict(common.config.items(type_value))
-                    for file_key,file_value in replacement_files.iteritems():
-                        modifyTemplate2(path + file_value, type_value, instance)

@@ -22,19 +22,19 @@ def main():
 	#Do I need to add a minSdkVersion check here?
 
 	if ((len(act_exp_list)>0) or (len(act_exp_perm_list>1)) or (len(act_prot_broad_list>0))):
-		findPreferenceActivity()
+		find_preference_activity()
 		if len(act_exp_list)>0:
-			if lookForFile(act_exp_list):
+			if look_for_file(act_exp_list):
 				common.logger.error("This application is vulnerable to a potentially serious type of reflection issue, detailed here: http://securityintelligence.com/new-vulnerability-android-framework-fragment-injection. Unfortunately, we are still working on an automated exploit for this.")
 		if len(act_exp_perm_list)>1:
-			if lookForFile(act_exp_perm_list):
+			if look_for_file(act_exp_perm_list):
 				common.logger.error("This application is vulnerable to a potentially serious type of reflection issue, detailed here: http://securityintelligence.com/new-vulnerability-android-framework-fragment-injection. Unfortunately, we are still working on an automated exploit for this.")
 		if len(act_prot_broad_list)>0:
-			if lookForFile(act_prot_broad_list):
+			if look_for_file(act_prot_broad_list):
 				common.logger.error("This application is vulnerable to a potentially serious type of reflection issue, detailed here: http://securityintelligence.com/new-vulnerability-android-framework-fragment-injection. Unfortunately, we are still working on an automated exploit for this.")
 	return
 
-def lookForFile(act_list):
+def look_for_file(act_list):
 	global preferenceClasses
 	vuln=False
 
@@ -44,7 +44,7 @@ def lookForFile(act_list):
 				vuln=True
 	return vuln
 
-def findPreferenceActivity():
+def find_preference_activity():
 	global parser
 	global preferenceClasses
 
@@ -67,6 +67,6 @@ def findPreferenceActivity():
 									preferenceClasses.append(str(type_decl.name))
 	#Trying to be recursive here, so extensions of extensions, etc are found, might require more refinement
 	if len(preferenceClasses)>init_len_pc:
-		findPreferenceActivity()
+		find_preference_activity()
 
 	return

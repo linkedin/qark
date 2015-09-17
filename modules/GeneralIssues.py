@@ -16,7 +16,7 @@ import modules.common
 common.logger = logging.getLogger()
 logger = logging.getLogger(__name__)
 
-def verifyAllowBackup(app):
+def verify_allow_backup(app):
     """
     Check if AllowBackup option is enabled in manifest.xml
     """
@@ -36,7 +36,7 @@ def verifyAllowBackup(app):
     except Exception as e:
         print e.message
 
-def verifyCustomPermissions():
+def verify_custom_permissions():
     """
     Verify if the application defines any custom permissions
     """
@@ -54,7 +54,7 @@ def verifyCustomPermissions():
             logger.debug(common.config.get('qarkhelper', 'NO_PERM_PROT'))
     return
 
-def verifyDebuggable(app):
+def verify_debuggable(app):
     '''
     Verify whether the debuggable flag is set in the manifest
     '''

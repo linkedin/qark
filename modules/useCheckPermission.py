@@ -7,8 +7,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.'''
 
 from modules import common
 
-def useCheckPermission():
-	common.logger.info("Sorry, we haven't completed the check for useCheckPermission yet. Check for updates soon.")
+def use_check_permission():
+	common.logger.info("Sorry, we haven't completed the check for use_check_permission yet. Check for updates soon.")
 	'''
 	From Android Lint:
 

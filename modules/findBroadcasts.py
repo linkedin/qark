@@ -45,16 +45,16 @@ def main(queue):
 						if type(type_decl) is m.ClassDeclaration:
 							for t in type_decl.body:
 								try:
-									recursiveBroadcastFinder(t,results)
+									recursive_broadcast_finder(t,results)
 								except Exception as e:
 									common.parsingerrors.add(str(j))
-									common.logger.debug("Unable to process recursiveBroadcastFinder in findBroadcasts.py: " + str(e))
+									common.logger.debug("Unable to process recursive_broadcast_finder in findBroadcasts.py: " + str(e))
 						elif type(type_decl) is list:
 							for y in type_decl:
-								recursiveBroadcastFinder(y,results)
+								recursive_broadcast_finder(y,results)
 						elif hasattr(type_decl,'_fields'):
 							for d in type_decl._fields:
-								recursiveBroadcastFinder(getattr(type_decl,d),results)
+								recursive_broadcast_finder(getattr(type_decl,d),results)
 			else:								
 				common.logger.debug("Unable to create tree for " + str(j))
 		except Exception as e:
@@ -63,7 +63,7 @@ def main(queue):
 	queue.put(results)
 	return
 
-def localBroadcastManagerImported():
+def local_broadcast_manager_imported():
 	'''
 	Need to ensure sendBroadcast is not the method from LocalBroadcastManager, which is not insecure
 	'''
@@ -87,7 +87,7 @@ def localBroadcastManagerImported():
 	return importFound
 
 
-def recursiveBroadcastFinder(t,results):
+def recursive_broadcast_finder(t,results):
 
 	if type(t) is m.MethodDeclaration:
 		if str(t.name) == 'sendBroadcast':
@@ -111,7 +111,7 @@ def recursiveBroadcastFinder(t,results):
 			if len(t.arguments)==1:
 				#We need to ensure this isn't a local broadcast
 				#TODO - There is a lot more we need to do to fully qualify this, but should be good enough for now
-				if localBroadcastManagerImported()==True:
+				if local_broadcast_manager_imported()==True:
 					common.logger.debug(tree)
 				else:
 					report.write_badger("manifest-issues", modules.common.Severity.INFO, "NO IMPORT")
@@ -293,12 +293,12 @@ def recursiveBroadcastFinder(t,results):
 			results.append(issue)
 		elif hasattr(t,'_fields'):
 			for g in t._fields:
-				recursiveBroadcastFinder(getattr(t,g),results)
+				recursive_broadcast_finder(getattr(t,g),results)
 	elif type(t) is list:
 		for l in t:
-			recursiveBroadcastFinder(l,results)
+			recursive_broadcast_finder(l,results)
 	elif hasattr(t,'_fields'):
 		for f in t._fields:
 			if type(getattr(t,f)) is not str:
-				recursiveBroadcastFinder(getattr(t,f),results)
+				recursive_broadcast_finder(getattr(t,f),results)
 	return

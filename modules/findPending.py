@@ -92,10 +92,10 @@ def recurse(f,t,results):
 									#TODO - the interesting ones seem to be of type Name only
 									#The intent is always the third parameter, for getActivities it is an array
 									try:
-										parseArgs(current.arguments[2],results)
+										parse_args(current.arguments[2],results)
 									except Exception as e:
 										report.write("parsingerror-issues-list", str(current_file), "strong")
-										common.logger.debug("Problem in parseArgs function of findPending.py: " + str(e))
+										common.logger.debug("Problem in parse_args function of findPending.py: " + str(e))
 			elif l is None:
 				pass
 			else:
@@ -122,7 +122,7 @@ def recurse(f,t,results):
 							#TODO - the interesting ones seem to be of type Name only
 							#The intent is always the third parameter, for getActivities it is an array
 							try:
-								parseArgs(current.arguments[2],results)
+								parse_args(current.arguments[2],results)
 							except Exception as e:
 								report.write("parsingerror-issues-list", str(current_file), "strong")
 								common.logger.debug("Problem in recurse function of findPending.py: " + str(e))
@@ -147,7 +147,7 @@ def recurse(f,t,results):
 				common.logger.debug("Problem in recurse function of findPending.py: " + str(e))
 	return
 
-def parseArgs(arg,results):
+def parse_args(arg,results):
 	"""
 	Checking to see whether the setClass method is called on the arguments of a pending intent, if it is a new instance of an Intent
 	"""
@@ -160,14 +160,14 @@ def parseArgs(arg,results):
 					#If the argument is not a name, what is it?
 					if hasattr(arg.target.arguments[1],'value'):
 						try:
-							if findClass(arg.target.arguments[1].value,results):
+							if find_class(arg.target.arguments[1].value,results):
 								return
 							else:
 								report.write("parsingerror-issues-list", str(current_file), "strong")
-								common.logger.debug("ERROR: CAN'T FIND THE CLASS in parseArgs")
+								common.logger.debug("ERROR: CAN'T FIND THE CLASS in parse_args")
 						except Exception as e:
 							report.write("parsingerror-issues-list", str(current_file), "strong")
-							common.logger.debug("Problem in findClass function of findPending.py: " + str(e))
+							common.logger.debug("Problem in find_class function of findPending.py: " + str(e))
 				else:
 					report.write("parsingerror-issues-list", str(current_file), "strong")
 					common.logger.debug("ERROR: UNEXPECTED Type " + str(type(arg.target.arguments[1])))
@@ -192,10 +192,10 @@ def parseArgs(arg,results):
 	elif type(arg) is m.Name:
 		if hasattr(arg,'value'):
 			try:
-				findIntent(arg.value,results)
+				find_intent(arg.value,results)
 			except Exception as e:
 				report.write("parsingerror-issues-list", str(current_file), "strong")
-				common.logger.debug("Problem in findIntent function of findPending.py: " + str(e))
+				common.logger.debug("Problem in find_intent function of findPending.py: " + str(e))
 	else:
 		#TODO - Remove this (never seems to be hit)
 		report.write("parsingerror-issues-list", str(current_file), "strong")
@@ -203,7 +203,7 @@ def parseArgs(arg,results):
 		common.logger.debug("ERROR: INCOMPLETE CODE BRANCH REACHED findPending.py #5 - Press any key to continue (results may be incomplete)")
 	return
 
-def findClass(classname,results):
+def find_class(classname,results):
 	found=False
 	"""
 	Find the class name
@@ -216,7 +216,7 @@ def findClass(classname,results):
 					found=True
 					return found
 				else:
-					if recurseClass(classname,type_decl,results):
+					if recurse_class(classname,type_decl,results):
 						return True
 			elif type(type_decl) is m.VariableDeclaration:
 				if hasattr(type_decl,'type'):
@@ -225,11 +225,11 @@ def findClass(classname,results):
 							if str(type_decl.type.name.value) == str(classname):
 								return True
 			else:
-				if recurseClass(classname,type_decl,results):
+				if recurse_class(classname,type_decl,results):
 					return True
 	return found
 
-def recurseClass(classname,treeObject,results):
+def recurse_class(classname,treeObject,results):
 	found=False
 	if hasattr(treeObject,'_fields'):
 		for x in treeObject._fields:
@@ -249,14 +249,14 @@ def recurseClass(classname,treeObject,results):
 												found=True
 												return found
 					else:
-						if recurseClass(classname,y,results):
+						if recurse_class(classname,y,results):
 							return True
 			elif type(getattr(treeObject,x)) is m.ClassDeclaration:
 				if x.name == str(classname):
 					found=True
 					return found
 				else:
-					if recurseClass(classname,x,results):
+					if recurse_class(classname,x,results):
 						return True
 
 			elif type(getattr(treeObject,x)) is m.VariableDeclaration:
@@ -269,15 +269,15 @@ def recurseClass(classname,treeObject,results):
 
 			elif hasattr(getattr(treeObject,x),'_fields'):
 				for z in getattr(treeObject,x)._fields:
-					if recurseClass(classname,getattr(getattr(treeObject,x),z),results):
+					if recurse_class(classname,getattr(getattr(treeObject,x),z),results):
 						return True
 	elif type(treeObject) is list:
 		for a in treeObject:
-			if recurseClass(classname,a,results):
+			if recurse_class(classname,a,results):
 				return True
 	return found
 
-def findIntent(intent,results):
+def find_intent(intent,results):
 	"""
 	Find Intent 
 	"""
@@ -342,9 +342,9 @@ def findIntent(intent,results):
 																		else:
 																			common.logger.debug("Something went wrong in findPending, when determining if the Intent was explicit")
 														elif type(x) is list:
-															common.logger.debug("ERROR: UNEXPECTED CODE PATH in findIntent - 1")
+															common.logger.debug("ERROR: UNEXPECTED CODE PATH in find_intent - 1")
 											elif type(getattr(t,f)) is m.MethodInvocation:
-												common.logger.debug("ERROR: UNEXPECTED CODE PATH in findIntent - 2")
+												common.logger.debug("ERROR: UNEXPECTED CODE PATH in find_intent - 2")
 									else:
 										for f in t._fields:
 											if type(getattr(t,f)) is list:

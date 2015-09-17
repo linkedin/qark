@@ -61,32 +61,32 @@ def validate(queue,height):
                     if type(type_decl) is m.ClassDeclaration:
                         for t in type_decl.body:
                             try:
-                                recursiveInsecureTrustManager(t,j,results)
+                                recursive_insecure_trust_manager(t,j,results)
                             except Exception as e:
-                                common.logger.error("Unable to run recursiveInsecureTrustManager in certValidation.py: " + str(e))
+                                common.logger.error("Unable to run recursive_insecure_trust_manager in certValidation.py: " + str(e))
                             try:
-                                recursiveAllowAllHostnameVerifier(t,j,results)
+                                recursive_allow_all_hostname_verifier(t,j,results)
                             except Exception as e:
-                                common.logger.error("Unable to run recursiveAllowAllHostnameVerifier in certValidation.py: " + str(e))
+                                common.logger.error("Unable to run recursive_allow_all_hostname_verifier in certValidation.py: " + str(e))
                             try:
-                                recursiveSSLSession(t,j,results)
+                                recursive_ssl_session(t,j,results)
                             except Exception as e:
-                                common.logger.error("Unable to run recursiveSSLSession in certValidation.py: " + str(e))
+                                common.logger.error("Unable to run recursive_ssl_session in certValidation.py: " + str(e))
             except Exception as e:
                 if common.source_or_apk==2:
-                    common.logger.error("findLocalMethodDeclarations returned an error in certValidation.py" + str(e))
+                    common.logger.error("Error in validate function of certValidation.py: " + str(e))
                 else:
                     common.logger.error("Bad file: " + str(j) + ", this is not uncommon")
             try:
-                rescursiveFindVerify(None,j,results)
+                recursive_find_verify(None,j,results)
             except Exception as e:
                 common.logger.error("Problem in findVerify function of certValidation.py: " + str(e))
         warningGiven=False
-    unverifiedSessions(results)
+    unverified_sessions(results)
     queue.put(results)
     return
 
-def recursiveInsecureTrustManager(t,filename,results):
+def recursive_insecure_trust_manager(t,filename,results):
     if type(t) is m.MethodDeclaration:
         if str(t.name)=='checkServerTrusted':
             if len(t.body)==0:
@@ -120,13 +120,13 @@ def recursiveInsecureTrustManager(t,filename,results):
                         break #TODO - only want to check once, to see if it's only a return, can probably be replaced by len()
     elif type(t) is list:
         for x in t:
-            recursiveInsecureTrustManager(x,filename,results)
+            recursive_insecure_trust_manager(x,filename,results)
     elif hasattr(t,'_fields'):
         for f in t._fields:
-            recursiveInsecureTrustManager(getattr(t,f),filename,results)
+            recursive_insecure_trust_manager(getattr(t,f),filename,results)
     return
 
-def recursiveAllowAllHostnameVerifier(t,filename,results):
+def recursive_allow_all_hostname_verifier(t,filename,results):
     #TODO - This can be fleshed out to be more of an accurate, exhaustive check, but will suffice for now
     if type(t) is m.Assignment:
         if type(t.rhs) is m.InstanceCreation:
@@ -169,13 +169,13 @@ def recursiveAllowAllHostnameVerifier(t,filename,results):
                                     results.append(issue)
     elif type(t) is list:
         for x in t:
-            recursiveAllowAllHostnameVerifier(x,filename,results)
+            recursive_allow_all_hostname_verifier(x,filename,results)
     elif hasattr(t,'_fields'):
         for f in t._fields:
-            recursiveAllowAllHostnameVerifier(getattr(t,f),filename,results)
+            recursive_allow_all_hostname_verifier(getattr(t,f),filename,results)
     return
 
-def recursiveSSLSession(t,filename,results):
+def recursive_ssl_session(t,filename,results):
     '''
     Looks for use of a HostnameVerifier where no call to .verify is made
     '''
@@ -200,16 +200,16 @@ def recursiveSSLSession(t,filename,results):
                                                     sslSessions.append(str(d.variable.name))
         elif type(t) is list:
             for l in t:
-                recursiveSSLSession(l,filename,results)
+                recursive_ssl_session(l,filename,results)
         elif hasattr(t,'_fields'):
             for f in t._fields:
-                recursiveSSLSession(getattr(t,f),filename,results)
+                recursive_ssl_session(getattr(t,f),filename,results)
     except Exception as e:
-        common.logger.debug("Something went wrong in certValidation.py's recursiveSSLSession: " + str(e))
+        common.logger.debug("Something went wrong in certValidation.py's recursive_ssl_session: " + str(e))
         common.parsingerrors.add(str(filename))
     return
 
-def rescursiveFindVerify(q,filename,results):
+def recursive_find_verify(q,filename,results):
     '''
     Find all .verify methods 
     '''
@@ -265,22 +265,22 @@ def rescursiveFindVerify(q,filename,results):
                                 for l in t:
                                     if type(l) is not None:
                                         verifyIteration=1
-                                        rescursiveFindVerify(l,filename,results)
+                                        recursive_find_verify(l,filename,results)
                             elif hasattr(t,'_fields'):
                                 for f in t._fields:
                                     if type(getattr(t,f)) is not None:
                                         verifyIteration=1
-                                        rescursiveFindVerify(getattr(t,f),filename,results)
+                                        recursive_find_verify(getattr(t,f),filename,results)
                                     elif type(t) is list:
                                         for l in t:
                                             if type(l) is not None:
                                                 verifyIteration=1
-                                                rescursiveFindVerify(l,filename,results)
+                                                recursive_find_verify(l,filename,results)
                                     elif hasattr(t,'_fields'):
                                         for f in t._fields:
                                             if type(getattr(t,f)) is not None:
                                                 verifyIteration=1
-                                                rescursiveFindVerify(getattr(t,f),filename,results)
+                                                recursive_find_verify(getattr(t,f),filename,results)
             except Exception as e:
                 common.logger.debug("Something went wrong in certValidation.py's findVerify: " + str(e))
                 report.write("parsingerror-issues-list", "Something went wrong in certValidation.py's findVerify: " + str(e), "strong")
@@ -332,24 +332,24 @@ def rescursiveFindVerify(q,filename,results):
             elif type(q) is list:
                 for l in q:
                     if type(l) is not None:
-                        rescursiveFindVerify(l,filename,results)
+                        recursive_find_verify(l,filename,results)
             elif hasattr(q,'_fields'):
                 for f in q._fields:
                     if type(getattr(q,f)) is not None:
-                        rescursiveFindVerify(getattr(q,f),filename,results)
+                        recursive_find_verify(getattr(q,f),filename,results)
                     elif type(q) is list:
                         for l in q:
                             if type(l) is not None:
-                                rescursiveFindVerify(l,filename,results)
+                                recursive_find_verify(l,filename,results)
                     elif hasattr(q,'_fields'):
                         for f in q._fields:
                             if type(getattr(q,f)) is not None:
-                                rescursiveFindVerify(getattr(q,f),filename,results)
+                                recursive_find_verify(getattr(q,f),filename,results)
         verifyIteration=1
-        unverifiedSessions(results)
+        unverified_sessions(results)
     return
 
-def unverifiedSessions(results):
+def unverified_sessions(results):
     global sslSessions
     #This is untested because I could not find a vulnerable app, which didn't have a custom .verify method
     for s in sslSessions:

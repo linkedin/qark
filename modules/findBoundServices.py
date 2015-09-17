@@ -25,7 +25,7 @@ def main(t,tree):
 									targetName=b.result.target.value
 									print "B Target: " + str(b.result.target)
 									raw_input()
-									whatIsThis(targetName,tree)
+									what_is_this(targetName,tree)
 				elif type(b.result) is list:
 					for l in b.result:
 						if type(l) is m.MethodInvocation:
@@ -37,7 +37,7 @@ def main(t,tree):
 												targetName=l.result.target.value
 												print "L Target: " + str(l.result.target)
 												raw_input()
-												whatIsThis(targetName,tree)
+												what_is_this(targetName,tree)
 				elif hasattr(b.result,'_fields'):
 					for f in b.result._fields:
 						if type(f) is m.MethodInvocation:
@@ -49,11 +49,11 @@ def main(t,tree):
 											print "F Target: " + str(f.result.target)
 											if hasattr(f.result.target,'value'):
 												targetName=f.result.target.value
-												whatIsThis(targetName,tree)
+												what_is_this(targetName,tree)
 												raw_input()
 	return
 
-def whatIsThis(targetName,tree):
+def what_is_this(targetName,tree):
 	for x in tree.body:
 		if type(x) is m.VariableDeclaration:
 			print "X: " + str(x)

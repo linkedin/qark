@@ -61,21 +61,21 @@ def main(token,tree,current_file):
 								if type(type_decl) is m.ClassDeclaration:
 									for t in type_decl.body:
 										try:
-											recursiveMethodFinder(t,token)
+											recursive_method_finder(t,token)
 										except Exception as e:
-											common.logger.error("Problem running recursiveMethodFinder for m.ClassDeclaration in externalMethodDeclarations.py: " + str(e))
+											common.logger.error("Problem running recursive_method_finder for m.ClassDeclaration in externalMethodDeclarations.py: " + str(e))
 								elif type(type_decl) is list:
 									for y in t:
 										try:
-											recursiveMethodFinder(y,token)
+											recursive_method_finder(y,token)
 										except Exception as e:
-											common.logger.error("Problem running recursiveMethodFinder for lists in externalMethodDeclarations.py: " + str(e))
+											common.logger.error("Problem running recursive_method_finder for lists in externalMethodDeclarations.py: " + str(e))
 								elif hasattr(t,'_fields'):
 									for f in t._fields:
 										try:
-											recursiveMethodFinder(getattr(t,f),token)
+											recursive_method_finder(getattr(t,f),token)
 										except Exception as e:
-											common.logger.error("Problem running recursiveMethodFinder for _fields in externalMethodDeclarations.py: " + str(e))
+											common.logger.error("Problem running recursive_method_finder for _fields in externalMethodDeclarations.py: " + str(e))
 						else:
 							common.logger.error("There was a problem reading the imported class: " + str(classFile) + ". Results may be negatively impacted if the class contains security relevant methods. This may be due to a de-compilation error.")
 							continue
@@ -95,7 +95,7 @@ def main(token,tree,current_file):
 		else:
 			break
 	if numMatches>0:
-		processMatches(token,tree)
+		process_matches(token,tree)
 	else:
 		if common.source_or_apk==1:
 			common.parsingerrors.add(str(current_file))
@@ -105,7 +105,7 @@ def main(token,tree,current_file):
 			common.logger.debug("Unable to locate the definition of the " + str(token.name)+" method from the imports in "+str(current_file)+". This will negatively impact results if this is not part of the standard Java/Android libraries and is a security relevant method. We are still working on ignoring safe standard methods. Please check back for updates or contribute your own code.")
 	return
 
-def recursiveMethodFinder(t,token):
+def recursive_method_finder(t,token):
 	'''
 	Looks for any locally declared methods. All entry points should be captured in this list
 	'''
@@ -130,54 +130,54 @@ def recursiveMethodFinder(t,token):
 									thorough=False
 							numMatches+=1
 						except Exception as e:
-							common.logger.error("Problem during parameter type matching in externalMethodDeclaration.py's recursiveMethodFinder method: " + str(e))
+							common.logger.error("Problem during parameter type matching in externalMethodDeclaration.py's recursive_method_finder method: " + str(e))
 
 		except Exception as e:
-			common.logger.error("Problem in recursiveMethodFinder, trying to traverse m.MethodDeclaration: " + str(e))
+			common.logger.error("Problem in recursive_method_finder, trying to traverse m.MethodDeclaration: " + str(e))
 	elif type(t) is list:
 		try:
 			for i in t:
 				if type(i) is m.MethodDeclaration:
-					recursiveMethodFinder(i,token)
+					recursive_method_finder(i,token)
 				elif type(i) is list:
 					for y in i:
-						recursiveMethodFinder(i,token)
+						recursive_method_finder(i,token)
 				elif hasattr(i,'_fields'):
 					try:
 						for z in i._fields:
-							recursiveMethodFinder(getattr(i,z),token)
+							recursive_method_finder(getattr(i,z),token)
 					except Exception as e:
-						common.logger.error("Problem in recursiveMethodFinder, trying to iterate fields on list branch: " + str(e))
+						common.logger.error("Problem in recursive_method_finder, trying to iterate fields on list branch: " + str(e))
 		except Exception as e:
-			common.logger.error("Problem in recursiveMethodFinder, trying to traverse list: " + str(e))
+			common.logger.error("Problem in recursive_method_finder, trying to traverse list: " + str(e))
 	elif hasattr(t,'_fields'):
 		try:
 			for f in t._fields:
-				recursiveMethodFinder(getattr(t,f),token)
+				recursive_method_finder(getattr(t,f),token)
 		except Exception as e:
-			common.logger.error("Problem in recursiveMethodFinder, trying to iterate over fields: " + str(e))
+			common.logger.error("Problem in recursive_method_finder, trying to iterate over fields: " + str(e))
 	return
 
-def processMatches(token,tree):
+def process_matches(token,tree):
 	global numMatches
 	global thorough
 	try:
 		if thorough:
 			common.logger.debug("Located method declaration for: " + str(token.name))
-			sinksEncountered(token,tree)
+			sinks_encountered(token,tree)
 		elif numMatches==1:
 			common.logger.info("Only one match was found for this method: " + str(token.name)+",but cannot be confirmed 100% accurate.")
-			sinksEncountered(token,tree)
+			sinks_encountered(token,tree)
 		else:
 			common.logger.warning("A number of potentially matching method declarations were found for : " + str(token.name)+". QARK cannot currently provide a 100% positive match, so false positives could arise from this.")
-			sinksEncountered(token,tree)
+			sinks_encountered(token,tree)
 	except Exception as e:
-		common.logger.error("Problem running sinksEncountered in externalMethodDeclarations.py: " + str(e))
+		common.logger.error("Problem running sinks_encountered in externalMethodDeclarations.py: " + str(e))
 	numMatches=0
 	thorough=False
 	return
 
-def sinksEncountered(token,tree):
+def sinks_encountered(token,tree):
 	found=False
 	for type_decl in tree.type_declarations:
 		if type(type_decl) is m.ClassDeclaration:
@@ -188,10 +188,10 @@ def sinksEncountered(token,tree):
 							found=common.sink_list_check(token,tree)
 		elif type(type_decl) is list:
 			for l in type_decl:
-				sinksEncountered(type_decl,tree)
+				sinks_encountered(type_decl,tree)
 		elif hasattr(type_decl,'_fields'):
 			for f in type_decl._fields:
-				sinksEncountered(getattr(type_decl,f),tree)
+				sinks_encountered(getattr(type_decl,f),tree)
 	if found:
 		common.logger.log(common.VULNERABILITY_LEVEL,"It appears a vulnerablity was found here, but unfortunately we haven't completed this branch yet.")
 		# raw_input()

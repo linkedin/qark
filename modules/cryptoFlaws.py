@@ -27,8 +27,8 @@ def main(queue):
 	count = 0
 
 	if common.minSdkVersion<19:
-		weakRngWarning(results)
-	findKeyFiles(results)
+		weak_rng_warning(results)
+	find_key_files(results)
 	for j in common.java_files:
 		count = count + 1
 		pub.sendMessage('progress', count6=round(count*100/common.java_files.__len__()))
@@ -41,11 +41,11 @@ def main(queue):
 					if type(type_decl) is m.ClassDeclaration:
 						for t in type_decl.body:
 							try:
-								recursiveEcbCheck(t,j,results)
+								recursive_ecb_check(t,j,results)
 								#fixedSeedCheck(t,j)
 							except Exception as e:
-								common.logger.debug("Error running recursiveEcbCheck in cryptoFlaws.py: " + str(e))
-								report.write("parsingerror-issues-list", "Error running recursiveEcbCheck in cryptoFlaws.py: " + str(e), "strong")
+								common.logger.debug("Error running recursive_ecb_check in cryptoFlaws.py: " + str(e))
+								report.write("parsingerror-issues-list", "Error running recursive_ecb_check in cryptoFlaws.py: " + str(e), "strong")
 
 		except Exception as e:
 			common.logger.debug("Unable to create tree for " + str(j))
@@ -53,13 +53,13 @@ def main(queue):
 	queue.put(results)
 	return
 
-def weakRngWarning(results):
+def weak_rng_warning(results):
 	#TODO - check for any actual use of RNG
 	#common.logger.warning("Key generation, signing, encryption, and random number generation may not receive cryptographically strong values due to improper initialization of the underlying PRNG on Android 4.3 (API level 18) and below. If your application relies on cryptographically secure random number generation you should apply the workaround described in https://android-developers.blogspot.com/2013/08/some-securerandom-thoughts.htm. More information: https://android-developers.blogspot.com/2013/08/some-securerandom-thoughts.html")
 	return
 '''
 	#TODO - Need to finish this
-def fixedSeedCheck(t,filename):
+def fixed_seed_check(t,filename):
 	SecureRandom
 	------------
 	Summary: Using a fixed seed with SecureRandom
@@ -95,7 +95,7 @@ def fixedSeedCheck(t,filename):
 		#raw_input("T: " + str(t))
 	return
 '''
-def recursiveEcbCheck(t,filename,results):
+def recursive_ecb_check(t,filename,results):
 	#TODO - review this for thoroughness
 	#TODO - need to verify .getInstance is actually being invoked on a Cipher object
 	#TODO - we could whittle down the possibilities by checking the imports as well
@@ -139,10 +139,10 @@ def recursiveEcbCheck(t,filename,results):
 
 	if type(t) is list:
 		for l in t:
-			recursiveEcbCheck(l,filename, results)
+			recursive_ecb_check(l,filename, results)
 	elif hasattr(t,'_fields'):
 		for f in t._fields:
-			recursiveEcbCheck(getattr(t,f),filename,results)
+			recursive_ecb_check(getattr(t,f),filename,results)
 
 
 	'''		GetInstance
@@ -159,7 +159,7 @@ def recursiveEcbCheck(t,filename,results):
 
 	return
 
-def findKeyFiles(results):
+def find_key_files(results):
 	'''	PackagedPrivateKey
 	------------------
 	Summary: Packaged private key

@@ -27,28 +27,28 @@ def main(token,tree,current_file):
 	for type_decl in tree.type_declarations:
 		if type(type_decl) is m.ClassDeclaration:
 			for t in type_decl.body:
-				recursiveMethodFinder(t,token)
+				recursive_method_finder(t,token)
 	return closeEnough
 
-def recursiveMethodFinder(t,token):
+def recursive_method_finder(t,token):
 	global closeEnough
 
 	if type(t) is m.MethodDeclaration:
 		if str(t.name)==str(token.name):
 			if len(t.parameters)==len(token.arguments):
 				closeEnough=True
-				if sinksEncountered(t):
+				if sinks_encountered(t):
 					common.logger.log(common.VULNERABILITY_LEVEL,"It appears a vulnerability was found here, but unfortunately we haven't completed this branch yet.")
 	elif type(t) is list:
 		for l in t:
-			recursiveMethodFinder(l,token)
+			recursive_method_finder(l,token)
 	elif hasattr(t,'_fields'):
 		for f in t._fields:
-			recursiveMethodFinder(getattr(t,f),token)
+			recursive_method_finder(getattr(t,f),token)
 
 	return
 
-def sinksEncountered(t):
+def sinks_encountered(t):
 	global localTree
 	global found
 
@@ -60,8 +60,8 @@ def sinksEncountered(t):
 			common.logger.error("Problem in call to common.sink_list_check from localMethodDeclarations.py: " + str(e))
 	elif type(t) is list:
 		for l in t:
-			sinksEncountered(l)
+			sinks_encountered(l)
 	elif hasattr(t,'_fields'):
 		for f in t._fields:
-			sinksEncountered(f)
+			sinks_encountered(f)
 	return found

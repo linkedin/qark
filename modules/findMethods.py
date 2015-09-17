@@ -9,6 +9,7 @@ import lib.plyj.parser as plyj
 from modules import common
 from modules import filters
 from modules import findBoundServices
+from modules import findExtras
 import lib.plyj.model as m
 import re, sys
 import logging
@@ -16,6 +17,7 @@ from modules import externalMethodDeclarations,localMethodDeclarations
 from modules.common import ReportIssue, Severity
 from modules.createExploit import ExploitType
 from modules import report
+from modules import findSupers
 
 parser = plyj.Parser()
 tracker = []
@@ -80,7 +82,7 @@ def tree_parser(j, comp_type):
 	else:
 		common.logger.info("Checking this file for vulns: " + str(j))
 		try:
-			findLocalMethodDeclarations(tree)
+			find_local_method_declarations(tree)
 			find_entry(tree, comp_type)
 		except Exception as e:
 			if common.source_or_apk == 2:
@@ -90,42 +92,42 @@ def tree_parser(j, comp_type):
 	return
 
 
-def findLocalMethodDeclarations(tree):
+def find_local_method_declarations(tree):
 	'''
-	Iterates over tree passing each object to recursiveMethodFinder
+	Iterates over tree passing each object to recursive_method_finder
 	'''
 	global component_type
 
 	if tree is None:
-		common.logger.error("Tree type is None for findLocalMethodDeclarations in findMethods.py")
+		common.logger.error("Tree type is None for find_local_method_declarations in findMethods.py")
 	else:
 		try:
 			#TODO - verify the other branches are needed here, is m.ClassDeclaration check enough?
 			for type_decl in tree.type_declarations:
 				if type(type_decl) is m.ClassDeclaration:
 					for t in type_decl.body:
-						recursiveMethodFinder(t)
+						recursive_method_finder(t)
 						#possibly redundant
 						if str(component_type) == 'activity':
-							findSetResult(t)
+							find_set_result(t)
 				elif type(type_decl) is list:
 					for y in t:
-						recursiveMethodFinder(y)
+						recursive_method_finder(y)
 						#possibly redundant
 						if str(component_type) == 'activity':
-							findSetResult(y)
+							find_set_result(y)
 				elif hasattr(t, '_fields'):
 					for f in t._fields:
-						recursiveMethodFinder(getattr(t, f))
+						recursive_method_finder(getattr(t, f))
 						#possibly redundant
 						if str(component_type) == 'activity':
-							findSetResult(f)
+							find_set_result(f)
 		except Exception as e:
-			common.logger.error("Problem with findLocalMethodDeclarations in findMethods.py: " + str(e))
+			common.logger.error("Problem with find_local_method_declarations in findMethods.py: " + str(e))
 	return
 
 
-def recursiveMethodFinder(t):
+def recursive_method_finder(t):
 	'''
 	Looks for any locally declared methods. All entry points should be captured in this list
 	'''
@@ -145,10 +147,10 @@ def recursiveMethodFinder(t):
 						local_meth_decls.append(i.name)
 			elif type(i) is list:
 				for y in i:
-					recursiveMethodFinder(i)
+					recursive_method_finder(i)
 	elif hasattr(t, '_fields'):
 		for f in t._fields:
-			recursiveMethodFinder(getattr(t, f))
+			recursive_method_finder(getattr(t, f))
 	return
 
 
@@ -161,10 +163,11 @@ def find_entry(tree, comp_type):
 
 	try:
 		#Create list of entry points, based on component type
+		'''
 		if comp_type == 'activity':
-			entry = ['onCreate', 'onResume', 'onStart']
+			entry = ['onCreate', 'onStart']
 		elif comp_type == 'activity-alias':
-			entry = ['onCreate', 'onResume', 'onStart']
+			entry = ['onCreate', 'onStart']
 		elif comp_type == 'receiver':
 			entry = ['onReceive']
 		elif comp_type == 'service':
@@ -172,6 +175,8 @@ def find_entry(tree, comp_type):
 		#TODO - The provider is a unicorn and needs more work
 		elif comp_type == 'provider':
 			entry = ['onReceive']
+		'''
+		entry=common.get_entry_for_component(comp_type)
 		#Search the tree to see if there is a matching entry point
 		if tree is not None:
 			for type_decl in tree.type_declarations:
@@ -185,11 +190,13 @@ def find_entry(tree, comp_type):
 									if str(t.name) == str(e):
 										common.logger.debug("--Found entry point: " + str(t.name))
 										entries.append(str(e))
-										'''try:
+										'''
+										try:
 											if str(t.name)=='onBind':
 												findBoundServices.main(t,tree)
 										except Exception as e:
-											common.logger.error("Error in findMethods.py trying to trace bound service: " + str(e))'''
+											common.logger.error("Error in findMethods.py trying to trace bound service: " + str(e))
+										'''
 										if hasattr(t, 'parameters'):
 											for p in t.parameters:
 												if hasattr(p, 'type'):
@@ -200,6 +207,7 @@ def find_entry(tree, comp_type):
 					print "entries: "
 					for q in entries:
 						print str(q)
+						findExtras.find_extras(current_file,q)
 					if len(entries) < 1:
 						if ((comp_type == 'activity') or (comp_type == 'activity-alias')):
 							common.logger.debug("This may be a fragment")
@@ -234,6 +242,7 @@ def walk_the_class_from_entry(tree, entries, comp_type):
 							if t.name == str(e):
 								track(None, True)
 								if type(t.body) is list:
+									#print "T.BODY: " + str(t.body)
 									for b in t.body:
 										token_mapper(b)
 								else:
@@ -241,7 +250,7 @@ def walk_the_class_from_entry(tree, entries, comp_type):
 	return
 
 
-def findSetResult(t):
+def find_set_result(t):
 	global component_type
 	#This is used to find if the incoming triggering this Activity is going to cause data to be returned
 	#TODO - it would be nicer if we actually tracked the flow, but since the exploit APK already parses returned data, it really doesn't matter
@@ -252,21 +261,21 @@ def findSetResult(t):
 			return True
 		elif hasattr(t, '_fields'):
 			for y in t._fields:
-				findSetResult(getattr(t, y))
+				find_set_result(getattr(t, y))
 	elif type(t) is list:
 		for i in t:
 			if type(i) is m.MethodInvocation:
-				findSetResult(i)
+				find_set_result(i)
 			elif type(i) is list:
 				for j in i:
-					findSetResult(j)
+					find_set_result(j)
 			elif hasattr(i, '_fields'):
 				for k in i._fields:
-					findSetResult(getattr(i, k))
+					find_set_result(getattr(i, k))
 				#Need to add has fields
 	elif hasattr(t, '_fields'):
 		for x in t._fields:
-			findSetResult(getattr(t, x))
+			find_set_result(getattr(t, x))
 	else:
 		return False
 
@@ -277,103 +286,247 @@ def token_mapper(token):
 	"""
 	try:
 		if type(token) is m.FieldDeclaration:
-			parseFieldDeclaration(token)
+			try:
+				parse_field_declaration(token)
+			except Exception as e:
+				common.logger.error("Problem in findMethods.py parsing token type: " + str(type(token)) + ". " +str(e))
 		elif type(token) is m.MethodInvocation:
-			parseMethodInvocation(token)
+			try:
+				parse_method_invocation(token)
+			except Exception as e:
+				common.logger.error("Problem in findMethods.py parsing token type: " + str(type(token)) + ". " +str(e))
 		elif type(token) is m.VariableDeclaration:
-			parseVariableDeclaration(token)
+			try:
+				parse_variable_declaration(token)
+			except Exception as e:
+				common.logger.error("Problem in findMethods.py parsing token type: " + str(type(token)) + ". " +str(e))
 		elif type(token) is m.VariableDeclarator:
-			parseVariableDeclarator(token)
+			try:
+				parse_variable_declarator(token)
+			except Exception as e:
+				common.logger.error("Problem in findMethods.py parsing token type: " + str(type(token)) + ". " +str(e))
 		elif type(token) is m.MethodDeclaration:
-			parseMethodDeclaration(token)
+			try:
+				parse_method_declaration(token)
+			except Exception as e:
+				common.logger.error("Problem in findMethods.py parsing token type: " + str(type(token)) + ". " +str(e))
 		elif type(token) is m.ClassInitializer:
-			parseClassInitializer(token)
+			try:
+				parse_class_initializer(token)
+			except Exception as e:
+				common.logger.error("Problem in findMethods.py parsing token type: " + str(type(token)) + ". " +str(e))
 		elif type(token) is m.ConstructorDeclaration:
-			parseConstructorDeclaration(token)
+			try:
+				parse_constructor_declaration(token)
+			except Exception as e:
+				common.logger.error("Problem in findMethods.py parsing token type: " + str(type(token)) + ". " +str(e))
 		elif type(token) is m.EnumDeclaration:
-			parseEnumDeclaration(token)
+			try:
+				parse_enum_declaration(token)
+			except Exception as e:
+				common.logger.error("Problem in findMethods.py parsing token type: " + str(type(token)) + ". " +str(e))
 		elif type(token) is m.InterfaceDeclaration:
-			parseInterfaceDeclaration(token)
+			try:
+				parse_interface_declaration(token)
+			except Exception as e:
+				common.logger.error("Problem in findMethods.py parsing token type: " + str(type(token)) + ". " +str(e))
 		elif type(token) is m.ExpressionStatement:
-			parseExpressionStatement(token)
+			try:
+				parse_expression_statement(token)
+			except Exception as e:
+				common.logger.error("Problem in findMethods.py parsing token type: " + str(type(token)) + ". " +str(e))
 		elif type(token) is m.IfThenElse:
-			parseIfThenElse(token)
+			try:
+				parse_if_then_else(token)
+			except Exception as e:
+				common.logger.error("Problem in findMethods.py parsing token type: " + str(type(token)) + ". " +str(e))
 		elif type(token) is m.Return:
-			parseReturn(token)
+			try:
+				parse_return(token)
+			except Exception as e:
+				common.logger.error("Problem in findMethods.py parsing token type: " + str(type(token)) + ". " +str(e))
 		elif type(token) is m.Try:
-			parseTry(token)
+			try:
+				parse_try(token)
+			except Exception as e:
+				common.logger.error("Problem in findMethods.py parsing token type: " + str(type(token)) + ". " +str(e))
 		elif type(token) is m.Catch:
-			parseCatch(token)
+			try:
+				parse_catch(token)
+			except Exception as e:
+				common.logger.error("Problem in findMethods.py parsing token type: " + str(type(token)) + ". " +str(e))
 		elif type(token) is m.ForEach:
-			parseForEach(token)
+			try:
+				parse_for_each(token)
+			except Exception as e:
+				common.logger.error("Problem in findMethods.py parsing token type: " + str(type(token)) + ". " +str(e))
 		elif type(token) is m.For:
-			parseFor(token)
+			try:
+				parse_for(token)
+			except Exception as e:
+				common.logger.error("Problem in findMethods.py parsing token type: " + str(type(token)) + ". " +str(e))
 		elif type(token) is m.Switch:
-			parseSwitch(token)
+			try:
+				parse_switch(token)
+			except Exception as e:
+				common.logger.error("Problem in findMethods.py parsing token type: " + str(type(token)) + ". " +str(e))
 		elif type(token) is m.SwitchCase:
-			parseSwitchCase(token)
+			try:
+				parse_switch_case(token)
+			except Exception as e:
+				common.logger.error("Problem in findMethods.py parsing token type: " + str(type(token)) + ". " +str(e))
 		elif type(token) is m.Block:
-			parseBlock(token)
+			try:
+				parse_block(token)
+			except Exception as e:
+				common.logger.error("Problem in findMethods.py parsing token type: " + str(type(token)) + ". " +str(e))
 		elif type(token) is m.Synchronized:
-			parseSynchronized(token)
+			try:
+				parse_synchronized(token)
+			except Exception as e:
+				common.logger.error("Problem in findMethods.py parsing token type: " + str(type(token)) + ". " +str(e))
 		elif type(token) is m.Variable:
-			parseVariable(token)
+			try:
+				parse_variable(token)
+			except Exception as e:
+				common.logger.error("Problem in findMethods.py parsing token type: " + str(type(token)) + ". " +str(e))
 		elif type(token) is m.EmptyDeclaration:
 			common.logger.debug("OOPS - EmptyDeclaration: " + str(type(token)))
 		elif type(token) is type(None):
-			parseNone()
+			try:
+				parse_none()
+			except Exception as e:
+				common.logger.error("Problem in findMethods.py parsing token type: " + str(type(token)) + ". " +str(e))
 		elif type(token) is m.ClassDeclaration:
-			parseClassDeclaration(token)
+			try:
+				parse_class_declaration(token)
+			except Exception as e:
+				common.logger.error("Problem in findMethods.py parsing token type: " + str(type(token)) + ". " +str(e))
 		elif type(token) is m.Assignment:
-			parseAssignment(token)
+			try:
+				parse_assignment(token)
+			except Exception as e:
+				common.logger.error("Problem in findMethods.py parsing token type: " + str(type(token)) + ". " +str(e))
 		elif type(token) is m.Literal:
-			parseLiteral(token)
+			try:
+				parse_literal(token)
+			except Exception as e:
+				common.logger.error("Problem in findMethods.py parsing token type: " + str(type(token)) + ". " +str(e))
 		elif type(token) is m.ClassLiteral:
-			parseClassLiteral(token)
+			try:
+				parse_class_literal(token)
+			except Exception as e:
+				common.logger.error("Problem in findMethods.py parsing token type: " + str(type(token)) + ". " +str(e))
 		elif type(token) is m.InstanceCreation:
-			parseInstanceCreation(token)
+			try:
+				parse_instance_creation(token)
+			except Exception as e:
+				common.logger.error("Problem in findMethods.py parsing token type: " + str(type(token)) + ". " +str(e))
 		elif type(token) is m.Cast:
-			parseCast(token)
+			try:
+				parse_cast(token)
+			except Exception as e:
+				common.logger.error("Problem in findMethods.py parsing token type: " + str(type(token)) + ". " +str(e))
 		elif type(token) is m.Unary:
-			parseUnary(token)
+			try:
+				parse_unary(token)
+			except Exception as e:
+				common.logger.error("Problem in findMethods.py parsing token type: " + str(type(token)) + ". " +str(e))
 		elif type(token) is m.Additive:
-			parseAdditive(token)
+			try:
+				parse_additive(token)
+			except Exception as e:
+				common.logger.error("Problem in findMethods.py parsing token type: " + str(type(token)) + ". " +str(e))
 		elif type(token) is m.Type:
-			parseType(token)
+			try:
+				parse_type(token)
+			except Exception as e:
+				common.logger.error("Problem in findMethods.py parsing token type: " + str(type(token)) + ". " +str(e))
 		elif type(token) is m.Equality:
-			parseEquality(token)
+			try:
+				parse_equality(token)
+			except Exception as e:
+				common.logger.error("Problem in findMethods.py parsing token type: " + str(type(token)) + ". " +str(e))
 		elif type(token) is m.ConditionalAnd:
-			parseConditionalAnd(token)
+			try:
+				parse_conditional_and(token)
+			except Exception as e:
+				common.logger.error("Problem in findMethods.py parsing token type: " + str(type(token)) + ". " +str(e))
 		elif type(token) is m.Conditional:
-			parseConditional(token)
+			try:
+				parse_conditional(token)
+			except Exception as e:
+				common.logger.error("Problem in findMethods.py parsing token type: " + str(type(token)) + ". " +str(e))
 		elif type(token) is m.ArrayCreation:
-			parseArrayCreation(token)
+			try:
+				parse_array_creation(token)
+			except Exception as e:
+				common.logger.error("Problem in findMethods.py parsing token type: " + str(type(token)) + ". " +str(e))
 		elif type(token) is m.While:
-			parseWhile(token)
+			try:
+				parse_while(token)
+			except Exception as e:
+				common.logger.error("Problem in findMethods.py parsing token type: " + str(type(token)) + ". " +str(e))
 		elif type(token) is bool:
-			parseBool(token)
+			try:
+				parse_bool(token)
+			except Exception as e:
+				common.logger.error("Problem in findMethods.py parsing token type: " + str(type(token)) + ". " +str(e))
 		elif type(token) is m.Break:
-			parseBreak(token)
+			try:
+				parse_break(token)
+			except Exception as e:
+				common.logger.error("Problem in findMethods.py parsing token type: " + str(type(token)) + ". " +str(e))
 		elif type(token) is m.ArrayInitializer:
-			parseArrayInitializer(token)
+			try:
+				parse_array_initializer(token)
+			except Exception as e:
+				common.logger.error("Problem in findMethods.py parsing token type: " + str(type(token)) + ". " +str(e))
 		elif type(token) is m.Annotation:
-			parseAnnotation(token)
+			try:
+				parse_annotation(token)
+			except Exception as e:
+				common.logger.error("Problem in findMethods.py parsing token type: " + str(type(token)) + ". " +str(e))
 		elif type(token) is m.FormalParameter:
-			parseFormalParameter(token)
+			try:
+				parse_formal_parameter(token)
+			except Exception as e:
+				common.logger.error("Problem in findMethods.py parsing token type: " + str(type(token)) + ". " +str(e))
 		elif type(token) is m.ConditionalOr:
-			parseConditionalOr(token)
+			try:
+				parse_conditional_or(token)
+			except Exception as e:
+				common.logger.error("Problem in findMethods.py parsing token type: " + str(type(token)) + ". " +str(e))
 		elif type(token) is m.Wildcard:
-			parseWildcard(token)
+			try:
+				parse_wildcard(token)
+			except Exception as e:
+				common.logger.error("Problem in findMethods.py parsing token type: " + str(type(token)) + ". " +str(e))
 		elif type(token) is str:
-			parseString(token)
+			try:
+				parse_string(token)
+			except Exception as e:
+				common.logger.error("Problem in findMethods.py parsing token type: " + str(type(token)) + ". " +str(e))
 		elif type(token) is int:
-			parseInt(token)
+			try:
+				parse_int(token)
+			except Exception as e:
+				common.logger.error("Problem in findMethods.py parsing token type: " + str(type(token)) + ". " +str(e))
 		elif type(token) is m.Relational:
-			parseRelational(token)
+			try:
+				parse_relational(token)
+			except Exception as e:
+				common.logger.error("Problem in findMethods.py parsing token type: " + str(type(token)) + ". " +str(e))
 		elif type(token) is m.Name:
-			parseName(token)
+			try:
+				parse_name(token)
+			except Exception as e:
+				common.logger.error("Problem in findMethods.py parsing token type: " + str(type(token)) + ". " +str(e))
 		elif type(token) is m.FieldAccess:
-			parseFieldAccess(token)
+			try:
+				parse_field_access(token)
+			except Exception as e:
+				common.logger.error("Problem in findMethods.py parsing token type: " + str(type(token)) + ". " +str(e))
 		else:
 			common.logger.debug("NOT COVERED IN TOKEN MAPPER: ")
 			common.logger.debug(type(token))
@@ -422,7 +575,7 @@ def wtf_is(token):
 	return token_type
 
 
-def isGlobal(token):
+def is_global(token):
 	"""
 	Checks if a given token is global in context
 	"""
@@ -438,24 +591,27 @@ def isGlobal(token):
 	return foundglobal
 
 
-def genericTainted(token, tainted):
+def generic_tainted(token, tainted):
+	'''
+	Finds whether any generic object is tainted
+	'''
 	global taint_list
 	if hasattr(token, '_fields'):
 		for f in token._fields:
 			try:
-				if isTainted(getattr(token, f)):
+				if is_tainted(getattr(token, f)):
 					tainted = True
 					if str(token) not in taint_list:
 						common.logger.debug("TAINTED " + str(type(token)) + ": " + str(token))
 			except Exception as e:
-				common.logger.error("Problem calling isTainted, from genericTainted in findMethods.py: " + str(e))
+				common.logger.error("Problem calling is_tainted, from generic_tainted in findMethods.py: " + str(e))
 
 	return tainted
 
 
-def isTainted(token):
+def is_tainted(token):
 	"""
-	Identifies if a given token is tainted or now
+	Identifies if a given token is tainted or not
 	"""
 	tainted = False
 	global taint_list
@@ -464,7 +620,7 @@ def isTainted(token):
 			if hasattr(token, '_fields'):
 				for f in token._fields:
 					if hasattr(token, str(f)):
-						if isTainted(getattr(token, str(f))):
+						if is_tainted(getattr(token, str(f))):
 							tainted = True
 							if str(token) not in taint_list:
 								if type(token.lhs) is m.FieldAccess:
@@ -475,12 +631,12 @@ def isTainted(token):
 								elif type(token.lhs.value) is str:
 									if str(token.lhs.value) not in taint_list:
 										taint_list.append(str(token.lhs.value))
-									isGlobal(token.lhs.value)
+									is_global(token.lhs.value)
 							else:
 								common.logger.debug("Token already in taint_list : " + str(token))
 		elif type(token) is m.MethodInvocation:
 			for f in token._fields:
-				if isTainted(getattr(token, f)):
+				if is_tainted(getattr(token, f)):
 					tainted = True
 					if str(f) == 'arguments':
 						if hasattr(token.target, 'value'):
@@ -488,7 +644,7 @@ def isTainted(token):
 						#TODO - Verify the class for the package found actually is imported by this class
 		elif type(token) is m.VariableDeclaration:
 			for f in token._fields:
-				if isTainted(getattr(token, f)):
+				if is_tainted(getattr(token, f)):
 					tainted = True
 					if str(token) not in taint_list:
 						for v in token.variable_declarators:
@@ -500,7 +656,7 @@ def isTainted(token):
 
 		elif type(token) is type(None):
 			#no-op
-			parseNone()
+			parse_none()
 
 		elif type(token) is str:
 			for t in taint_list:
@@ -511,19 +667,19 @@ def isTainted(token):
 					track(None, True)
 
 		elif type(token) is int:
-			parseInt(token)
+			parse_int(token)
 
 		elif type(token) is list:
 			for x in token:
-				tainted = genericTainted(x, tainted)
+				tainted = generic_tainted(x, tainted)
 
 		elif type(token) is bool:
-			parseBool(token)
+			parse_bool(token)
 
 		else:
-			tainted = genericTainted(token, tainted)
+			tainted = generic_tainted(token, tainted)
 	except Exception as e:
-		common.logger.error("Problem with isTainted method in findMethods.py: " + str(e))
+		common.logger.error("Problem with is_tainted method in findMethods.py: " + str(e))
 	return tainted
 
 def tainted_sink_processor(sink, token):
@@ -672,6 +828,11 @@ def tainted_sink_processor(sink, token):
 	#final_sink.append(['android.content.ContentResolver','android.database.Cursor','query',['android.net.Uri','java.lang.String[]'','java.lang.String','java.lang.String[]'','java.lang.String','android.os.CancellationSignal']])
 	#final_sink.append(['java.lang.ProcessBuilder','java.lang.Process','start',[]']
 	final_sink.append(['android.app.NotificationManager', 'void', 'notify', ['int', 'android.app.Notification']])
+	#Not in SOOT SINK LIST
+	final_sink.append(['android.webkit.WebView','void','loadUrl',['java.lang.String']])
+	#The second param is java.util.Map<K,V>
+	final_sink.append(['android.webkit.WebView','void','loadUrl',['java.lang.String','java.util.Map']])
+
 
 	#STUFF THAT GETS TAINTED
 	intermediate_sink = []
@@ -913,7 +1074,7 @@ def import_checker(imp, token, method, argslength):
 
 											#Need to figure out what the type of the tainting object is, so that we can see what parameters are passed in
 											token_type = wtf_is(a.target.value)
-											extras = extras_for_attack(token_type, a)
+											extras = findExtras.extras_for_attack(token_type, a)
 											common.logger.log(common.VULNERABILITY_LEVEL,
 												"To exploit, you will need to send an intent with the key: " + str(
 													extras[1]) + " of type: " + str(re.sub(r'get', '', extras[0])))
@@ -933,84 +1094,6 @@ def import_checker(imp, token, method, argslength):
 					else:
 						common.logger.warning("Uncategorized Vulnerability: " + str(token))
 	return confirmed
-
-
-def extras_for_attack(token_type, method):
-	"""
-	Identifies any extras to be included in the exploit app
-	"""
-	bundle_extras = []
-	bundle_extras.append("get")
-	bundle_extras.append("getBoolean")
-	bundle_extras.append("getBooleanArray")
-	bundle_extras.append("getDouble")
-	bundle_extras.append("getDoubleArray")
-	#TODO - more than one
-	bundle_extras.append("getInt")
-	bundle_extras.append("getIntArray")
-	bundle_extras.append("getLong")
-	bundle_extras.append("getLongArray")
-	#TODO - more than one
-	bundle_extras.append("getString")
-	bundle_extras.append("getStringArray")
-	bundle_extras.append("getIntArray")
-
-	intent_extras = []
-	intent_extras.append("getBooleanArrayExtra")
-	intent_extras.append("getBundleExtra")
-	intent_extras.append("getByteArrayExtra")
-	intent_extras.append("getByteExtra")
-	intent_extras.append("getCharArrayExtra")
-	intent_extras.append("getCharExtra")
-	intent_extras.append("getCharSequenceArrayExtra")
-	intent_extras.append("getCharSequenceArrayListExtra")
-	intent_extras.append("getCharSequenceExtra")
-	intent_extras.append("getDoubleArrayExtra")
-	intent_extras.append("getDoubleExtra")
-	intent_extras.append("getExtras")
-	intent_extras.append("getFloatArrayExtra")
-	intent_extras.append("getFloatExtra")
-	intent_extras.append("getIntArrayExtra")
-	intent_extras.append("getIntExtra")
-	intent_extras.append("getIntegerArrayListExtra")
-	intent_extras.append("getLongArrayExtra")
-	intent_extras.append("getLongExtra")
-	intent_extras.append("getParcelableArrayExtra")
-	intent_extras.append("getParcelableArrayListExtra")
-	intent_extras.append("getParcelableExtra")
-	intent_extras.append("getSerializableExtra")
-	intent_extras.append("getShortArrayExtra")
-	intent_extras.append("getShortExtra")
-	intent_extras.append("getStringArrayExtra")
-	intent_extras.append("getStringArrayListExtra")
-	intent_extras.append("getStringExtra")
-
-	#TODO - Need to deal with non-Extra data pulled from intents
-
-	extra = []
-
-	if str(token_type) == "Bundle":
-		for b in bundle_extras:
-			if str(b) == str(method.name):
-				if str(b) not in extra:
-					extra.append(str(b))
-				for a in method.arguments:
-					if type(a) is m.Literal:
-						if str(a.value) not in extra:
-							extra.append(a.value)
-	elif str(token_type) == "Intent":
-		for i in intent_extras:
-			if str(i) == str(method.name):
-				if str(i) not in extra:
-					extra.append(str(i))
-				for a in method.arguments:
-					if type(a) is m.Literal:
-						if str(a.value) not in extra:
-							extra.append(a.value)
-	else:
-		pass
-	return extra
-
 
 def obj_instance_of(token):
 	"""
@@ -1069,7 +1152,7 @@ def list_checker(token, q):
 				common.logger.error("Problem with list parsing in list_checker method of findMethods.py: " + str(e))
 		else:
 			try:
-				if isTainted(token):
+				if is_tainted(token):
 					tainted = True
 				try:
 					check = getattr(token, str(q))
@@ -1078,7 +1161,7 @@ def list_checker(token, q):
 				if type(check) is list:
 					tainted = list_checker(token, check)
 				else:
-					if isTainted(check):
+					if is_tainted(check):
 						tainted = True
 					token_mapper(check)
 			except Exception as e:
@@ -1089,9 +1172,9 @@ def list_checker(token, q):
 	return tainted
 
 
-def parseExpressionStatement(token):
+def parse_expression_statement(token):
 	"""
-	Parse toke type - statement
+	Parse token type - statement
 	"""
 	try:
 		track(token.expression, False)
@@ -1099,57 +1182,57 @@ def parseExpressionStatement(token):
 			for t in token._fields:
 				list_checker(token, t)
 	except Exception as e:
-		common.logger.error("Problem with parseExpressionStatement in findMethods.py: " + str(e))
+		common.logger.error("Problem with parse_expression_statement in findMethods.py: " + str(e))
 	return
 
 
-def parseClassLiteral(token):
+def parse_class_literal(token):
 	"""
-	Parse toke type - literal
+	Parse token type - literal
 	"""
 	try:
 		track(token, False)
 		if hasattr(token, '_fields'):
 			for f in token._fields:
 				track(f, False)
-				if isTainted(getattr(token, f)):
+				if is_tainted(getattr(token, f)):
 					common.logger.debug("TAINTED: " + str(token))
 				else:
 					if list_checker(token, f):
 						common.logger.debug("TAINTED: " + str(token))
 	except Exception as e:
-		common.logger.error("Problem with parseClassLiteral in findMethods.py: " + str(e))
+		common.logger.error("Problem with parse_class_literal in findMethods.py: " + str(e))
 	return
 
 
-def parseRelational(token):
+def parse_relational(token):
 	"""
-	Parse toke type - relational
+	Parse token type - relational
 	"""
 	try:
 		track(token, False)
 		if hasattr(token, '_fields'):
 			for f in token._fields:
 				track(f, False)
-				if isTainted(getattr(token, f)):
+				if is_tainted(getattr(token, f)):
 					common.logger.debug("TAINTED: " + str(token))
 				else:
 					if list_checker(token, f):
 						common.logger.debug("TAINTED: " + str(token))
 	except Exception as e:
-		common.logger.error("Problem with parseRelational in findMethods.py: " + str(e))
+		common.logger.error("Problem with parse_relational in findMethods.py: " + str(e))
 	return
 
 
-def parseWhile(token):
+def parse_while(token):
 	"""
-	Parse toke type - While
+	Parse token type - While
 	"""
 	track(token, False)
 	if hasattr(token, '_fields'):
 		for f in token._fields:
 			track(f, False)
-			if isTainted(getattr(token, f)):
+			if is_tainted(getattr(token, f)):
 				common.logger.debug("TAINTED: " + str(token))
 			else:
 				if list_checker(token, f):
@@ -1157,15 +1240,15 @@ def parseWhile(token):
 	return
 
 
-def parseArrayInitializer(token):
+def parse_array_initializer(token):
 	"""
-	Parse toke type - ArrayInitializer
+	Parse token type - ArrayInitializer
 	"""
 	track(token, False)
 	if hasattr(token, '_fields'):
 		for f in token._fields:
 			track(f, False)
-			if isTainted(getattr(token, f)):
+			if is_tainted(getattr(token, f)):
 				common.logger.debug("TAINTED: " + str(token))
 			else:
 				if list_checker(token, f):
@@ -1173,15 +1256,15 @@ def parseArrayInitializer(token):
 	return
 
 
-def parseWildcard(token):
+def parse_wildcard(token):
 	"""
-	Parse toke type - Wildcard
+	Parse token type - Wildcard
 	"""
 	track(token, False)
 	if hasattr(token, '_fields'):
 		for f in token._fields:
 			track(f, False)
-			if isTainted(getattr(token, f)):
+			if is_tainted(getattr(token, f)):
 				common.logger.debug("TAINTED: " + str(token))
 			else:
 				if list_checker(token, f):
@@ -1189,29 +1272,29 @@ def parseWildcard(token):
 	return
 
 
-def parseInt(token):
+def parse_int(token):
 	"""
-	Parse toke type - Integer
-	"""
-	return
-
-
-def parseBool(token):
-	"""
-	Parse toke type - Boolean
+	Parse token type - Integer
 	"""
 	return
 
 
-def parseFormalParameter(token):
+def parse_bool(token):
 	"""
-	Parse toke type - formal parameter
+	Parse token type - Boolean
+	"""
+	return
+
+
+def parse_formal_parameter(token):
+	"""
+	Parse token type - formal parameter
 	"""
 	track(token, False)
 	if hasattr(token, '_fields'):
 		for f in token._fields:
 			track(f, False)
-			if isTainted(getattr(token, f)):
+			if is_tainted(getattr(token, f)):
 				common.logger.debug("TAINTED: " + str(token))
 			else:
 				if list_checker(token, f):
@@ -1219,15 +1302,15 @@ def parseFormalParameter(token):
 	return
 
 
-def parseEquality(token):
+def parse_equality(token):
 	"""
-	Parse toke type - equality
+	Parse token type - equality
 	"""
 	track(token, False)
 	if hasattr(token, '_fields'):
 		for f in token._fields:
 			track(f, False)
-			if isTainted(getattr(token, f)):
+			if is_tainted(getattr(token, f)):
 				common.logger.debug("TAINTED: " + str(token))
 			else:
 				if list_checker(token, f):
@@ -1235,23 +1318,23 @@ def parseEquality(token):
 	return
 
 
-def parseUnary(token):
+def parse_unary(token):
 	"""
-	Parse toke type - unary
-	"""
-	return
-
-
-def parseNone():
-	"""
-	Parse toke type - None
+	Parse token type - unary
 	"""
 	return
 
 
-def parseFieldAccess(token):
+def parse_none():
 	"""
-	Parse toke type - FieldAccess
+	Parse token type - None
+	"""
+	return
+
+
+def parse_field_access(token):
+	"""
+	Parse token type - FieldAccess
 	"""
 	track(token, False)
 	if hasattr(token, '_fields'):
@@ -1260,15 +1343,15 @@ def parseFieldAccess(token):
 	return
 
 
-def parseArrayCreation(token):
+def parse_array_creation(token):
 	"""
-	Parse toke type - ArrayCreation
+	Parse token type - ArrayCreation
 	"""
 	track(token, False)
 	if hasattr(token, '_fields'):
 		for f in token._fields:
 			track(f, False)
-			if isTainted(getattr(token, f)):
+			if is_tainted(getattr(token, f)):
 				common.logger.debug("TAINTED: " + str(token))
 			else:
 				if list_checker(token, f):
@@ -1276,15 +1359,15 @@ def parseArrayCreation(token):
 	return
 
 
-def parseConditionalAnd(token):
+def parse_conditional_and(token):
 	"""
-	Parse toke type - Conditional AND
+	Parse token type - Conditional AND
 	"""
 	track(token, False)
 	if hasattr(token, '_fields'):
 		for f in token._fields:
 			track(f, False)
-			if isTainted(getattr(token, f)):
+			if is_tainted(getattr(token, f)):
 				common.logger.debug("TAINTED: " + str(token))
 			else:
 				if list_checker(token, f):
@@ -1292,15 +1375,15 @@ def parseConditionalAnd(token):
 	return
 
 
-def parseConditional(token):
+def parse_conditional(token):
 	"""
-	Parse toke type - Conditional
+	Parse token type - Conditional
 	"""
 	track(token, False)
 	if hasattr(token, '_fields'):
 		for f in token._fields:
 			track(f, False)
-			if isTainted(getattr(token, f)):
+			if is_tainted(getattr(token, f)):
 				common.logger.debug("TAINTED: " + str(token))
 			else:
 				if list_checker(token, f):
@@ -1308,15 +1391,15 @@ def parseConditional(token):
 	return
 
 
-def parseType(token):
+def parse_type(token):
 	"""
-	Parse toke type - Type
+	Parse token type - Type
 	"""
 	track(token, False)
 	if hasattr(token, '_fields'):
 		for f in token._fields:
 			track(f, False)
-			if isTainted(getattr(token, f)):
+			if is_tainted(getattr(token, f)):
 				common.logger.debug("TAINTED: " + str(token))
 			else:
 				if list_checker(token, f):
@@ -1324,12 +1407,12 @@ def parseType(token):
 	return
 
 
-def parseString(token):
+def parse_string(token):
 	"""
-	Parse toke type - String
+	Parse token type - String
 	"""
 	track(token, False)
-	if isTainted(token):
+	if is_tainted(token):
 		common.logger.debug("TAINTED STRING: " + str(tracker[len(tracker) - 2]))
 	#BUG - This may be causing me to miss a second getIntent in the path
 	#It might make sense to traverse the tree backwards until is not longer tainted, but then how to move forward
@@ -1337,15 +1420,15 @@ def parseString(token):
 	return
 
 
-def parseAdditive(token):
+def parse_additive(token):
 	"""
-	Parse toke type - Additive
+	Parse token type - Additive
 	"""
 	track(token, False)
 	if hasattr(token, '_fields'):
 		for f in token._fields:
 			track(f, False)
-			if isTainted(getattr(token, f)):
+			if is_tainted(getattr(token, f)):
 				common.logger.debug("TAINTED: " + str(token))
 			else:
 				if list_checker(token, f):
@@ -1353,15 +1436,15 @@ def parseAdditive(token):
 	return
 
 
-def parseAssignment(token):
+def parse_assignment(token):
 	"""
-	Parse toke type - assignment
+	Parse token type - assignment
 	"""
 	track(token, False)
 	if hasattr(token, '_fields'):
 		for f in token._fields:
 			track(f, False)
-			if isTainted(getattr(token, f)):
+			if is_tainted(getattr(token, f)):
 				common.logger.debug("TAINTED: " + str(token))
 			else:
 				if list_checker(token, f):
@@ -1369,78 +1452,107 @@ def parseAssignment(token):
 
 	return
 
+def is_super(token):
+	match=False
+	if hasattr(token,'target'):
+		if token.target =='super':
+			match=True
+	return match
 
-def parseMethodInvocation(token):
+
+def parse_method_invocation(token):
 	"""
-	Parse toke type - Method invocation
+	Parse token type - Method invocation
 	"""
 	global tree
 	global local_meth_decls
 	global entries
 	global component_type
+	global current_file
 
-	#TODO - This call may now be redundant
-	if str(component_type) == 'activity':
-		findSetResult(token)
-	if hasattr(token, 'name'):
-		if token.name not in local_meth_decls:
-		#BUG - Problem with this logic is it assumes the entire class has already been parsed
-		#To avoid this, we use an ugly hack that should cause the whole class to be parsed
-			recursiveMethodFinder(tree)
-			#Yes this could be re-ordered, but seems more efficient, since it saves the recursion time
-	if token.name not in entries:
-		if type(tree) is not None:
-			closeEnough=False
-		#From here we need to create the call tree in the local file
-			try:
-				common.logger.debug("Parsing local method declarations")
-				closeEnough=localMethodDeclarations.main(token, tree, current_file)
-			except Exception as e:
-				common.logger.error("Problem trying to look for locally declared methods in findMethods.py: " + str(e))
-			if not closeEnough:
+	if is_super(token):
+		#Returns a bool of whether a sensitive method was encountered
+		try:
+			if findSupers.find_extensions(tree,token):
+				#Need filename and current entry point
 				try:
-					common.logger.debug("Parsing external method declarations")
-					externalMethodDeclarations.main(token, tree, current_file)
+					findExtras.find_extras(current_file,current_entry)
 				except Exception as e:
-					common.logger.error('Problem running externalMethodDeclarations module from findMethods.py: ' + str(e))
-		else:
-			common.logger.error("Tried to pass None type tree to externalMethodDeclarations in findMethods.py")
-
-	try:
-		track(token, False)
-		if hasattr(token, '_fields'):
-			for f in token._fields:
-				if type(f) is m.MethodInvocation:
-					#TODO possibly redundant
-					if str(component_type) == 'activity':
-						findSetResult(f)
-				track(f, False)
-				if isTainted(getattr(token, f)):
-					common.logger.debug("TAINTED: " + str(token))
+					common.logger.error("Problem with findExtras in parse_method_invocation for supers: " +str(e))
+				#Need to deliver the results from the two calls above to the exploit and report
+			if component_type == 'activity':
+				try:
+					find_set_result(token)
+				except Exception as e:
+					common.logger.error("Problem calling find_set_result in parse_method_invocation for supers: " +str(e))
+		except Exception as e:
+				common.logger.error("Problem parsing supers in parse_method_invocation: " +str(e))
+	else:
+		#TODO - This call may now be redundant
+		if str(component_type) == 'activity':
+			try:
+				find_set_result(token)
+			except Exception as e:
+				common.logger.error("Problem calling find_set_result in parse_method_invocation: " +str(e))
+		if hasattr(token, 'name'):
+			if token.name not in local_meth_decls:
+			#BUG - Problem with this logic is it assumes the entire class has already been parsed
+			#To avoid this, we use an ugly hack that should cause the whole class to be parsed
+				recursive_method_finder(tree)
+				#Yes this could be re-ordered, but seems more efficient, since it saves the recursion time
+		if token.name not in entries:
+			if type(tree) is not None:
+				closeEnough=False
+			#From here we need to create the call tree in the local file
+				try:
+					common.logger.debug("Parsing local method declarations")
+					closeEnough=localMethodDeclarations.main(token, tree, current_file)
+				except Exception as e:
+					common.logger.error("Problem trying to look for locally declared methods in findMethods.py: " + str(e))
+				if not closeEnough:
 					try:
-						sink = common.sink_list_check(token,tree)
+						common.logger.debug("Parsing external method declarations")
+						externalMethodDeclarations.main(token, tree, current_file)
 					except Exception as e:
-						common.logger.error("Problem trying to find sink: " + str(e))
-					if sink != None:
-						if tainted_sink_processor(sink, token):
-							break
-				elif list_checker(token, f):
-					common.logger.debug("TAINTED: " + str(token))
-	except Exception as e:
-		common.parsingerrors.add(str(current_file))
-		common.logger.error("Problem in parseMethodInvocation of findMethods.py, when trying to match sinks: " + str(e))
+						common.logger.error('Problem running externalMethodDeclarations module from findMethods.py: ' + str(e))
+			else:
+				common.logger.error("Tried to pass None type tree to externalMethodDeclarations in findMethods.py")
+
+			try:
+				track(token, False)
+				if hasattr(token, '_fields'):
+					for f in token._fields:
+						if type(f) is m.MethodInvocation:
+							#TODO possibly redundant
+							if str(component_type) == 'activity':
+								find_set_result(f)
+						track(f, False)
+						if is_tainted(getattr(token, f)):
+							common.logger.debug("TAINTED: " + str(token))
+							try:
+								sink = common.sink_list_check(token,tree)
+							except Exception as e:
+								common.logger.error("Problem trying to find sink: " + str(e))
+							if sink != None:
+								if tainted_sink_processor(sink, token):
+									break
+						elif list_checker(token, f):
+							common.logger.debug("TAINTED: " + str(token))
+			except Exception as e:
+				common.parsingerrors.add(str(current_file))
+				common.logger.error("Problem in parse_method_invocation of findMethods.py, when trying to match sinks: " + str(e))
 	return
 
 
-def parseConditionalOr(token):
+def parse_conditional_or(token):
 	"""
-	Parse toke type - Conditional OR
+	Parse token type - Conditional OR
 	"""
 	track(token, False)
 	if hasattr(token, '_fields'):
 		for f in token._fields:
 			track(f, False)
-			if isTainted(getattr(token, f)):
+			if is_tainted(getattr(token, f)):
 				common.logger.debug("TAINTED: " + str(token))
 			else:
 				if list_checker(token, f):
@@ -1448,15 +1560,15 @@ def parseConditionalOr(token):
 	return
 
 
-def parseFieldDeclaration(token):
+def parse_field_declaration(token):
 	"""
-	Parse toke type - Field Declaration
+	Parse token type - Field Declaration
 	"""
 	track(token, False)
 	if hasattr(token, '_fields'):
 		for f in token._fields:
 			track(f, False)
-			if isTainted(getattr(token, f)):
+			if is_tainted(getattr(token, f)):
 				common.logger.debug("TAINTED: " + str(token))
 			else:
 				if list_checker(token, f):
@@ -1464,15 +1576,15 @@ def parseFieldDeclaration(token):
 	return
 
 
-def parseName(token):
+def parse_name(token):
 	"""
-	Parse toke type - Name
+	Parse token type - Name
 	"""
 	track(token, False)
 	if hasattr(token, '_fields'):
 		for f in token._fields:
 			track(f, False)
-			if isTainted(getattr(token, f)):
+			if is_tainted(getattr(token, f)):
 				common.logger.debug("TAINTED: " + str(token))
 			else:
 				if list_checker(token, f):
@@ -1480,15 +1592,15 @@ def parseName(token):
 	return
 
 
-def parseCast(token):
+def parse_cast(token):
 	"""
-	Parse toke type - Cast
+	Parse token type - Cast
 	"""
 	track(token, False)
 	if hasattr(token, '_fields'):
 		for f in token._fields:
 			track(f, False)
-			if isTainted(getattr(token, f)):
+			if is_tainted(getattr(token, f)):
 				common.logger.debug("TAINTED: " + str(token))
 			else:
 				if list_checker(token, f):
@@ -1496,15 +1608,15 @@ def parseCast(token):
 	return
 
 
-def parseVariableDeclaration(token):
+def parse_variable_declaration(token):
 	"""
-	Parse toke type - variable declaration
+	Parse token type - variable declaration
 	"""
 	track(token, False)
 	if hasattr(token, '_fields'):
 		for f in token._fields:
 			track(f, False)
-			if isTainted(getattr(token, f)):
+			if is_tainted(getattr(token, f)):
 				common.logger.debug("TAINTED: " + str(token))
 			else:
 				if list_checker(token, f):
@@ -1512,15 +1624,15 @@ def parseVariableDeclaration(token):
 	return
 
 
-def parseCatch(token):
+def parse_catch(token):
 	"""
-	Parse toke type - Catch
+	Parse token type - Catch
 	"""
 	track(token, False)
 	if hasattr(token, '_fields'):
 		for f in token._fields:
 			track(f, False)
-			if isTainted(getattr(token, f)):
+			if is_tainted(getattr(token, f)):
 				common.logger.debug("TAINTED: " + str(token))
 			else:
 				if list_checker(token, f):
@@ -1528,15 +1640,15 @@ def parseCatch(token):
 	return
 
 
-def parseSwitch(token):
+def parse_switch(token):
 	"""
-	Parse toke type - switch
+	Parse token type - switch
 	"""
 	track(token, False)
 	if hasattr(token, '_fields'):
 		for f in token._fields:
 			track(f, False)
-			if isTainted(getattr(token, f)):
+			if is_tainted(getattr(token, f)):
 				common.logger.debug("TAINTED: " + str(token))
 			else:
 				if list_checker(token, f):
@@ -1544,15 +1656,15 @@ def parseSwitch(token):
 	return
 
 
-def parseSwitchCase(token):
+def parse_switch_case(token):
 	"""
-	Parse toke type - switchCase
+	Parse token type - switchCase
 	"""
 	track(token, False)
 	if hasattr(token, '_fields'):
 		for f in token._fields:
 			track(f, False)
-			if isTainted(getattr(token, f)):
+			if is_tainted(getattr(token, f)):
 				common.logger.debug("TAINTED: " + str(token))
 			else:
 				if list_checker(token, f):
@@ -1560,15 +1672,15 @@ def parseSwitchCase(token):
 	return
 
 
-def parseVariableDeclarator(token):
+def parse_variable_declarator(token):
 	"""
-	Parse toke type - variable declaration
+	Parse token type - variable declaration
 	"""
 	track(token, False)
 	if hasattr(token, '_fields'):
 		for f in token._fields:
 			track(f, False)
-			if isTainted(getattr(token, f)):
+			if is_tainted(getattr(token, f)):
 				common.logger.debug("TAINTED: " + str(token))
 			else:
 				if list_checker(token, f):
@@ -1576,7 +1688,7 @@ def parseVariableDeclarator(token):
 	return
 
 
-def parseMethodDeclaration(token):
+def parse_method_declaration(token):
 	"""
 	Parse token type - method declaration
 	"""
@@ -1584,7 +1696,7 @@ def parseMethodDeclaration(token):
 	if hasattr(token, '_fields'):
 		for f in token._fields:
 			track(f, False)
-			if isTainted(getattr(token, f)):
+			if is_tainted(getattr(token, f)):
 				common.logger.debug("TAINTED: " + str(token))
 			else:
 				if list_checker(token, f):
@@ -1592,15 +1704,15 @@ def parseMethodDeclaration(token):
 	return
 
 
-def parseClassInitializer(token):
+def parse_class_initializer(token):
 	"""
-	Parse toke type - Class Initializer
+	Parse token type - Class Initializer
 	"""
 	track(token, False)
 	if hasattr(token, '_fields'):
 		for f in token._fields:
 			track(f, False)
-			if isTainted(getattr(token, f)):
+			if is_tainted(getattr(token, f)):
 				common.logger.debug("TAINTED: " + str(token))
 			else:
 				if list_checker(token, f):
@@ -1608,15 +1720,15 @@ def parseClassInitializer(token):
 	return
 
 
-def parseConstructorDeclaration(token):
+def parse_constructor_declaration(token):
 	"""
-	Parse toke type - constructor declaration
+	Parse token type - constructor declaration
 	"""
 	track(token, False)
 	if hasattr(token, '_fields'):
 		for f in token._fields:
 			track(f, False)
-			if isTainted(getattr(token, f)):
+			if is_tainted(getattr(token, f)):
 				common.logger.debug("TAINTED: " + str(token))
 			else:
 				if list_checker(token, f):
@@ -1624,15 +1736,15 @@ def parseConstructorDeclaration(token):
 	return
 
 
-def parseEnumDeclaration(token):
+def parse_enum_declaration(token):
 	"""
-	Parse toke type - enum declaration
+	Parse token type - enum declaration
 	"""
 	track(token, False)
 	if hasattr(token, '_fields'):
 		for f in token._fields:
 			track(f, False)
-			if isTainted(getattr(token, f)):
+			if is_tainted(getattr(token, f)):
 				common.logger.debug("TAINTED: " + str(token))
 			else:
 				if list_checker(token, f):
@@ -1640,15 +1752,15 @@ def parseEnumDeclaration(token):
 	return
 
 
-def parseInterfaceDeclaration(token):
+def parse_interface_declaration(token):
 	"""
-	Parse toke type - interface declaration
+	Parse token type - interface declaration
 	"""
 	track(token, False)
 	if hasattr(token, '_fields'):
 		for f in token._fields:
 			track(f, False)
-			if isTainted(getattr(token, f)):
+			if is_tainted(getattr(token, f)):
 				common.logger.debug("TAINTED: " + str(token))
 			else:
 				if list_checker(token, f):
@@ -1656,15 +1768,15 @@ def parseInterfaceDeclaration(token):
 	return
 
 
-def parseIfThenElse(token):
+def parse_if_then_else(token):
 	"""
-	Parse toke type - IfThenElse
+	Parse token type - IfThenElse
 	"""
 	track(token, False)
 	if hasattr(token, '_fields'):
 		for f in token._fields:
 			track(f, False)
-			if isTainted(getattr(token, f)):
+			if is_tainted(getattr(token, f)):
 				common.logger.debug("TAINTED: " + str(token))
 			else:
 				if list_checker(token, f):
@@ -1672,15 +1784,15 @@ def parseIfThenElse(token):
 	return
 
 
-def parseReturn(token):
+def parse_return(token):
 	"""
-	Parse toke type - return
+	Parse token type - return
 	"""
 	track(token, False)
 	if hasattr(token, '_fields'):
 		for f in token._fields:
 			track(f, False)
-			if isTainted(getattr(token, f)):
+			if is_tainted(getattr(token, f)):
 				common.logger.debug("TAINTED: " + str(token))
 			else:
 				if list_checker(token, f):
@@ -1688,15 +1800,15 @@ def parseReturn(token):
 	return
 
 
-def parseTry(token):
+def parse_try(token):
 	"""
-	Parse toke type - try
+	Parse token type - try
 	"""
 	track(token, False)
 	if hasattr(token, '_fields'):
 		for f in token._fields:
 			track(f, False)
-			if isTainted(getattr(token, f)):
+			if is_tainted(getattr(token, f)):
 				common.logger.debug("TAINTED: " + str(token))
 			else:
 				if list_checker(token, f):
@@ -1704,15 +1816,15 @@ def parseTry(token):
 	return
 
 
-def parseForEach(token):
+def parse_for_each(token):
 	"""
-	Parse toke type - For each
+	Parse token type - For each
 	"""
 	track(token, False)
 	if hasattr(token, '_fields'):
 		for f in token._fields:
 			track(f, False)
-			if isTainted(getattr(token, f)):
+			if is_tainted(getattr(token, f)):
 				common.logger.debug("TAINTED: " + str(token))
 			else:
 				if list_checker(token, f):
@@ -1720,15 +1832,15 @@ def parseForEach(token):
 	return
 
 
-def parseFor(token):
+def parse_for(token):
 	"""
-	Parse toke type - For
+	Parse token type - For
 	"""
 	track(token, False)
 	if hasattr(token, '_fields'):
 		for f in token._fields:
 			track(f, False)
-			if isTainted(getattr(token, f)):
+			if is_tainted(getattr(token, f)):
 				common.logger.debug("TAINTED: " + str(token))
 			else:
 				if list_checker(token, f):
@@ -1736,15 +1848,15 @@ def parseFor(token):
 	return
 
 
-def parseBlock(token):
+def parse_block(token):
 	"""
-	Parse toke type - Block
+	Parse token type - Block
 	"""
 	track(token, False)
 	if hasattr(token, '_fields'):
 		for f in token._fields:
 			track(f, False)
-			if isTainted(getattr(token, f)):
+			if is_tainted(getattr(token, f)):
 				common.logger.debug("TAINTED: " + str(token))
 			else:
 				if list_checker(token, f):
@@ -1752,15 +1864,15 @@ def parseBlock(token):
 	return
 
 
-def parseSynchronized(token):
+def parse_synchronized(token):
 	"""
-	Parse toke type - Synchronized
+	Parse token type - Synchronized
 	"""
 	track(token, False)
 	if hasattr(token, '_fields'):
 		for f in token._fields:
 			track(f, False)
-			if isTainted(getattr(token, f)):
+			if is_tainted(getattr(token, f)):
 				common.logger.debug("TAINTED: " + str(token))
 			else:
 				if list_checker(token, f):
@@ -1768,15 +1880,15 @@ def parseSynchronized(token):
 	return
 
 
-def parseVariable(token):
+def parse_variable(token):
 	"""
-	Parse toke type - Variable
+	Parse token type - Variable
 	"""
 	track(token, False)
 	if hasattr(token, '_fields'):
 		for f in token._fields:
 			track(f, False)
-			if isTainted(getattr(token, f)):
+			if is_tainted(getattr(token, f)):
 				common.logger.debug("TAINTED: " + str(token))
 			else:
 				if list_checker(token, f):
@@ -1784,15 +1896,15 @@ def parseVariable(token):
 	return
 
 
-def parseClassDeclaration(token):
+def parse_class_declaration(token):
 	"""
-	Parse toke type - Class declaration
+	Parse token type - Class declaration
 	"""
 	track(token, False)
 	if hasattr(token, '_fields'):
 		for f in token._fields:
 			track(f, False)
-			if isTainted(getattr(token, f)):
+			if is_tainted(getattr(token, f)):
 				common.logger.debug("TAINTED: " + str(token))
 			else:
 				if list_checker(token, f):
@@ -1800,15 +1912,15 @@ def parseClassDeclaration(token):
 	return
 
 
-def parseAnnotation(token):
+def parse_annotation(token):
 	"""
-	Parse toke type - annotation
+	Parse token type - annotation
 	"""
 	track(token, False)
 	if hasattr(token, '_fields'):
 		for f in token._fields:
 			track(f, False)
-			if isTainted(getattr(token, f)):
+			if is_tainted(getattr(token, f)):
 				common.logger.debug("TAINTED: " + str(token))
 			else:
 				if list_checker(token, f):
@@ -1816,15 +1928,15 @@ def parseAnnotation(token):
 	return
 
 
-def parseLiteral(token):
+def parse_literal(token):
 	"""
-	Parse toke type - Literal
+	Parse token type - Literal
 	"""
 	track(token, False)
 	if hasattr(token, '_fields'):
 		for f in token._fields:
 			track(f, False)
-			if isTainted(getattr(token, f)):
+			if is_tainted(getattr(token, f)):
 				common.logger.debug("TAINTED: " + str(token))
 			else:
 				if list_checker(token, f):
@@ -1832,15 +1944,15 @@ def parseLiteral(token):
 	return
 
 
-def parseBreak(token):
+def parse_break(token):
 	"""
-	Parse toke type - break
+	Parse token type - break
 	"""
 	track(token, False)
 	if hasattr(token, '_fields'):
 		for f in token._fields:
 			track(f, False)
-			if isTainted(getattr(token, f)):
+			if is_tainted(getattr(token, f)):
 				common.logger.debug("TAINTED: " + str(token))
 			else:
 				if list_checker(token, f):
@@ -1848,15 +1960,15 @@ def parseBreak(token):
 	return
 
 
-def parseInstanceCreation(token):
+def parse_instance_creation(token):
 	"""
-	Parse toke type - Instance creation
+	Parse token type - Instance creation
 	"""
 	track(token, False)
 	if hasattr(token, '_fields'):
 		for f in token._fields:
 			track(f, False)
-			if isTainted(getattr(token, f)):
+			if is_tainted(getattr(token, f)):
 				common.logger.debug("TAINTED: " + str(token))
 			else:
 				if list_checker(token, f):
