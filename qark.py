@@ -1014,7 +1014,7 @@ if exploit_choice==1:
 				common.dedup(extras_list)
 				if len(common.sploitparams)==0:
 					for j in range(0,len(extras_list)):
-						extras_list[j] = extras_list[j].replace('\"','')
+						extras_list[j] = str(extras_list[j]).replace('\"','')
 						if (extras_list[j]==" " or extras_list[j]==""):
 							pass
 						else:
@@ -1026,7 +1026,7 @@ if exploit_choice==1:
 							pass
 							#exploit.setExtra(common.sploitparams[j])
 						else:
-							common.sploitparams[j][0] = common.sploitparams[j][0].replace('\"','')
+							common.sploitparams[j][0] = str(common.sploitparams[j][0]).replace('\"','')
 							if (common.sploitparams[j][0]==" " or common.sploitparams[j][0]==""):
 								pass
 							else:
