@@ -490,7 +490,8 @@ if common.source_or_apk==1:
 		package = defaultdict(list)
 		mf = unpackAPK.find_manifest_in_unpacked_apk(common.apkPath, common.manifestName)
 		ap = axmlprinter.AXMLPrinter(open(mf, 'rb').read())
-		manifestInXML = minidom.parseString(ap.getBuff()).toxml()
+		mfbuff  = re.sub('xmlns:(?!android).*=', 'xmlns:android=', ap.getBuff())		
+		manifestInXML = minidom.parseString(mfbuff).toxml()
 		if common.interactive_mode:
 			show=raw_input("Inspect Manifest?[y/n]")
 			if show in ['y','Y']:
