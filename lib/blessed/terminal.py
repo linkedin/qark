@@ -4,17 +4,21 @@ import collections
 import contextlib
 import functools
 import warnings
-import termios
 import codecs
 import curses
 import locale
 import select
 import struct
-import fcntl
 import time
-import tty
 import sys
 import os
+
+from terminal.winsz import *;
+
+try:
+    import terminal.posix as vterm
+except ImportError:
+    import terminal.win32 as vterm
 
 try:
     from io import UnsupportedOperation as IOUnsupportedOperation
@@ -259,31 +263,17 @@ class Terminal(object):
     def _winsize(fd):
         """T._winsize -> WINSZ(ws_row, ws_col, ws_xpixel, ws_ypixel)
 
-        The tty connected by file desriptor fd is queried for its window size,
-        and returned as a collections.namedtuple instance WINSZ.
+        On a POSIX system, the tty connected by file desriptor fd is queried 
+        for its window size, and returned as a collections.namedtuple instance 
+        WINSZ.
 
         May raise exception IOError.
         """
-        data = fcntl.ioctl(fd, termios.TIOCGWINSZ, WINSZ._BUF)
-        return WINSZ(*struct.unpack(WINSZ._FMT, data))
-
+        return vterm._winsize(self, fd)
     def _height_and_width(self):
         """Return a tuple of (terminal height, terminal width).
         """
-        # TODO(jquast): hey kids, even if stdout is redirected to a file,
-        # we can still query sys.__stdin__.fileno() for our terminal size.
-        # -- of course, if both are redirected, we have no use for this fd.
-        for fd in (self._init_descriptor, sys.__stdout__):
-            try:
-                if fd is not None:
-                    return self._winsize(fd)
-            except IOError:
-                pass
-
-        return WINSZ(ws_row=int(os.getenv('LINES', '25')),
-                     ws_col=int(os.getenv('COLUMNS', '80')),
-                     ws_xpixel=None,
-                     ws_ypixel=None)
+        return vterm._height_and_width(self)
 
     @contextlib.contextmanager
     def location(self, x=None, y=None):
@@ -494,17 +484,7 @@ class Terminal(object):
         return lines
 
     def getch(self):
-        """T.getch() -> unicode
-
-        Read and decode next byte from keyboard stream.  May return u''
-        if decoding is not yet complete, or completed unicode character.
-        Should always return bytes when self.kbhit() returns True.
-
-        Implementors of input streams other than os.read() on the stdin fd
-        should derive and override this method.
-        """
-        byte = os.read(self.keyboard_fd, 1)
-        return self._keyboard_decoder.decode(byte, final=False)
+        return vterm.getch(terminal)
 
     def kbhit(self, timeout=None, _intr_continue=True):
         """T.kbhit([timeout=None]) -> bool
@@ -567,19 +547,7 @@ class Terminal(object):
         Note also that setcbreak sets VMIN = 1 and VTIME = 0,
         http://www.unixwiz.net/techtips/termios-vmin-vtime.html
         """
-        if self.keyboard_fd is not None:
-            # save current terminal mode,
-            save_mode = termios.tcgetattr(self.keyboard_fd)
-            tty.setcbreak(self.keyboard_fd, termios.TCSANOW)
-            try:
-                yield
-            finally:
-                # restore prior mode,
-                termios.tcsetattr(self.keyboard_fd,
-                                  termios.TCSAFLUSH,
-                                  save_mode)
-        else:
-            yield
+        return vterm.cbreak(self);
 
     @contextlib.contextmanager
     def raw(self):
@@ -589,19 +557,7 @@ class Terminal(object):
         suspend, and flow control characters are all passed through as their
         raw character values instead of generating a signal.
         """
-        if self.keyboard_fd is not None:
-            # save current terminal mode,
-            save_mode = termios.tcgetattr(self.keyboard_fd)
-            tty.setraw(self.keyboard_fd, termios.TCSANOW)
-            try:
-                yield
-            finally:
-                # restore prior mode,
-                termios.tcsetattr(self.keyboard_fd,
-                                  termios.TCSAFLUSH,
-                                  save_mode)
-        else:
-            yield
+        return vterm.raw(self)
 
     def inkey(self, timeout=None, esc_delay=0.35, _intr_continue=True):
         """T.inkey(timeout=None, [esc_delay, [_intr_continue]]) -> Keypress()
@@ -709,13 +665,3 @@ class Terminal(object):
 
 _CUR_TERM = None
 
-WINSZ = collections.namedtuple('WINSZ', (
-    'ws_row',     # /* rows, in characters */
-    'ws_col',     # /* columns, in characters */
-    'ws_xpixel',  # /* horizontal size, pixels */
-    'ws_ypixel',  # /* vertical size, pixels */
-))
-#: format of termios structure
-WINSZ._FMT = 'hhhh'
-#: buffer of termios structure appropriate for ioctl argument
-WINSZ._BUF = '\x00' * struct.calcsize(WINSZ._FMT)
