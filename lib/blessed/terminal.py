@@ -497,35 +497,7 @@ class Terminal(object):
 
         If input is not a terminal, False is always returned.
         """
-        # Special care is taken to handle a custom SIGWINCH handler, which
-        # causes select() to be interrupted with errno 4 (EAGAIN) --
-        # it is ignored, and a new timeout value is derived from the previous,
-        # unless timeout becomes negative, because signal handler has blocked
-        # beyond timeout, then False is returned. Otherwise, when timeout is 0,
-        # we continue to block indefinitely (default).
-        stime = time.time()
-        check_w, check_x = [], []
-        check_r = [self.keyboard_fd] if self.keyboard_fd is not None else []
-
-        while True:
-            try:
-                ready_r, ready_w, ready_x = select.select(
-                    check_r, check_w, check_x, timeout)
-            except InterruptedError:
-                if not _intr_continue:
-                    return u''
-                if timeout is not None:
-                    # subtract time already elapsed,
-                    timeout -= time.time() - stime
-                    if timeout > 0:
-                        continue
-                    # no time remains after handling exception (rare)
-                    ready_r = []
-                    break
-            else:
-                break
-
-        return False if self.keyboard_fd is None else check_r == ready_r
+        return vterm.kbhit(self, timeout=timeout, _intr_continue=_intr_continue)
 
     @contextlib.contextmanager
     def cbreak(self):

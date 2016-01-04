@@ -68,3 +68,5 @@ def _winsize(terminal, fd):
     On Windows, just returns _height_and_width(terminal)
     """
     return _height_and_width(terminal)
+def kbhit(terminal, timeout=None, ...):
+    return msvcrt.kbhit()

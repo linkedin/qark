@@ -109,4 +109,44 @@ def _height_and_width(terminal):
                  ws_col=int(os.getenv('COLUMNS', '80')),
                  ws_xpixel=None,
                  ws_ypixel=None)
+def kbhit(terminal, timeout=None, _intr_continue=True):
+    """T.kbhit([timeout=None]) -> bool
+
+    Returns True if a keypress has been detected on keyboard.
+
+    When ``timeout`` is 0, this call is non-blocking, Otherwise blocking
+    until keypress is detected (default).  When ``timeout`` is a positive
+    number, returns after ``timeout`` seconds have elapsed.
+
+    If input is not a terminal, False is always returned.
+    """
+    # Special care is taken to handle a custom SIGWINCH handler, which
+    # causes select() to be interrupted with errno 4 (EAGAIN) --
+    # it is ignored, and a new timeout value is derived from the previous,
+    # unless timeout becomes negative, because signal handler has blocked
+    # beyond timeout, then False is returned. Otherwise, when timeout is 0,
+    # we continue to block indefinitely (default).
+    stime = time.time()
+    check_w, check_x = [], []
+    check_r = [terminal.keyboard_fd] if terminal.keyboard_fd is not None else []
+
+    while True:
+        try:
+            ready_r, ready_w, ready_x = select.select(
+                check_r, check_w, check_x, timeout)
+        except InterruptedError:
+            if not _intr_continue:
+                return u''
+            if timeout is not None:
+                # subtract time already elapsed,
+                timeout -= time.time() - stime
+                if timeout > 0:
+                    continue
+                # no time remains after handling exception (rare)
+                ready_r = []
+                break
+        else:
+            break
+
+    return False if terminal.keyboard_fd is None else check_r == ready_r
 
