@@ -9,6 +9,6 @@ if ('3', '0', '0') <= _platform.python_version_tuple() < ('3', '2', '2+'):
                       'support due to http://bugs.python.org/issue10570.')
 
 
-#from terminal import Terminal
+from terminal import Terminal
 
-#__all__ = ['Terminal']
+__all__ = ['Terminal']

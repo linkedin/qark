@@ -4,7 +4,6 @@ positioning"""
 from contextlib import contextmanager
 import curses
 from curses import setupterm, tigetnum, tigetstr, tparm
-from fcntl import ioctl
 
 try:
     from io import UnsupportedOperation as IOUnsupportedOperation
@@ -17,7 +16,6 @@ from os import isatty, environ
 from platform import python_version_tuple
 import struct
 import sys
-from termios import TIOCGWINSZ
 
 
 __all__ = ['Terminal']
@@ -228,6 +226,8 @@ class Terminal(object):
         # setupterm() again.
         for descriptor in self._init_descriptor, sys.__stdout__:
             try:
+                from fcntl import ioctl
+                from termios import TIOCGWINSZ
                 return struct.unpack(
                         'hhhh', ioctl(descriptor, TIOCGWINSZ, '\000' * 8))[0:2]
             except IOError:
@@ -235,6 +235,8 @@ class Terminal(object):
                 # as when when stdout is piped to another program, fe. tee(1),
                 # these ioctls will raise IOError
                 pass
+	    except ImportError:
+		pass
         try:
             return int(environ.get('LINES')), int(environ.get('COLUMNS'))
         except TypeError:

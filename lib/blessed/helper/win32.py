@@ -1,7 +1,8 @@
-import msvcr32
+import msvcrt
 import console
 import contextlib
-from terminal.winsz import *
+import os
+from winsz import *
 
 @contextlib.contextmanager
 def cbreak(terminal):
@@ -14,7 +15,8 @@ def cbreak(terminal):
     leaving as a stub"""
     try:
         yield
-
+    finally:
+	pass
 
 @contextlib.contextmanager
 def buffered(terminal):
@@ -28,6 +30,8 @@ def buffered(terminal):
     end of a curses run, this functionality is not implemented here."""
     try:
         yield
+    finally:
+	pass
 
 @contextlib.contextmanager
 def raw(terminal):
@@ -35,6 +39,8 @@ def raw(terminal):
        By default they are already in raw mode, so this is necessarily a stub"""
     try:
         yield
+    finally:
+	pass
 
 def get_size(terminal):
     """Gets he size of the current terminal"""
@@ -68,5 +74,5 @@ def _winsize(terminal, fd):
     On Windows, just returns _height_and_width(terminal)
     """
     return _height_and_width(terminal)
-def kbhit(terminal, timeout=None, ...):
+def kbhit(terminal, timeout=None, _intr_continue=None):
     return msvcrt.kbhit()
