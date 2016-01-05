@@ -13,12 +13,12 @@ import time
 import sys
 import os
 
-from terminal.winsz import *;
+from helper.winsz import *;
 
 try:
-    import terminal.posix as vterm
+    import helper.posix as vterm
 except ImportError:
-    import terminal.win32 as vterm
+    import helper.win32 as vterm
 
 try:
     from io import UnsupportedOperation as IOUnsupportedOperation

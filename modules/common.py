@@ -23,8 +23,7 @@ from collections import defaultdict
 from lib import colorama
 import glob
 import subprocess
-from lib.blessed import *
-
+import lib.blessed.terminal as myterminal
 
 VULNERABILITY_LEVEL = 60
 logging.addLevelName(VULNERABILITY_LEVEL, "POTENTIAL VULNERABILITY")
@@ -85,7 +84,7 @@ Better to have a scan and no html report, than no scan
 '''
 reportInitSuccess=True
 
-term = Terminal()
+term = myterminal.Terminal()
 height = 0
 
 class terminalPrint():
