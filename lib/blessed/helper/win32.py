@@ -65,7 +65,7 @@ def _height_and_width(terminal):
                  ws_xpixel=None,
                  ws_ypixel=None)
 
-def _winsize(terminal, fd):
+def _winsize(fd):
     """T._winsize -> WINSZ(ws_row, ws_col, ws_xpixel, ws_ypixel)
 
     The tty connected by file desriptor fd is queried for its window size,
@@ -73,6 +73,6 @@ def _winsize(terminal, fd):
 
     On Windows, just returns _height_and_width(terminal)
     """
-    return _height_and_width(terminal)
+    return _height_and_width(None)
 def kbhit(terminal, timeout=None, _intr_continue=None):
     return msvcrt.kbhit()

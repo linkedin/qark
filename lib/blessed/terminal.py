@@ -269,7 +269,7 @@ class Terminal(object):
 
         May raise exception IOError.
         """
-        return vterm._winsize(self, fd)
+        return vterm._winsize(fd)
     def _height_and_width(self):
         """Return a tuple of (terminal height, terminal width).
         """

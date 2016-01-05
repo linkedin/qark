@@ -1,5 +1,7 @@
 import curses
 import tty
+import os
+import sys
 import termios
 import fcntl
 import select
@@ -82,7 +84,7 @@ def getch(terminal):
         """
         byte = os.read(self.keyboard_fd, 1)
         return self._keyboard_decoder.decode(byte, final=False)
-def _winsize(terminal, fd):
+def _winsize(fd):
         """T._winsize -> WINSZ(ws_row, ws_col, ws_xpixel, ws_ypixel)
 
         The tty connected by file desriptor fd is queried for its window size,
@@ -101,7 +103,7 @@ def _height_and_width(terminal):
     for fd in (terminal._init_descriptor, sys.__stdout__):
         try:
             if fd is not None:
-                return terminal._winsize(fd)
+                return _winsize(fd)
         except IOError:
             pass
 
