@@ -17,6 +17,7 @@ import ConfigParser
 from xml.dom import minidom
 import fileinput
 import logging
+import shutil
 
 from IssueType import IssueType, IssueSeverity
 from collections import defaultdict
@@ -213,7 +214,7 @@ def readLayoutFiles(pathToLayout):
 	print output
 
 def checkJavaVersion():
-	process = subprocess.Popen(["java","-version"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+	process = subprocess.Popen(["java","-version"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
 	try:
 		while True:
 			line = process.stdout.readline()
