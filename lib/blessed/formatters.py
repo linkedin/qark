@@ -1,4 +1,5 @@
 "This sub-module provides formatting functions."
+import _curses # needed for error trapping on Windows
 import curses
 
 _derivatives = ('on', 'bright', 'on_bright',)
@@ -53,6 +54,8 @@ class ParameterizingString(unicode):
             # concats work.
             attr = curses.tparm(self.encode('latin1'), *args).decode('latin1')
             return FormattingString(attr, self._normal)
+        except _curses.error:
+	    pass
         except TypeError, err:
             # If the first non-int (i.e. incorrect) arg was a string, suggest
             # something intelligent:

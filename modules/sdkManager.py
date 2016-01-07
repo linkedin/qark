@@ -70,13 +70,18 @@ def download_sdk():
     """
 
     url = ""
+    url_windows = "https://dl.google.com/android/android-sdk_r24.0.2-windows.zip"
     url_macosx = "https://dl.google.com/android/android-sdk_r24.0.2-macosx.zip"
     url_linux = "https://dl.google.com/android/android-sdk_r24.3.4-linux.tgz"
 
     if sys.platform == "linux2":
         url = url_linux
     else:
-        url = url_macosx
+        try:
+           import lib.blessed.helpers.posix as vterm
+           url = url_macosx
+        except ImportError:
+           url = url_windows
 
     file_name = url.split('/')[-1]
     u = urllib2.urlopen(url)
@@ -123,7 +128,10 @@ def download_sdk():
                 logger.info('Done')
         common.writeKey('AndroidSDKPath', androidSDKZIP.rsplit(".",1)[0] + "/android-sdk-macosx/")
     #We dont need the ZIP file anymore
-    os.remove(androidSDKZIP)
+    try:
+        os.remove(androidSDKZIP)
+    except WindowsError:
+        pass
     run_sdk_manager()
     
 def run_sdk_manager():

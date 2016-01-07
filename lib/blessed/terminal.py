@@ -298,7 +298,10 @@ class Terminal(object):
         # Save position and move to the requested column, row, or both:
         self.stream.write(self.save)
         if x is not None and y is not None:
-            self.stream.write(self.move(y, x))
+            try:
+                self.stream.write(self.move(y, x))
+	    except TypeError:
+		self.move(y, x)
         elif x is not None:
             self.stream.write(self.move_x(x))
         elif y is not None:
