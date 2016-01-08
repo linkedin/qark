@@ -144,7 +144,6 @@ def run_sdk_manager():
     """
     flag_no_ui = " --no-ui"
     android = common.getConfig('AndroidSDKPath') + "tools/android"
-    print(android)
     #need to have execute permission on the android executable
     try:
         st = os.stat(android)
