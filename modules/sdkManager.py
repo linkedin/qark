@@ -73,15 +73,19 @@ def download_sdk():
     url_windows = "https://dl.google.com/android/android-sdk_r24.0.2-windows.zip"
     url_macosx = "https://dl.google.com/android/android-sdk_r24.0.2-macosx.zip"
     url_linux = "https://dl.google.com/android/android-sdk_r24.3.4-linux.tgz"
+    platform_name = ""
 
     if sys.platform == "linux2":
         url = url_linux
+	platform_name = "linux"
     else:
         try:
            import lib.blessed.helpers.posix as vterm
            url = url_macosx
+	   platform_name = "macosx"
         except ImportError:
            url = url_windows
+	   platform_name = "windows"
 
     file_name = url.split('/')[-1]
     u = urllib2.urlopen(url)
@@ -126,12 +130,12 @@ def download_sdk():
                 logger.error(e.message)
             else:
                 logger.info('Done')
-        common.writeKey('AndroidSDKPath', androidSDKZIP.rsplit(".",1)[0] + "/android-sdk-macosx/")
+        common.writeKey('AndroidSDKPath', androidSDKZIP.rsplit(".",1)[0] + "/android-sdk-" + platform_name + "/")
     #We dont need the ZIP file anymore
     try:
         os.remove(androidSDKZIP)
     except WindowsError:
-        pass
+        pass # cannot always remove on Windows due to file locking
     run_sdk_manager()
     
 def run_sdk_manager():
@@ -140,8 +144,13 @@ def run_sdk_manager():
     """
     flag_no_ui = " --no-ui"
     android = common.getConfig('AndroidSDKPath') + "tools/android"
+    print(android)
     #need to have execute permission on the android executable
-    st = os.stat(android)
+    try:
+        st = os.stat(android)
+    except WindowsError:
+	android = android + ".bat"
+	st = os.stat(android)
     os.chmod(android, st.st_mode | stat.S_IEXEC)
     #Android list sdk
     android_cmd1= android + "list" + "sdk" + "-a"
