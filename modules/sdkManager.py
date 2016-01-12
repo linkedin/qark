@@ -171,15 +171,20 @@ def run_sdk_manager():
     print selected_filters
     p1 = Popen([android, 'update','sdk','-a','--filter',selected_filters,'--no-ui'], stdout=PIPE, stdin=PIPE, stderr=STDOUT, bufsize=1)
     if not common.interactive_mode:
-        p1.stdin.write(common.args.acceptterms)
+	acceptterms = common.args.acceptterms
+	if not acceptterms:
+	    acceptterms = "y\n"
+        output, err = p1.communicate(acceptterms)
     else:
-        p1.stdin.write("y\n")
+        output, err = p1.communicate("y\n")
     for line in iter(p1.stdout.readline, b''):
         print line,
         if "Do you accept the license" in line:
-            p1.stdin.flush()
-            p1.stdin.write("y\n")
-    output, err = p1.communicate("y\n")
+            output, err = p1.communicate("y\n")
+    try: # in case needed, not removing this for now, just wrapping in try
+        output, err = p1.communicate("y\n")
+    except ValueError:
+        pass
     common.set_environment_variables()
 
 
@@ -199,6 +204,10 @@ def build_apk(path):
     properties.write('sdk.dir='+common.getConfig('AndroidSDKPath'))
     properties.close()
     os.chdir(currentDir + "/build/" + path)
-    p1 = Popen(['./gradlew',"assembleDebug"], stdout=PIPE, stdin=PIPE, stderr=STDOUT, bufsize=1)
+    p1 = None
+    try: 
+        p1 = Popen(['./gradlew',"assembleDebug"], stdout=PIPE, stdin=PIPE, stderr=STDOUT, bufsize=1)
+    except WindowsError:
+        p1 = Popen(['./gradlew.bat',"assembleDebug"], stdout=PIPE, stdin=PIPE, stderr=STDOUT, bufsize=1)
     for line in iter(p1.stdout.readline, b''):
         print line,
