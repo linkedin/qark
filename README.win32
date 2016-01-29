@@ -1,0 +1,53 @@
+INSTALLING AND RUNNING QARK ON MICROSOFT WINDOWS
+================================================
+
+Qark now comes with experimental Windows support.  This support may not be
+complete or perfect.  Use at your own risk and please report problems.
+
+Qark on Windows requires pdcurses and python-pdcurses to work.
+
+NOTE:  pdcurses-win32a is not expected to work at present because of differences
+in standard input, standard output, and standard error.
+
+Installing Dependencies from Packages
+-------------------------------------
+
+As of 2016-02-01, packages for pdcurses which are available for Qark for 64-bit 
+versions of Python are not available.  For these you must download and install 
+from source.
+
+For users of Windows where 32-bit Python is used, you can install these
+dependencies from packages.
+
+
+Follow the installation instructions at 
+https://github.com/jmcb/python-pdcurses/blob/master/INSTALL.rst
+Use pdcurses, not pdcurses-win32a.  These packages contain all dependencies.
+
+Installing Dependencies from Source
+-----------------------------------
+
+Installing from source requires building pdcurses, and then building the 
+Python bindings on this.  You will need a build environment and a software 
+version control system compatible with Github (currently svn and git are 
+natively supported and many others, such as Mercurial have git compatibility
+available).
+
+These instructions assume your compiler is from MinGW, and your revision control
+system is git.  It should be easy to follow for those using other systems, such
+as Visual Studio, SVN, and Mercurial.
+
+1.  Get PDCurses:  git clone https://github.com/macton/pdcurses.git
+2.  Build PDCurses:
+    - cd pdcurses/win32
+    - gmake
+    - you can test your build by running various executable files compiled.
+    - gmake install
+3.  Return to your directory above pdcurses  cd ../..
+4.  Get python-pdcurses: git clone https://github.com/jmcb/python-pdcurses.git
+5.  Build python-pdcurses:
+    - cd python-pdcurses.git
+    - gmake dirs
+    - gmake make all-pd-only
+    - python setup.py build -c mingw32
+    - python setup.py install
