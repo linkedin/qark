@@ -40,12 +40,13 @@ as Visual Studio, SVN, and Mercurial.
 1.  Get PDCurses:  git clone https://github.com/macton/pdcurses.git
 2.  Build PDCurses:
     - cd pdcurses/win32
-    - gmake
+    - set DLL=Y
+    - gmake -f mingw.makefile
     - you can test your build by running various executable files compiled.
-    - gmake install
+    - copy to the system directory
 3.  Return to your directory above pdcurses  cd ../..
 4.  Get python-pdcurses: git clone https://github.com/jmcb/python-pdcurses.git
-5.  Build python-pdcurses:
+5.  Build python-pdcurses (instructions need some work here):
     - cd python-pdcurses.git
     - gmake dirs
     - gmake make all-pd-only
