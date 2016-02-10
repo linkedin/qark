@@ -247,7 +247,7 @@ def procyon(path,dirname):
 	"""
 	calls the procyon decompiler from command line
 	"""
-	process = subprocess.Popen(["java","-jar", common.rootDir + "/lib/procyon/procyon-decompiler-0.5.29.jar", path, "-o ", dirname+"2"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+	process = subprocess.Popen(["java","-jar", common.rootDir + "/lib/procyon/procyon-decompiler-0.5.30.jar", path, "-o ", dirname+"2"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 	try:
 		while True:
 			line = process.stdout.readline()
