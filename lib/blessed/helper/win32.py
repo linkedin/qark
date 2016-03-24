@@ -1,5 +1,4 @@
 import msvcrt
-import console
 import contextlib
 import os
 from winsz import *

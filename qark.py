@@ -597,7 +597,11 @@ if common.source_or_apk!=1:
 		if os.path.exists(common.manifest.rsplit("/",1)[0] + "/java"):
 			common.pathToUnpackedAPK = common.manifest.rsplit("/",1)[0] + "/java"
 			common.logger.info("Found Java Source at %s", common.pathToUnpackedAPK)
-			confirm = raw_input(common.config.get('qarkhelper', 'SOURCE_CONFIRM'))
+			if common.interactive_mode:
+				confirm = raw_input(common.config.get('qarkhelper', 'SOURCE_CONFIRM'))
+			else:
+				confirm = True;
+
 			if str(confirm).lower()=='n':
 				common.sourceDirectory = os.path.abspath(raw_input(common.config.get('qarkhelper', 'SOURCE_PROMPT'))).rstrip()
 			else:
