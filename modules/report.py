@@ -23,7 +23,6 @@ logger = logging.getLogger(__name__)
 
 pre_rendered_html = ""
 
-
 class Section():
     """
     Enum type for exploitatin category
@@ -64,7 +63,7 @@ severity[Severity.ERROR] = "Error"
 
 def writeSection(sec,data_list):
     try:
-        pre_rendered = open(common.getConfig("rootDir") + "/report/report.html",'r').read()
+        pre_rendered = open(common.reportDir + "/report.html",'r').read()
         pre_rendered_html2 = BeautifulSoup(pre_rendered,'html5lib')
 
         list_of_files = []
@@ -202,7 +201,7 @@ def writeSection(sec,data_list):
 
             pre_rendered_html2.find("div", id=str(section[sec] + "-issues-list")).append(new_div_tag_1)
 
-            with open(common.getConfig("rootDir") + "/report/report.html", "w") as fh:
+            with open(common.reportDir + "/report.html", "w") as fh:
                 fh.write(str(pre_rendered_html2.prettify()))
             fh.close()
     except Exception as e:
@@ -215,8 +214,8 @@ def write_manifest(data):
     """
     if common.reportInitSuccess:
         try:
-            if os.path.exists(common.getConfig("rootDir") + "/report/report.html"):
-                pre_rendered = open(common.getConfig("rootDir") + "/report/report.html",'r').read()
+            if os.path.exists(common.reportDir + "/report.html"):
+                pre_rendered = open(common.reportDir + "/report.html",'r').read()
                 pre_rendered_html = BeautifulSoup(pre_rendered,'html5lib')
 
                 new_code_div = pre_rendered_html.new_tag("code")
@@ -224,15 +223,15 @@ def write_manifest(data):
                 new_code_div.string = data
                 pre_rendered_html.find("pre", id="rawmanifest").append(new_code_div)
 
-            with open(common.getConfig("rootDir") + "/report/report.html", "w") as fh:
+            with open(common.reportDir + "/report.html", "w") as fh:
                 fh.write(str(pre_rendered_html.prettify()))
             fh.close()
         except Exception as e:
             common.logger.debug("Error writing manifest: " + str(e))
 def write(identity, data, tag=None):
     try:
-        if os.path.exists(common.getConfig("rootDir") + "/report/report.html"):
-            pre_rendered = open(common.getConfig("rootDir") + "/report/report.html",'r').read()
+        if os.path.exists(common.reportDir + "/report.html"):
+            pre_rendered = open(common.reportDir + "/report.html",'r').read()
             pre_rendered_html = BeautifulSoup(pre_rendered,'html5lib')
 
             if tag is not None:
@@ -243,7 +242,7 @@ def write(identity, data, tag=None):
             new_span_tag.string = str(data)
             pre_rendered_html.find("span", id=identity).append(new_span_tag)
 
-        with open(common.getConfig("rootDir") + "/report/report.html", "w") as fh:
+        with open(common.reportDir + "/report.html", "w") as fh:
             fh.write(str(pre_rendered_html.prettify()))
         fh.close()
     except Exception as e:
@@ -252,8 +251,8 @@ def write(identity, data, tag=None):
 
 def write_counters():
     try:
-        if os.path.exists(common.getConfig("rootDir") + "/report/report.html"):
-            pre_rendered = open(common.getConfig("rootDir") + "/report/report.html",'r').read()
+        if os.path.exists(common.reportDir + "/report.html"):
+            pre_rendered = open(common.reportDir + "/report.html",'r').read()
             pre_rendered_html = BeautifulSoup(pre_rendered,'html5lib')
             warnings =  len(re.findall(r'badger-warning', str(pre_rendered_html)))
             information =  len(re.findall(r'badger-success', str(pre_rendered_html)))
@@ -276,7 +275,7 @@ def write_counters():
             new_div_tag3.string = str(debug)
             pre_rendered_html.find("h1", id="debug_count").append(new_div_tag3)
 
-            with open(common.getConfig("rootDir") + "/report/report.html", "w") as fh:
+            with open(common.reportDir + "/report.html", "w") as fh:
                 fh.write(str(pre_rendered_html.prettify()))
             fh.close()
     except Exception as e:
@@ -285,8 +284,8 @@ def write_counters():
 def write_badger(identity, sev, data, extra=None):
     if common.reportInitSuccess:
         try:
-            if os.path.exists(common.getConfig("rootDir") + "/report/report.html"):
-                pre_rendered = open(common.getConfig("rootDir") + "/report/report.html",'r').read()
+            if os.path.exists(common.reportDir + "/report.html"):
+                pre_rendered = open(common.reportDir + "/report.html",'r').read()
                 pre_rendered_html = BeautifulSoup(pre_rendered,'html5lib')
 
                 new_div_tag = pre_rendered_html.new_tag("div")
@@ -336,7 +335,7 @@ def write_badger(identity, sev, data, extra=None):
                 new_div_tag.append(new_ul_tag)
                 pre_rendered_html.find("div", id=identity).insert(0, new_div_tag)
 
-            with open(common.getConfig("rootDir") + "/report/report.html", "w") as fh:
+            with open(common.reportDir + "/report.html", "w") as fh:
                 fh.write(str(pre_rendered_html.prettify()))
             fh.close()
         except Exception as e:
@@ -344,8 +343,8 @@ def write_badger(identity, sev, data, extra=None):
 
 def write_adb_commands(identity, sev, data, extra=None, infobartext=None):
     try:
-        if os.path.exists(common.getConfig("rootDir") + "/report/report.html"):
-            pre_rendered = open(common.getConfig("rootDir") + "/report/report.html",'r').read()
+        if os.path.exists(common.reportDir + "/report.html"):
+            pre_rendered = open(common.reportDir + "/report.html",'r').read()
             pre_rendered_html = BeautifulSoup(pre_rendered,'html5lib')
 
             new_div_tag = pre_rendered_html.new_tag("div")
@@ -398,7 +397,7 @@ def write_adb_commands(identity, sev, data, extra=None, infobartext=None):
             new_div_tag.append(new_ul_tag)
             pre_rendered_html.find("div", id=identity).insert(0, new_div_tag)
 
-        with open(common.getConfig("rootDir") + "/report/report.html", "w") as fh:
+        with open(common.reportDir + "/report.html", "w") as fh:
             fh.write(str(pre_rendered_html.prettify()))
         fh.close()
     except Exception as e:
@@ -409,9 +408,16 @@ def reset():
     Flushes the contents of the report
     """
     try:
-        if os.path.exists(common.getConfig("rootDir") + "/report"):
-            shutil.rmtree(common.getConfig("rootDir") + "/report")
-        shutil.copytree(common.getConfig("rootDir") + "/template3", common.getConfig("rootDir") + "/report")
-        os.rename(common.getConfig("rootDir") + "/report/index.html", common.getConfig("rootDir") + "/report/report.html")
+        # report_dir = common.getConfig("rootDir") + "/report"
+	common.reportDir = common.getConfig("rootDir") + "/report"
+        if common.args.reportdir is not None :
+		common.reportDir = common.args.reportdir
+	#	report_dir = common.args.reportdir
+	# common.writeKey("reportDir",report_dir);
+
+        if os.path.exists(common.reportDir):
+            shutil.rmtree(common.reportDir)
+        shutil.copytree(common.getConfig("rootDir") + "/template3", common.reportDir)
+        os.rename(common.reportDir + "/index.html", common.reportDir + "/report.html")
     except Exception as e:
         common.logger.debug("Error when trying to reset report")
