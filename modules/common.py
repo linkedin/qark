@@ -57,6 +57,7 @@ xml_files = []
 keyFiles=[]
 minSdkVersion = 1
 rootDir = ""
+reportDir = ""
 interactive_mode = True
 source_or_apk = 1
 exploitLocation = ""

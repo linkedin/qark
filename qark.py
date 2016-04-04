@@ -1060,12 +1060,12 @@ if exploit_choice==1:
 			common.logger.info("The apk can be found in the "+common.getConfig("rootDir")+"/build/qark directory")
 elif exploit_choice==2:
 	if common.reportInitSuccess:
-		print "An html report of the findings is located in : " + common.getConfig("rootDir") + "/report/report.html"
+		print "An html report of the findings is located in : " + common.reportDir
 	else:
 		common.logger.error("Problem with reporting; No html report generated. Please see the readme file for possible solutions.")
 	common.exitClean()
 if common.reportInitSuccess:
-	print "An html report of the findings is located in : " + common.getConfig("rootDir") + "/report/report.html"
+	print "An html report of the findings is located in : " + common.reportDir
 else:
 	common.logger.error("Problem with reporting; No html report generated. Please see the readme file for possible solutions.")
 
