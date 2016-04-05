@@ -408,10 +408,9 @@ def reset():
     Flushes the contents of the report
     """
     try:
-        # report_dir = common.getConfig("rootDir") + "/report"
-	common.reportDir = common.getConfig("rootDir") + "/report"
+        common.reportDir = common.getConfig("rootDir") + "/report"
         if common.args.reportdir is not None :
-		common.reportDir = common.args.reportdir
+            common.reportDir = common.args.reportdir + "/report"
 	#	report_dir = common.args.reportdir
 	# common.writeKey("reportDir",report_dir);
 
