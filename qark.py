@@ -193,6 +193,7 @@ optional.add_argument("-i", "--install", dest="install", help="1 to install expl
 optional.add_argument("-d", "--debug", dest="debuglevel", help="Debug Level. 10=Debug, 20=INFO, 30=Warning, 40=Error")
 optional.add_argument("-v", "--version", dest="version", help="Print version info", action='store_true')
 optional.add_argument("-r", "--reportdir", dest="reportdir", help="Specify full path for output report directory. Defaults to /report")
+optional.add_argument("-D", "--download-sdk", dest="download_sdk", help="Download SDK if needed")
 required_group = required.add_mutually_exclusive_group()
 required_group.add_argument("-t", "--acceptterms", dest="acceptterms", help="Automatically accept terms and conditions when downloading Android SDK")
 required_group.add_argument("-b", "--basesdk", dest="basesdk", help="Specify the full path to the root directory of the Android SDK")
@@ -200,9 +201,12 @@ required_group.add_argument("-b", "--basesdk", dest="basesdk", help="Specify the
 
 common.args = parser.parse_args()
 
+
 if len(sys.argv) > 1:
 	common.interactive_mode = False
 
+if not common.args.download_sdk:
+       common.args.download_sdk = False 
 #######################################
 #Command line argument sanity checks
 if not common.interactive_mode:
@@ -257,7 +261,7 @@ if not os.path.exists(common.getConfig("rootDir") + "/build"):
 common.logger.info(common.config.get('qarkhelper', 'STARTUP'))
 
 if not sdkManager.is_android_sdk_installed():
-	sdkManager.get_android_sdk_manager()
+	sdkManager.get_android_sdk_manager(common.args.download_sdk)
 else:
 	common.logger.info( common.config.get('qarkhelper', 'SDK_INSTALLATION_IDENTIFIED'))
 

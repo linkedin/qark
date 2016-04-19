@@ -32,14 +32,15 @@ def is_android_sdk_installed():
     else:
         return False
 
-def get_android_sdk_manager():
+def get_android_sdk_manager(autoload = False):
     """
     Gets the location of SDK manager through CLI while in interactive mode, or via settings.properties if running headlessly
     """
     print common.term.yellow + str(common.config.get('qarkhelper','ANDROID_SDK_INFO')).decode('string-escape').format(t=common.term)
     print common.term.cyan
-    choice=raw_input(common.config.get('qarkhelper','GET_ANDROID_SDK_MANAGER_PROMPT'))
-    if str(choice).lower()=='y':
+    if not autoload:
+        choice=raw_input(common.config.get('qarkhelper','GET_ANDROID_SDK_MANAGER_PROMPT'))
+    if autoload or str(choice).lower()=='y':
         download_sdk()
     else:
         AndroidSDKPath=raw_input(common.config.get('qarkhelper','ANDROID_SDK_MANAGER_PATH_PROMPT'))
