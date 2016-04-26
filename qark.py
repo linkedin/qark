@@ -1,8 +1,8 @@
 '''Copyright 2015 LinkedIn Corp. Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
  You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
 
-Unless required by applicable law or agreed to in writing, software 
-distributed under the License is distributed on an "AS IS" BASIS, 
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.'''
 
 import os
@@ -21,7 +21,7 @@ from xml.dom import minidom
 from modules.IssueType import IssueType, IssueSeverity
 import traceback
 from modules import common,findExtras,webviews, report, unpackAPK
-
+import lib.axmlparserpy.axmlprinter as axmlprinter
 from modules.DetermineMinSDK import determine_min_sdk
 from modules import sdkManager
 from modules import createSploit
@@ -165,7 +165,7 @@ def show_exports(compList,compType):
                         common.logger.error("Problem running adb.show_adb_commands, for Receivers, in qark.py: " + str(e))
 
     except Exception as e:
-            common.logger.error("Problem running show_exports in qark.py: " + str(e))
+        common.logger.error("Problem running show_exports in qark.py: " + str(e))
     return
 
 
@@ -303,13 +303,13 @@ common.logger.info('Initializing QARK\n')
 common.checkJavaVersion()
 
 def process_manifest(manifest):
-
     try:
         common.manifest = os.path.abspath(str(manifest).strip())
         common.manifest = re.sub("\\\\\s",' ',common.manifest)
-        common.xmldoc = minidom.parse(common.manifest)
-        common.logger.info(common.xmldoc.toprettyxml())
+        common.manifest = minidom.parseString(open(common.manifest, 'r').read()).toxml()
+        common.xmldoc = minidom.parseString(common.manifest.encode('utf-8'))
         report.write_manifest(common.xmldoc)
+        common.logger.info(common.xmldoc.toxml())
     except Exception as e:
         try:
             # not human readable yet?
@@ -325,33 +325,33 @@ def process_manifest(manifest):
 
 
 def list_all_apk():
-        result = []
-        adb = common.getConfig('AndroidSDKPath') + "platform-tools/adb"
-        st = os.stat(adb)
-        os.chmod(adb, st.st_mode | stat.S_IEXEC)
-        while True:
-                    p1 = Popen([adb, 'devices'], stdout=PIPE, stdin=PIPE, stderr=STDOUT)
-                    a = 0
-                    error = False
-                    for line in p1.stdout:
-                        a = a+1
-                        if "daemon not running. starting it now on port" in line:
-                            error = True
-                    # If atleast one device is connected
-                    if a >2 and not error:
-                        break
-                    else:
-                        common.logger.warning("Waiting for a device to be connected...")
-                        time.sleep(5)
-        p0 = Popen([adb, 'shell', 'pm', 'list', 'packages', '-f'], stdout=PIPE, stdin=PIPE, stderr=STDOUT)
-        index = 0
-        for line in p0.stdout:
+    result = []
+    adb = common.getConfig('AndroidSDKPath') + "platform-tools/adb"
+    st = os.stat(adb)
+    os.chmod(adb, st.st_mode | stat.S_IEXEC)
+    while True:
+        p1 = Popen([adb, 'devices'], stdout=PIPE, stdin=PIPE, stderr=STDOUT)
+        a = 0
+        error = False
+        for line in p1.stdout:
+            a = a+1
+            if "daemon not running. starting it now on port" in line:
+                error = True
+            # If atleast one device is connected
+        if a >2 and not error:
+            break
+        else:
+            common.logger.warning("Waiting for a device to be connected...")
+            time.sleep(5)
+    p0 = Popen([adb, 'shell', 'pm', 'list', 'packages', '-f'], stdout=PIPE, stdin=PIPE, stderr=STDOUT)
+    index = 0
+    for line in p0.stdout:
 
 
-            path = str(line).find('=')
-            result.append(str(line)[8:path])
-            index+=1
-        return result
+        path = str(line).find('=')
+        result.append(str(line)[8:path])
+        index+=1
+    return result
 
 def uninstall(package):
     print "trying to uninstall " + package
@@ -360,16 +360,16 @@ def uninstall(package):
     st = os.stat(adb)
     os.chmod(adb, st.st_mode | stat.S_IEXEC)
     while True:
-                p1 = Popen([adb, 'devices'], stdout=PIPE, stdin=PIPE, stderr=STDOUT)
-                a = 0
-                for line in p1.stdout:
-                    a = a+1
-                # If atleast one device is connected
-                if a >2 :
-                    break
-                else:
-                    common.logger.warning("Waiting for a device to be connected...")
-                    time.sleep(5)
+        p1 = Popen([adb, 'devices'], stdout=PIPE, stdin=PIPE, stderr=STDOUT)
+        a = 0
+        for line in p1.stdout:
+            a = a+1
+            # If atleast one device is connected
+        if a >2 :
+            break
+        else:
+            common.logger.warning("Waiting for a device to be connected...")
+            time.sleep(5)
     uninstall = Popen([adb, 'shell', 'pm', 'uninstall', package], stdout=PIPE, stdin=PIPE, stderr=STDOUT)
     for line in uninstall.stdout:
         if "Failure" in line:
@@ -389,45 +389,48 @@ def pull_apk(pathOnDevice):
     return 'temp/'+str(pathOnDevice).split('/')[-1]
 
 def find_manifest_in_source():
-    common.logger.info('Finding AndroidManifest.xml')
-    listOfFiles = []
-    manifestPath=''
-    try:
-        for (dirpath, dirnames, filenames) in os.walk(common.sourceDirectory):
-            for filename in filenames:
-                if filename == 'AndroidManifest.xml':
-                    listOfFiles.append(os.path.join(dirpath,filename))
-        if len(listOfFiles)==0:
-            while True:
-                print common.term.cyan + common.term.bold + str(common.config.get('qarkhelper','CANT_FIND_MANIFEST')).decode('string-escape').format(t=common.term)
-                common.sourceDirectory=os.path.abspath(raw_input("Enter path: ")).rstrip()
-                common.sourceDirectory = re.sub("\\\\\s",' ',common.sourceDirectory)
-                if os.path.isdir(common.sourceDirectory):
-                    if not common.sourceDirectory.endswith('/'):
-                        common.sourceDirectory+='/'
-                    manifestPath=find_manifest_in_source()
-                    common.manifest=manifestPath
-                    break
-                else:
-                    common.logger.error("Not a directory. Please try again")
+    if not common.interactive_mode:
+        manifestPath = common.args.manifest
+    else:
+        common.logger.info('Finding AndroidManifest.xml')
+        listOfFiles = []
+        manifestPath=''
+        try:
+            for (dirpath, dirnames, filenames) in os.walk(common.sourceDirectory):
+                for filename in filenames:
+                    if filename == 'AndroidManifest.xml':
+                        listOfFiles.append(os.path.join(dirpath,filename))
+            if len(listOfFiles)==0:
+                while True:
+                    print common.term.cyan + common.term.bold + str(common.config.get('qarkhelper','CANT_FIND_MANIFEST')).decode('string-escape').format(t=common.term)
+                    common.sourceDirectory=os.path.abspath(raw_input("Enter path: ")).rstrip()
+                    common.sourceDirectory = re.sub("\\\\\s",' ',common.sourceDirectory)
+                    if os.path.isdir(common.sourceDirectory):
+                        if not common.sourceDirectory.endswith('/'):
+                            common.sourceDirectory+='/'
+                        manifestPath=find_manifest_in_source()
+                        common.manifest=manifestPath
+                        break
+                    else:
+                        common.logger.error("Not a directory. Please try again")
 
-        elif len(listOfFiles)>1:
-            print "Please enter the number corresponding to the correct file:"
-            for f in enumerate(listOfFiles,1):
-                print str(f)
-            while True:
-                selection=int(raw_input())
-                r=range(1,len(listOfFiles)+1)
-                if int(selection) in r:
-                    manifestPath=listOfFiles[selection-1]
-                    break
-                else:
-                    print "Invalid selection, please enter a number between 1 and " + str(len(listOfFiles))
-        else:
-            manifestPath=listOfFiles[0]
-    except Exception as e:
-        common.logger.error(str(e))
-        exit()
+            elif len(listOfFiles)>1:
+                print "Please enter the number corresponding to the correct file:"
+                for f in enumerate(listOfFiles,1):
+                    print str(f)
+                while True:
+                    selection=int(raw_input())
+                    r=range(1,len(listOfFiles)+1)
+                    if int(selection) in r:
+                        manifestPath=listOfFiles[selection-1]
+                        break
+                    else:
+                        print "Invalid selection, please enter a number between 1 and " + str(len(listOfFiles))
+            else:
+                manifestPath=listOfFiles[0]
+        except Exception as e:
+            common.logger.error(str(e))
+            exit()
     return manifestPath
 
 def report_badger(identity, objectlist):
@@ -525,31 +528,35 @@ if common.source_or_apk==1:
     #parse xml
     common.xmldoc = minidom.parseString(common.manifest.encode('utf-8'))
 elif common.source_or_apk==2:
-        # Check if all required arguments are present before proceeding
-        while True:
-            if common.interactive_mode:
-                common.sourceDirectory=os.path.abspath(raw_input(common.config.get('qarkhelper','SOURCE_PROMPT')).rstrip())
+    # Check if all required arguments are present before proceeding
+    while True:
+        if common.interactive_mode:
+            common.sourceDirectory=os.path.abspath(raw_input(common.config.get('qarkhelper','SOURCE_PROMPT')).rstrip())
+        else:
+            common.sourceDirectory=common.args.codepath
+        re.sub(r'AndroidManifest.xml','',common.sourceDirectory)
+        common.sourceDirectory = os.path.abspath(str(common.sourceDirectory).strip())
+        common.sourceDirectory = re.sub("\\\\\s",' ',common.sourceDirectory)
+        if os.path.isdir(common.sourceDirectory):
+            if not common.sourceDirectory.endswith('/'):
+                common.sourceDirectory+='/'
+            manifest = find_manifest_in_source()
+            if not common.interactive_mode:
+                process_manifest(common.args.manifest)
             else:
-                common.sourceDirectory=common.args.codepath
-            re.sub(r'AndroidManifest.xml','',common.sourceDirectory)
-            common.sourceDirectory = os.path.abspath(str(common.sourceDirectory).strip())
-            common.sourceDirectory = re.sub("\\\\\s",' ',common.sourceDirectory)
-            if os.path.isdir(common.sourceDirectory):
-                if not common.sourceDirectory.endswith('/'):
-                    common.sourceDirectory+='/'
-                process_manifest(find_manifest_in_source())
-                break
-            else:
-                common.logger.error("Not a directory. Please try again")
-        report.write("apkpath", common.sourceDirectory)
-        totalfiles = 0
-        for root, dirnames, filenames in os.walk(common.sourceDirectory):
-            for filename in fnmatch.filter(filenames, '*'):
-                totalfiles = totalfiles + 1
-        report.write("totalfiles",totalfiles)
+                process_manifest(manifest)
+            break
+        else:
+            common.logger.error("Not a directory. Please try again")
+    report.write("apkpath", common.sourceDirectory)
+    totalfiles = 0
+    for root, dirnames, filenames in os.walk(common.sourceDirectory):
+        for filename in fnmatch.filter(filenames, '*'):
+            totalfiles = totalfiles + 1
+    report.write("totalfiles",totalfiles)
 
 else:
-        common.logger.info("You only had 2 options and you still messed up. Let me choose option 2 for you")
+    common.logger.info("You only had 2 options and you still messed up. Let me choose option 2 for you")
 #Only application and manifest elements are required: http://developer.android.com/guide/topics/manifest/manifest-intro.html
 try:
     determine_min_sdk()
@@ -659,8 +666,8 @@ if common.source_or_apk==1:
 else:
     javafiles = 0
     for root, dirnames, filenames in os.walk(common.sourceDirectory):
-      for filename in fnmatch.filter(filenames, '*.java'):
-        javafiles = javafiles + 1
+        for filename in fnmatch.filter(filenames, '*.java'):
+            javafiles = javafiles + 1
     report.write("javafiles", javafiles)
 
 common.logger.info("Running Static Code Analysis...")
@@ -725,7 +732,7 @@ try:
             findMethods.map_from_manifest(act_exp_list,'activity')
         if len(act_exp_perm_list)>0:
             findMethods.map_from_manifest(act_exp_perm_list,'activity')
-        #BUG Need to customize this
+            #BUG Need to customize this
         if len(actalias_exp_list)>0:
             findMethods.map_from_manifest(actalias_exp_list,'activity-alias')
         if len(act_exp_perm_list)>0:
@@ -839,7 +846,7 @@ try:
         common.logger.log(common.HEADER_ISSUES_LEVEL, "WEB-VIEW ISSUES")
     if not any(isinstance(x, terminalPrint) for x in webview_results):
         common.logger.info(" No issues to report")
-    #webview_results_dedup = list(set(webview_results))
+        #webview_results_dedup = list(set(webview_results))
     for item in webview_results:
         if isinstance(item, terminalPrint):
             if item.getLevel() == Severity.INFO:
@@ -964,10 +971,10 @@ while True:
                 common.logger.error(common.config.get('qarkhelper','NOT_A_VALID_OPTION'))
                 common.exitClean()
     except Exception as e:
-            if not common.interactive_mode:
-                common.logger.error(common.config.get('qarkhelper','NOT_A_VALID_OPTION'))
-                exit()
-            common.logger.error(common.config.get('qarkhelper','NOT_A_VALID_OPTION_INTERACTIVE'))
+        if not common.interactive_mode:
+            common.logger.error(common.config.get('qarkhelper','NOT_A_VALID_OPTION'))
+            exit()
+        common.logger.error(common.config.get('qarkhelper','NOT_A_VALID_OPTION_INTERACTIVE'))
 
 if exploit_choice==1:
     # Exploit all vulnerabilities
