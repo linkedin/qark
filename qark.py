@@ -90,7 +90,7 @@ def apktool(pathToAPK):
     # Create /temp/foo/apktool
     # Run java -jar apktool_2.1.0.jar d /foo/bar/temp/myapp.apk --no-src --force -m --output /foo/bar/temp/apktool/
     # read AndroidManifest.xml and return the content
-    apktool = subprocess.Popen(['java', '-Djava.awt.headless=true','-jar', common.rootDir + '/lib/apktool_2.1.0.jar', 'd', pathToAPK, '--no-src', '--force', '-m','--output', str(pathToAPK.rsplit(".",1)[0]).rsplit("/",1)[0] + "/apktool"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    apktool = subprocess.call(['java', '-Djava.awt.headless=true','-jar', common.rootDir + '/lib/apktool_2.1.0.jar', 'd', pathToAPK, '--no-src', '--force', '-m','--output', str(pathToAPK.rsplit(".",1)[0]).rsplit("/",1)[0] + "/apktool"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     with open (str(pathToAPK.rsplit(".",1)[0]).rsplit("/",1)[0] + "/apktool" + "/AndroidManifest.xml", "r") as f:
         manifest = f.read()
     pub.sendMessage('manifest', mf=manifest)
