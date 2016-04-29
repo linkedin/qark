@@ -194,6 +194,7 @@ optional.add_argument("-d", "--debug", dest="debuglevel", help="Debug Level. 10=
 optional.add_argument("-v", "--version", dest="version", help="Print version info", action='store_true')
 optional.add_argument("-r", "--reportdir", dest="reportdir", help="Specify full path for output report directory. Defaults to /report")
 optional.add_argument("-D", "--download-sdk", dest="download_sdk", help="Download SDK if needed")
+optional.add_argument("-n", "--min-sdk", dest="min_sdk", help="Default minimum sdk version (if not found in Android Manifest)")
 required_group = required.add_mutually_exclusive_group()
 required_group.add_argument("-t", "--acceptterms", dest="acceptterms", help="Automatically accept terms and conditions when downloading Android SDK")
 required_group.add_argument("-b", "--basesdk", dest="basesdk", help="Specify the full path to the root directory of the Android SDK")
@@ -523,7 +524,8 @@ elif common.source_or_apk==2:
 			if os.path.isdir(common.sourceDirectory):
 				if not common.sourceDirectory.endswith('/'):
 					common.sourceDirectory+='/'
-				process_manifest(find_manifest_in_source())
+				manifest = common.args.manifest or find_manifest_in_source()
+				process_manifest(manifest)
 				break
 			else:
 				common.logger.error("Not a directory. Please try again")
@@ -613,8 +615,11 @@ if common.source_or_apk!=1:
 		elif os.path.exists(common.sourceDirectory):
 			common.logger.info("Using "+common.sourceDirectory+" as the project source directory")
 		else:
+			if not common.interactive_mode:
+				print("We need a source path, but don't have one. use --source")
+				exit(1)
 			common.sourceDirectory = os.path.abspath(raw_input(common.config.get('qarkhelper', 'SOURCE_PROMPT'))).rstrip()
-			common.sourceDirectory = re.sub("\\\\\s",' ',common.sourceDirectory)
+			common.sourceDirectory = re.sub(r"\\\s",' ',common.sourceDirectory)
 	except IOError:
 		common.logger.error("Oops! all hope is lost \n %s", IOError.message)
 else:

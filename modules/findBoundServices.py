@@ -9,6 +9,10 @@ import lib.plyj.parser as plyj
 from modules import common
 import lib.plyj.model as m
 
+def blank_user_input():
+    if common.interactive_mode:
+        raw_input()
+
 def main(t,tree):
 	for b in t.body:
 		if type(b) is m.Return:
@@ -24,7 +28,7 @@ def main(t,tree):
 									print "b.result.target.value: " + str(b.result.target.value)
 									targetName=b.result.target.value
 									print "B Target: " + str(b.result.target)
-									raw_input()
+									blank_user_input()
 									what_is_this(targetName,tree)
 				elif type(b.result) is list:
 					for l in b.result:
@@ -36,7 +40,7 @@ def main(t,tree):
 											if hasattr(l.result.target,'value'):
 												targetName=l.result.target.value
 												print "L Target: " + str(l.result.target)
-												raw_input()
+												blank_user_input()
 												what_is_this(targetName,tree)
 				elif hasattr(b.result,'_fields'):
 					for f in b.result._fields:
@@ -50,14 +54,14 @@ def main(t,tree):
 											if hasattr(f.result.target,'value'):
 												targetName=f.result.target.value
 												what_is_this(targetName,tree)
-												raw_input()
+												blank_user_input()
 	return
 
 def what_is_this(targetName,tree):
 	for x in tree.body:
 		if type(x) is m.VariableDeclaration:
 			print "X: " + str(x)
-			raw_input()
+			blank_user_input()
 		else:
 			print "TREE: " + str(tree)
 	return

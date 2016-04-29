@@ -62,8 +62,12 @@ def determine_min_sdk():
 				common.logger.error("Something went wrong trying to determine the version from the manifest: " + str(e))
 
 
-
+	if common.minSDKVersion == 0 and common.args.min_sdk:
+		common.minSDKVersion = common.args.min_sdk 
 	if common.minSdkVersion==0:
+		if not common.interactive_mode:
+			print("non-interactive mode and can't determine min sdk.  use --min-sdk")
+			exit(1)
 		if common.source_or_apk==2:
 			common.minSdkVersion=find_gradle()
 			if common.minSdkVersion==0:
