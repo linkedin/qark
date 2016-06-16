@@ -11,6 +11,7 @@ import sys
 import stat
 import fnmatch
 sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)) + '/lib')
+sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)) + '/plugins')
 
 from subprocess import Popen, PIPE, STDOUT
 import urllib2
@@ -55,6 +56,7 @@ from lib.pubsub import pub
 import subprocess
 from lib.progressbar import ProgressBar, Percentage, Bar
 from modules import adb
+from yapsy.PluginManager import PluginManager
 
 package_name=''
 pbar_file_permission_done = False
@@ -324,11 +326,46 @@ def find_manifest_in_source():
     return manifestPath
 
 def report_badger(identity, objectlist):
-
     for item in objectlist:
         if isinstance(item, ReportIssue):
             report.write_badger(identity, item.getSeverity(), item.getDetails(), item.getExtras())
 
+def writeReportSection(results, category):
+    if category == "CRYPTO ISSUES":
+        section = report.Section.CRYPTO_BUGS
+    elif category == "BROADCAST ISSUES":
+        section = report.Section.BROADCASTS
+    elif category == "CERTIFICATE VALIDATION ISSUES":
+        section = report.Section.X509
+    elif category == "PENDING INTENT ISSUES":
+        section = report.Section.PENDING_INTENTS
+    elif category == "FILE PERMISSION ISSUES":
+        section = report.Section.FILE_PERMISSIONS
+    elif category == "WEB-VIEW ISSUES":
+        section = report.Section.WEBVIEW
+    elif category == "PLUGIN ISSUES":
+        section = report.Section.PLUGIN
+
+    try: 
+        report.writeSection(section, results)
+    except Exception as e:
+        print e.message
+    with common.term.location(0,common.term.height):
+        common.logger.log(common.HEADER_ISSUES_LEVEL, category)
+    if not any(isinstance(x, terminalPrint) for x in results):
+        common.logger.info(" No issues to report")
+    for item in results:
+        if isinstance(item, terminalPrint):
+            if item.getLevel() == Severity.INFO:
+                common.logger.info(item.getData())
+            if item.getLevel() == Severity.WARNING:
+                common.logger.warning(item.getData())
+            if item.getLevel() == Severity.ERROR:
+                common.logger.error(item.getData())
+            if item.getLevel() == Severity.VULNERABILITY:
+                common.logger.log(common.VULNERABILITY_LEVEL,item.getData())
+
+    
 
 if __name__ == "__main__":
     ignore = os.system('clear')
@@ -443,6 +480,9 @@ if __name__ == "__main__":
     #Begin
     common.logger.info('Initializing QARK\n')
     common.checkJavaVersion()
+    manager = PluginManager()
+    manager.setPluginPlaces(["plugins"])
+    manager.collectPlugins()
 
     if common.interactive_mode:
         while True:
@@ -665,6 +705,7 @@ if __name__ == "__main__":
     web_view_queue = Queue()
     find_broadcast_queue = Queue()
     crypto_flaw_queue = Queue()
+    plugin_queue = Queue()
 
     if common.source_or_apk==1:
         report.write("javafiles", common.count)
@@ -693,34 +734,44 @@ if __name__ == "__main__":
         writers = [common.Writer((0, height-8)), common.Writer((0, height-6)), common.Writer((0, height-4)), common.Writer((0, height-2)), common.Writer((0, height-10)), common.Writer((0, height-12)), common.Writer((0, height-14))]
         testWidgets = ['X.509 Validation ', 'Pending Intents ', 'FIle Permissions (check 1) ', 'File Permissions (check 2) ', 'Webview checks ', 'Boardcast issues ', 'Crypto issues ']
         pbars = [] 
-     
+   
+        # create progress bars for each default category
         for widgetNum in range(len(testWidgets)):
             pbars.append(ProgressBar(widgets=[testWidgets[widgetNum], Percentage(), Bar()], maxval=100, fd=writers[widgetNum]).start())
-        '''
-        writer1 = common.Writer((0, height-8))
-        pbar1 = ProgressBar(widgets=['X.509 Validation ', Percentage(), Bar()], maxval=100, fd=writer1).start()
-        writer2 = common.Writer((0, height-6))
-        pbar2 = ProgressBar(widgets=['Pending Intents ', Percentage(), Bar()], maxval=100, fd=writer2).start()
-        writer3 = common.Writer((0, height-4))
-        pbar3 = ProgressBar(widgets=['File Permissions (check 1) ', Percentage(), Bar()], maxval=100, fd=writer3).start()
-        writer4 = common.Writer((0, height-2))
-        pbar4 = ProgressBar(widgets=['File Permissions (check 2) ', Percentage(), Bar()], maxval=100, fd=writer4).start()
-        writer5 = common.Writer((0, height-10))
-        pbar5 = ProgressBar(widgets=['Webview checks ', Percentage(), Bar()], maxval=100, fd=writer5).start()
-        writer6 = common.Writer((0, height-12))
-        pbar6 = ProgressBar(widgets=['Broadcast issues ', Percentage(), Bar()], maxval=100, fd=writer6).start()
-        writer7 = common.Writer((0, height-14))
-        pbar7 = ProgressBar(widgets=['Crypto issues ', Percentage(), Bar()], maxval=100, fd=writer7).start()
-        '''
+
+        # create writer and progress bar for each plugin
+        for plugin in manager.getAllPlugins():
+            writer = common.Writer((0, height-10))
+            writers.append(writer)
+            pbars.append(ProgressBar(widgets=[plugin.plugin_object.getName(), Percentage(), Bar()], maxval=100, fd=writer).start())
 
         pub.subscribe(progress_bar_update, 'progress')
 
+        threads = []
+        '''
         thread0 = Thread(name='Certificate Validation', target=certValidation.validate, args=(cert_queue,height-8))
         thread1 = Thread(name='Pending Intent validation', target=findPending.start, args = (pending_intents_queue,height-6))
         thread2 = Thread(name='File Permission checks', target=filePermissions.start, args = (file_permission_queue,height-4))
         thread3 = Thread(name='Webviews', target=webviews.validate, args = (web_view_queue,))
         thread4 = Thread(name='Find Broadcasts', target=findBroadcasts.main, args = (find_broadcast_queue,))
         thread5 = Thread(name='Crypto Issues', target=cryptoFlaws.main, args = (crypto_flaw_queue,))
+        '''
+        threads.append(Thread(name='Certificate Validation', target=certValidation.validate, args=(cert_queue,height-8)))
+        threads.append(Thread(name='Pending Intent validation', target=findPending.start, args = (pending_intents_queue,height-6)))
+        threads.append(Thread(name='File Permission checks', target=filePermissions.start, args = (file_permission_queue,height-4)))
+        threads.append(Thread(name='Webviews', target=webviews.validate, args = (web_view_queue,)))
+        threads.append(Thread(name='Find Broadcasts', target=findBroadcasts.main, args = (find_broadcast_queue,)))
+        threads.append(Thread(name='Crypto Issues', target=cryptoFlaws.main, args = (crypto_flaw_queue,)))
+
+        for plugin in manager.getAllPlugins():
+            threads.append(Thread(name=plugin.plugin_object.getCategory(), target=plugin.plugin_object.getTarget(), args = (plugin_queue,)))
+
+        for thread in threads:
+            thread.start()
+
+        for thread in threads:
+            thread.join()
+        '''
         thread0.start()
         thread1.start()
         thread2.start()
@@ -733,13 +784,14 @@ if __name__ == "__main__":
         thread3.join()
         thread4.join()
         thread5.join()
+        '''
 
         clear_lines(5)
         try:
         #Start looking for stuff potentially vulnerable to malicious apps
             if len(prov_exp_list)>0:
                 findMethods.map_from_manifest(prov_exp_list,'provider')
-            if len(prov_exp_list)>0:
+            if len(prov_exp_perm_list)>0:
                 findMethods.map_from_manifest(prov_exp_perm_list,'provider')
             if len(act_exp_list)>0:
                 findMethods.map_from_manifest(act_exp_list,'activity')
@@ -763,115 +815,28 @@ if __name__ == "__main__":
 
 
         crypto_flaw_results = crypto_flaw_queue.get()
-        try:
-            report.writeSection(report.Section.CRYPTO_BUGS, crypto_flaw_results)
-        except Exception as e:
-            print e.message
-        with common.term.location(0,common.term.height):
-            common.logger.log(common.HEADER_ISSUES_LEVEL, "CRYPTO ISSUES")
-        if not any(isinstance(x, terminalPrint) for x in crypto_flaw_results):
-            common.logger.info(" No issues to report")
-        for item in crypto_flaw_results:
-            if isinstance(item, terminalPrint):
-                if item.getLevel() == Severity.INFO:
-                    common.logger.info(item.getData())
-                if item.getLevel() == Severity.WARNING:
-                    common.logger.warning(item.getData())
-                if item.getLevel() == Severity.ERROR:
-                    common.logger.error(item.getData())
-                if item.getLevel() == Severity.VULNERABILITY:
-                    common.logger.log(common.VULNERABILITY_LEVEL,item.getData())
+        writeReportSection(crypto_flaw_results, "CRYPTO ISSUES")
 
         find_broadcast_results = find_broadcast_queue.get()
-        report.writeSection(report.Section.BROADCASTS, find_broadcast_results)
-        with common.term.location(0,common.term.height):
-            common.logger.log(common.HEADER_ISSUES_LEVEL, "BROADCAST ISSUES")
-        if not any(isinstance(x, terminalPrint) for x in find_broadcast_results):
-            common.logger.info(" No issues to report")
-        for item in find_broadcast_results:
-            if isinstance(item, terminalPrint):
-                if item.getLevel() == Severity.INFO:
-                    common.logger.info(item.getData())
-                if item.getLevel() == Severity.WARNING:
-                    common.logger.warning(item.getData())
-                if item.getLevel() == Severity.ERROR:
-                    common.logger.error(item.getData())
-                if item.getLevel() == Severity.VULNERABILITY:
-                    common.logger.log(common.VULNERABILITY_LEVEL,item.getData())
+        writeReportSection(find_broadcast_results, "BROADCAST ISSUES")
 
 
         cert_validation_results = cert_queue.get()
-        report.writeSection(report.Section.X509, cert_validation_results)
-        with common.term.location(0,common.term.height):
-            common.logger.log(common.HEADER_ISSUES_LEVEL, "CERTIFICATE VALIDATION ISSUES")
-        if not any(isinstance(x, terminalPrint) for x in cert_validation_results):
-            common.logger.info(" No issues to report")
-        for item in cert_validation_results:
-            if isinstance(item, terminalPrint):
-                if item.getLevel() == Severity.INFO:
-                    common.logger.info(item.getData())
-                if item.getLevel() == Severity.WARNING:
-                    common.logger.warning(item.getData())
-                if item.getLevel() == Severity.ERROR:
-                    common.logger.error(item.getData())
-                if item.getLevel() == Severity.VULNERABILITY:
-                    common.logger.log(common.VULNERABILITY_LEVEL,item.getData())
+        writeReportSection(cert_validation_results, "CERTIFICATE VALIDATION ISSUES")
 
         pending_intent_results = pending_intents_queue.get()
-        report.writeSection(report.Section.PENDING_INTENTS, pending_intent_results)
-        with common.term.location(0,common.term.height):
-            common.logger.log(common.HEADER_ISSUES_LEVEL, "PENDING INTENT ISSUES")
-        if not any(isinstance(x, terminalPrint) for x in pending_intent_results):
-            common.logger.info(" No issues to report")
-        for item in pending_intent_results:
-            if isinstance(item, terminalPrint):
-                if item.getLevel() == Severity.INFO:
-                    common.logger.info(item.getData())
-                if item.getLevel() == Severity.WARNING:
-                    common.logger.warning(item.getData())
-                if item.getLevel() == Severity.ERROR:
-                    common.logger.error(item.getData())
-                if item.getLevel() == Severity.VULNERABILITY:
-                    common.logger.log(common.VULNERABILITY_LEVEL,item.getData())
+        writeReportSection(pending_intent_results, "PENDING INTENT ISSUES")
 
 
         file_permission_results = file_permission_queue.get()
-        report.writeSection(report.Section.FILE_PERMISSIONS, file_permission_results)
-        with common.term.location(0,common.term.height):
-            common.logger.log(common.HEADER_ISSUES_LEVEL, "FILE PERMISSION ISSUES")
-        if not any(isinstance(x, terminalPrint) for x in file_permission_results):
-            common.logger.info(" No issues to report")
-        for item in file_permission_results:
-            if isinstance(item, terminalPrint):
-                if item.getLevel() == Severity.INFO:
-                    common.logger.info(item.getData())
-                if item.getLevel() == Severity.WARNING:
-                    common.logger.warning(item.getData())
-                if item.getLevel() == Severity.ERROR:
-                    common.logger.error(item.getData())
-                if item.getLevel() == Severity.VULNERABILITY:
-                    common.logger.log(common.VULNERABILITY_LEVEL,item.getData())
+        writeReportSection(file_permission_results, "FILE PERMISSION ISSUES")
 
 
         webview_results = web_view_queue.get()
-        report.writeSection(report.Section.WEBVIEW, webview_results)
-        with common.term.location(0,common.term.height):
-            common.logger.log(common.HEADER_ISSUES_LEVEL, "WEB-VIEW ISSUES")
-        if not any(isinstance(x, terminalPrint) for x in webview_results):
-            common.logger.info(" No issues to report")
-            #webview_results_dedup = list(set(webview_results))
-        for item in webview_results:
-            if isinstance(item, terminalPrint):
-                if item.getLevel() == Severity.INFO:
-                    common.logger.info(item.getData())
-                if item.getLevel() == Severity.WARNING:
-                    common.logger.warning(item.getData())
-                if item.getLevel() == Severity.ERROR:
-                    common.logger.error(item.getData())
-                if item.getLevel() == Severity.VULNERABILITY:
-                    common.logger.log(common.VULNERABILITY_LEVEL,item.getData())
+        writeReportSection(webview_results, "WEB-VIEW ISSUES")
 
-
+        plugin_results = plugin_queue.get()
+        writeReportSection(plugin_results, "PLUGIN ISSUES")
     except Exception as e:
         common.logger.error("Unexpected error: " + str(e))
     ########################
