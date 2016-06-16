@@ -103,28 +103,28 @@ def progress_bar_update(count1=None,count2=None,count3=None,count4=None,count5=N
     global pbar_file_permission_done
     if count1 is not None:
         if count1<=100:
-            pbar1.update(count1)
+            pbars[0].update(count1)
     if count2 is not None:
         if count2<=100:
-            pbar2.update(count2)
+            pbars[1].update(count2)
     if count3 is not None:
         if not pbar_file_permission_done:
             if count3<100:
-                pbar3.update(count3)
+                pbars[2].update(count3)
             else:
-                pbar3.update(count3)
+                pbars[2].update(count3)
                 pbar_file_permission_done = True
         else:
-            pbar4.update(count3)
+            pbars[3].update(count3)
     if count4 is not None:
         if count4<=100:
-            pbar5.update(count4)
+            pbars[4].update(count4)
     if count5 is not None:
         if count5<=100:
-            pbar6.update(count5)
+            pbars[5].update(count5)
     if count6 is not None:
         if count6<=100:
-            pbar7.update(count6)
+            pbars[6].update(count6)
     lock.release()
 
 def version():
@@ -690,6 +690,13 @@ if __name__ == "__main__":
     height = common.term.height
 
     try:
+        writers = [common.Writer((0, height-8)), common.Writer((0, height-6)), common.Writer((0, height-4)), common.Writer((0, height-2)), common.Writer((0, height-10)), common.Writer((0, height-12)), common.Writer((0, height-14))]
+        testWidgets = ['X.509 Validation ', 'Pending Intents ', 'FIle Permissions (check 1) ', 'File Permissions (check 2) ', 'Webview checks ', 'Boardcast issues ', 'Crypto issues ']
+        pbars = [] 
+     
+        for widgetNum in range(len(testWidgets)):
+            pbars.append(ProgressBar(widgets=[testWidgets[widgetNum], Percentage(), Bar()], maxval=100, fd=writers[widgetNum]).start())
+        '''
         writer1 = common.Writer((0, height-8))
         pbar1 = ProgressBar(widgets=['X.509 Validation ', Percentage(), Bar()], maxval=100, fd=writer1).start()
         writer2 = common.Writer((0, height-6))
@@ -704,6 +711,7 @@ if __name__ == "__main__":
         pbar6 = ProgressBar(widgets=['Broadcast issues ', Percentage(), Bar()], maxval=100, fd=writer6).start()
         writer7 = common.Writer((0, height-14))
         pbar7 = ProgressBar(widgets=['Crypto issues ', Percentage(), Bar()], maxval=100, fd=writer7).start()
+        '''
 
         pub.subscribe(progress_bar_update, 'progress')
 
