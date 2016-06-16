@@ -748,14 +748,6 @@ if __name__ == "__main__":
         pub.subscribe(progress_bar_update, 'progress')
 
         threads = []
-        '''
-        thread0 = Thread(name='Certificate Validation', target=certValidation.validate, args=(cert_queue,height-8))
-        thread1 = Thread(name='Pending Intent validation', target=findPending.start, args = (pending_intents_queue,height-6))
-        thread2 = Thread(name='File Permission checks', target=filePermissions.start, args = (file_permission_queue,height-4))
-        thread3 = Thread(name='Webviews', target=webviews.validate, args = (web_view_queue,))
-        thread4 = Thread(name='Find Broadcasts', target=findBroadcasts.main, args = (find_broadcast_queue,))
-        thread5 = Thread(name='Crypto Issues', target=cryptoFlaws.main, args = (crypto_flaw_queue,))
-        '''
         threads.append(Thread(name='Certificate Validation', target=certValidation.validate, args=(cert_queue,height-8)))
         threads.append(Thread(name='Pending Intent validation', target=findPending.start, args = (pending_intents_queue,height-6)))
         threads.append(Thread(name='File Permission checks', target=filePermissions.start, args = (file_permission_queue,height-4)))
@@ -771,20 +763,6 @@ if __name__ == "__main__":
 
         for thread in threads:
             thread.join()
-        '''
-        thread0.start()
-        thread1.start()
-        thread2.start()
-        thread3.start()
-        thread4.start()
-        thread5.start()
-        thread0.join()
-        thread1.join()
-        thread2.join()
-        thread3.join()
-        thread4.join()
-        thread5.join()
-        '''
 
         clear_lines(5)
         try:
