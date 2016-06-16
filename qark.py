@@ -814,29 +814,17 @@ if __name__ == "__main__":
             common.logger.error("Unable to use findMethods to map from manifest: " + str(e))
 
 
-        crypto_flaw_results = crypto_flaw_queue.get()
-        writeReportSection(crypto_flaw_results, "CRYPTO ISSUES")
+        results = [ (crypto_flaw_queue.get(), "CRYPTO ISSUES"),
+                    (find_broadcast_queue.get(), "BROADCAST ISSUES"), 
+                    (cert_queue.get(), "CERTIFICATE VALIDATION ISSUES"), 
+                    (pending_intents_queue.get(), "PENDING INTENT ISSUES"),
+                    (file_permission_queue.get(), "FILE PERMISSION ISSUES"),
+                    (web_view_queue.get(), "WEB-VIEW ISSUES"),
+                    (plugin_queue.get(), "PLUGIN ISSUES")]
+                    
+        for type in results:
+            writeReportSection(type[0], type[1])
 
-        find_broadcast_results = find_broadcast_queue.get()
-        writeReportSection(find_broadcast_results, "BROADCAST ISSUES")
-
-
-        cert_validation_results = cert_queue.get()
-        writeReportSection(cert_validation_results, "CERTIFICATE VALIDATION ISSUES")
-
-        pending_intent_results = pending_intents_queue.get()
-        writeReportSection(pending_intent_results, "PENDING INTENT ISSUES")
-
-
-        file_permission_results = file_permission_queue.get()
-        writeReportSection(file_permission_results, "FILE PERMISSION ISSUES")
-
-
-        webview_results = web_view_queue.get()
-        writeReportSection(webview_results, "WEB-VIEW ISSUES")
-
-        plugin_results = plugin_queue.get()
-        writeReportSection(plugin_results, "PLUGIN ISSUES")
     except Exception as e:
         common.logger.error("Unexpected error: " + str(e))
     ########################
