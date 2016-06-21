@@ -61,6 +61,7 @@ from yapsy.PluginManager import PluginManager
 package_name=''
 pbar_file_permission_done = False
 lock = Lock()
+PROGRESS_BARS = ['X.509 Validation', 'Pending Intents', 'File Permissions (check 1)', 'File Permissions (check 2)', 'Webview checks', 'Broadcast issues', 'Crypto issues', 'Plugin issues' ]
 
 def exit():
     """
@@ -100,9 +101,33 @@ def apktool(pathToAPK):
     return
 
 
-def progress_bar_update(count1=None,count2=None,count3=None,count4=None,count5=None,count6=None):
+# TODO: change counts to array
+def progress_bar_update(bar, percent):
     lock.acquire()
+    '''
     global pbar_file_permission_done
+    ['X.509 Validation', 'Pending Intents', 'File Permissions (check 1)', 'File Permissions (check 2) ', 'Webview checks', 'Boardcast issues', 'Crypto issues', 'Plugin issues' ]
+    if bar == "File Permissions (check 1)" and not pbar_file_permission_done:
+        if percent >= 100:
+            pbar_file_permission_done = True
+    
+    '''
+    global pbar_file_permission_done 
+    if bar == "File Permissions" and percent >= 100 and not pbar_file_permission_done:
+        pbar_file_permission_done = True
+        bar = "File Permissions (check 1)"
+    elif bar == "File Permissions" and pbar_file_permission_done:
+        bar = "File Permissions (check 2)"
+    elif bar == "File Permissions":
+        bar = "File Permissions (check 1)"
+
+    # check if the progress bar is a user plugin
+    if bar in PROGRESS_BARS:
+        pbars[bar].update(percent)
+    else:
+        pbars["Plugin issues"][bar].update(percent)
+
+    '''
     if count1 is not None:
         if count1<=100:
             pbars[0].update(count1)
@@ -127,6 +152,7 @@ def progress_bar_update(count1=None,count2=None,count3=None,count4=None,count5=N
     if count6 is not None:
         if count6<=100:
             pbars[6].update(count6)
+    '''
     lock.release()
 
 def version():
@@ -657,8 +683,7 @@ if __name__ == "__main__":
 
     #Begin static code Analysis
     #Easy Wins first
-    if common.source_or_apk ==1:
-        if common.interactive_mode:
+    if common.source_or_apk == 1 and common.interactive_mode:
             stop_point = raw_input("Press ENTER key to begin decompilation")
 
     #Converting dex files to jar
@@ -693,6 +718,7 @@ if __name__ == "__main__":
 
     if common.interactive_mode:
         stop_point = raw_input("Press ENTER key to begin Static Code Analysis")
+
     #Regex to look for collection of deviceID
     #Regex to determine if WebViews are imported
     wv_imp_rex=r'android.webkit.WebView'
@@ -727,23 +753,29 @@ if __name__ == "__main__":
         common.logger.error("Unable to run checks for improper use of checkCallingPermission: " + str(e))
     '''
 
-    clear_lines(14)
+    clear_lines(20)
     height = common.term.height
 
     try:
-        writers = [common.Writer((0, height-8)), common.Writer((0, height-6)), common.Writer((0, height-4)), common.Writer((0, height-2)), common.Writer((0, height-10)), common.Writer((0, height-12)), common.Writer((0, height-14))]
-        testWidgets = ['X.509 Validation ', 'Pending Intents ', 'FIle Permissions (check 1) ', 'File Permissions (check 2) ', 'Webview checks ', 'Boardcast issues ', 'Crypto issues ']
-        pbars = [] 
+        writers = [common.Writer((0, height-8)), common.Writer((0, height-6)), common.Writer((0, height-4)), 
+                    common.Writer((0, height-2)), common.Writer((0, height-10)), common.Writer((0, height-12)), common.Writer((0, height-14))]
+        pbars = {}
    
-        # create progress bars for each default category
-        for widgetNum in range(len(testWidgets)):
-            pbars.append(ProgressBar(widgets=[testWidgets[widgetNum], Percentage(), Bar()], maxval=100, fd=writers[widgetNum]).start())
+        # create dictionary for progress bars, { name: progressBar }
+        for barNum in range(len(PROGRESS_BARS)-1):
+            pbars[PROGRESS_BARS[barNum]] = ProgressBar(widgets=[PROGRESS_BARS[barNum], Percentage(), Bar()], maxval=100, fd=writers[barNum]).start()
 
         # create writer and progress bar for each plugin
         for plugin in manager.getAllPlugins():
-            writer = common.Writer((0, height-10))
+            writer = common.Writer((0, height-16))
             writers.append(writer)
-            pbars.append(ProgressBar(widgets=[plugin.plugin_object.getName(), Percentage(), Bar()], maxval=100, fd=writer).start())
+            if 'Plugin issues' not in pbars:
+                pbars['Plugin issues'] = {}
+
+            pbars['Plugin issues'][plugin.plugin_object.getName()] = ProgressBar(
+                widgets=[plugin.plugin_object.getName(), Percentage(), Bar()], maxval=100, fd=writer).start() 
+#            plugin_issues = pbars.get('Plugin issues', {})
+#            plugin_issues[plugin.plugin_object.getName()] = ProgressBar(widgets=[plugin.plugin_object.getName(), Percentage(), Bar()], maxval=100, fd=writer).start()
 
         pub.subscribe(progress_bar_update, 'progress')
 
@@ -792,6 +824,7 @@ if __name__ == "__main__":
             common.logger.error("Unable to use findMethods to map from manifest: " + str(e))
 
 
+        '''
         results = [ (crypto_flaw_queue.get(), "CRYPTO ISSUES"),
                     (find_broadcast_queue.get(), "BROADCAST ISSUES"), 
                     (cert_queue.get(), "CERTIFICATE VALIDATION ISSUES"), 
@@ -802,9 +835,11 @@ if __name__ == "__main__":
                     
         for type in results:
             writeReportSection(type[0], type[1])
+        '''
 
     except Exception as e:
         common.logger.error("Unexpected error: " + str(e))
+
     ########################
     #Look for exported Preference activities
     '''

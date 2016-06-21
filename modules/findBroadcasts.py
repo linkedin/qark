@@ -35,7 +35,7 @@ def main(queue):
 	common.logger.debug("Checking for any broadcasts sent from this app......")
 	for j in common.java_files:
 		count = count + 1
-		pub.sendMessage('progress', count1=None, count2=None, count3=None, count4=None, count5=round(count*100/common.java_files.__len__()))
+		pub.sendMessage('progress', bar="Broadcast issues", percent=round(count*100/common.java_files.__len__()))
 		current_file=j
 		try:
 			tree=parser.parse_file(j)

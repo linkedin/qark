@@ -46,7 +46,7 @@ def validate(queue,height):
     for j in common.java_files:
         sslSessions=[]
         count = count + 1
-        pub.sendMessage('progress', count1=round(count*100/common.java_files.__len__()), count2=None, count3=None, count4=None)
+        pub.sendMessage('progress', bar='X.509 Validation', percent=round(count*100/common.java_files.__len__()))
         filename=str(j)
         try:
             tree=parser.parse_file(j)

@@ -97,7 +97,7 @@ def text_scan(file_list,rex_n):
 	for x in file_list:
 		count = count + 1
 		#pbar.update(round(count*100/common.java_files.__len__()))
-		pub.sendMessage('progress', count1=None, count2=None, count3=round(count*100/common.java_files.__len__()))
+		pub.sendMessage('progress', bar='File Permissions', percent=round(count*100/common.java_files.__len__()))
 		result=common.read_files(x,rex_n)
 		if len(result)>0:
 			result_list.append([result,x])
