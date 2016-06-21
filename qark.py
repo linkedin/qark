@@ -104,14 +104,7 @@ def apktool(pathToAPK):
 # TODO: change counts to array
 def progress_bar_update(bar, percent):
     lock.acquire()
-    '''
-    global pbar_file_permission_done
-    ['X.509 Validation', 'Pending Intents', 'File Permissions (check 1)', 'File Permissions (check 2) ', 'Webview checks', 'Boardcast issues', 'Crypto issues', 'Plugin issues' ]
-    if bar == "File Permissions (check 1)" and not pbar_file_permission_done:
-        if percent >= 100:
-            pbar_file_permission_done = True
-    
-    '''
+
     global pbar_file_permission_done 
     if bar == "File Permissions" and percent >= 100 and not pbar_file_permission_done:
         pbar_file_permission_done = True
@@ -127,32 +120,6 @@ def progress_bar_update(bar, percent):
     else:
         pbars["Plugin issues"][bar].update(percent)
 
-    '''
-    if count1 is not None:
-        if count1<=100:
-            pbars[0].update(count1)
-    if count2 is not None:
-        if count2<=100:
-            pbars[1].update(count2)
-    if count3 is not None:
-        if not pbar_file_permission_done:
-            if count3<100:
-                pbars[2].update(count3)
-            else:
-                pbars[2].update(count3)
-                pbar_file_permission_done = True
-        else:
-            pbars[3].update(count3)
-    if count4 is not None:
-        if count4<=100:
-            pbars[4].update(count4)
-    if count5 is not None:
-        if count5<=100:
-            pbars[5].update(count5)
-    if count6 is not None:
-        if count6<=100:
-            pbars[6].update(count6)
-    '''
     lock.release()
 
 def version():
@@ -774,8 +741,6 @@ if __name__ == "__main__":
 
             pbars['Plugin issues'][plugin.plugin_object.getName()] = ProgressBar(
                 widgets=[plugin.plugin_object.getName(), Percentage(), Bar()], maxval=100, fd=writer).start() 
-#            plugin_issues = pbars.get('Plugin issues', {})
-#            plugin_issues[plugin.plugin_object.getName()] = ProgressBar(widgets=[plugin.plugin_object.getName(), Percentage(), Bar()], maxval=100, fd=writer).start()
 
         pub.subscribe(progress_bar_update, 'progress')
 
