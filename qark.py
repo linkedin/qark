@@ -789,7 +789,6 @@ if __name__ == "__main__":
             common.logger.error("Unable to use findMethods to map from manifest: " + str(e))
 
 
-        '''
         results = [ (crypto_flaw_queue.get(), "CRYPTO ISSUES"),
                     (find_broadcast_queue.get(), "BROADCAST ISSUES"), 
                     (cert_queue.get(), "CERTIFICATE VALIDATION ISSUES"), 
@@ -800,7 +799,6 @@ if __name__ == "__main__":
                     
         for type in results:
             writeReportSection(type[0], type[1])
-        '''
 
     except Exception as e:
         common.logger.error("Unexpected error: " + str(e))
