@@ -1,10 +1,14 @@
+import sys
+import os
+
+sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)) + '../lib')
+
 from yapsy.IPlugin import IPlugin
 from modules import common, report
 from modules.common import ReportIssue, Severity, terminalPrint, logger
 from modules.createExploit import ExploitType
 from lib.progressbar import *
 from lib.pubsub import pub
-from qark import lock
 import logging
 
 

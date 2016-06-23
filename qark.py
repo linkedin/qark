@@ -11,7 +11,6 @@ import sys
 import stat
 import fnmatch
 sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)) + '/lib')
-sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)) + '/plugins')
 
 from subprocess import Popen, PIPE, STDOUT
 import urllib2
@@ -37,15 +36,15 @@ from modules import filePermissions
 from modules import exportedPreferenceActivity
 from modules import useCheckPermission
 from modules import cryptoFlaws
-import logging
-import time
-import shutil
 from modules import certValidation
 from modules import GeneralIssues
 from modules import contentProvider
 from modules.contentProvider import *
 from modules import filters
 from modules.common import terminalPrint, Severity, ReportIssue
+import logging
+import time
+import shutil
 from lib import argparse
 from lib.pyfiglet import Figlet
 from threading import Thread, Lock
@@ -57,6 +56,7 @@ import subprocess
 from lib.progressbar import ProgressBar, Percentage, Bar
 from modules import adb
 from yapsy.PluginManager import PluginManager
+#from yapsy.PluginManager import PluginManager
 
 package_name=''
 pbar_file_permission_done = False

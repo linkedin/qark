@@ -1,3 +1,8 @@
+import sys
+import os
+
+sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)) + '../lib')
+
 from yapsy.IPlugin import IPlugin
 from modules import common, report
 from modules.common import ReportIssue, Severity, terminalPrint, logger
