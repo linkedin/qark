@@ -101,7 +101,6 @@ def apktool(pathToAPK):
     return
 
 
-# TODO: change counts to array
 def progress_bar_update(bar, percent):
     lock.acquire()
 
@@ -114,7 +113,7 @@ def progress_bar_update(bar, percent):
     elif bar == "File Permissions":
         bar = "File Permissions (check 1)"
 
-    # check if the progress bar is a user plugin
+    # if the supplied bar name is not in the list then we assume it is a user plugin
     if bar in PROGRESS_BARS:
         pbars[bar].update(percent)
     else:
@@ -473,6 +472,8 @@ if __name__ == "__main__":
     #Begin
     common.logger.info('Initializing QARK\n')
     common.checkJavaVersion()
+
+    #Define plugin location and get all plugins
     manager = PluginManager()
     manager.setPluginPlaces(["plugins"])
     manager.collectPlugins()
@@ -720,30 +721,38 @@ if __name__ == "__main__":
         common.logger.error("Unable to run checks for improper use of checkCallingPermission: " + str(e))
     '''
 
-    clear_lines(20)
     height = common.term.height
 
     try:
+        clear_amount = (len(PROGRESS_BARS) - 1) * 2
+        for plugin in manager.getAllPlugins():
+            clear_amount += 2
+        clear_lines(clear_amount)
+
+        # TODO: change to list comprehension to make it more pythonic
+        # all static writers included in every static analysis
         writers = [common.Writer((0, height-8)), common.Writer((0, height-6)), common.Writer((0, height-4)), 
                     common.Writer((0, height-2)), common.Writer((0, height-10)), common.Writer((0, height-12)), common.Writer((0, height-14))]
         pbars = {}
    
-        # create dictionary for progress bars, { name: progressBar }
+        # create dictionary for progress bars, pbars = { name: ProgressBar }
         for barNum in range(len(PROGRESS_BARS)-1):
             pbars[PROGRESS_BARS[barNum]] = ProgressBar(widgets=[PROGRESS_BARS[barNum], Percentage(), Bar()], maxval=100, fd=writers[barNum]).start()
 
         # create writer and progress bar for each plugin
+        placer = 0
         for plugin in manager.getAllPlugins():
-            writer = common.Writer((0, height-16))
+            writer = common.Writer((0, height-(16+placer)))
             writers.append(writer)
             if 'Plugin issues' not in pbars:
                 pbars['Plugin issues'] = {}
 
-            pbars['Plugin issues'][plugin.plugin_object.getName()] = ProgressBar(
-                widgets=[plugin.plugin_object.getName(), Percentage(), Bar()], maxval=100, fd=writer).start() 
+            pbars['Plugin issues'][plugin.plugin_object.getName()] = ProgressBar(widgets=[plugin.plugin_object.getName(), Percentage(), Bar()], maxval=100, fd=writer).start() 
+            placer += 2
 
         pub.subscribe(progress_bar_update, 'progress')
 
+        #Create static analysis threads
         threads = []
         threads.append(Thread(name='Certificate Validation', target=certValidation.validate, args=(cert_queue,height-8)))
         threads.append(Thread(name='Pending Intent validation', target=findPending.start, args = (pending_intents_queue,height-6)))
@@ -794,11 +803,14 @@ if __name__ == "__main__":
                     (cert_queue.get(), "CERTIFICATE VALIDATION ISSUES"), 
                     (pending_intents_queue.get(), "PENDING INTENT ISSUES"),
                     (file_permission_queue.get(), "FILE PERMISSION ISSUES"),
-                    (web_view_queue.get(), "WEB-VIEW ISSUES"),
-                    (plugin_queue.get(), "PLUGIN ISSUES")]
+                    (web_view_queue.get(), "WEB-VIEW ISSUES")
+         ]
+        if not plugin_queue.empty():
+            for i in range(plugin_queue.qsize()):
+                results.append((plugin_queue.get(), "PLUGIN ISSUES"))
                     
-        for type in results:
-            writeReportSection(type[0], type[1])
+        for r in results:
+            writeReportSection(r[0], r[1])
 
     except Exception as e:
         common.logger.error("Unexpected error: " + str(e))
@@ -1037,5 +1049,3 @@ if __name__ == "__main__":
 
     print "Goodbye!"
     raise SystemExit
-
-

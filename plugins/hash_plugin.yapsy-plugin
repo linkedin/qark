@@ -1,0 +1,9 @@
+[Core]
+Name = plugin2
+Module = hash_plugin
+
+[Documentation]
+Author = John Smith
+Version = 0.1
+Website = http://lotsofplugins.com
+Description = My first plugin
