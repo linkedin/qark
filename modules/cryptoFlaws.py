@@ -31,7 +31,7 @@ def main(queue):
 	find_key_files(results)
 	for j in common.java_files:
 		count = count + 1
-		pub.sendMessage('progress', count6=round(count*100/common.java_files.__len__()))
+		pub.sendMessage('progress', bar='Crypto issues', percent=round(count*100/common.java_files.__len__()))
 		try:
 			tree=parser.parse_file(j)
 			if tree is not None:

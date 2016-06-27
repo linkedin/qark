@@ -27,7 +27,7 @@ class Section():
     """
     Enum type for exploitatin category
     """
-    WEBVIEW, X509, PERMISSIONS, SERVICES, BROADCASTS, PENDING_INTENTS, FILE_PERMISSIONS, CRYPTO_BUGS, ACTIVITY, APPCOMPONENTS, ADB = range(11)
+    WEBVIEW, X509, PERMISSIONS, SERVICES, BROADCASTS, PENDING_INTENTS, FILE_PERMISSIONS, CRYPTO_BUGS, ACTIVITY, APPCOMPONENTS, ADB, PLUGIN = range(12)
 
 section = {}
 section[Section.WEBVIEW] = "webview"
@@ -41,6 +41,7 @@ section[Section.CRYPTO_BUGS] = "crypto"
 section[Section.ACTIVITY] = "activity"
 section[Section.APPCOMPONENTS] = "appcomponents"
 section[Section.ADB] = "adbcommands"
+section[Section.PLUGIN] = "plugin"
 
 labels = {}
 labels[Severity.VULNERABILITY] = "label label-danger"

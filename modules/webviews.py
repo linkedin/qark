@@ -680,7 +680,7 @@ def text_scan(file_list,rex_n):
     count = 0
     for x in file_list:
         count = count + 1
-        pub.sendMessage('progress', count1=None, count2=None, count3=None, count4=round(count*100/common.java_files.__len__()))
+        pub.sendMessage('progress', bar='Webview checks', percent=round(count*100/common.java_files.__len__()))
         result=common.read_files(x,rex_n)
         if len(result)>0:
             result_list.append([result,x])

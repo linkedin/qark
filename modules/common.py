@@ -390,11 +390,11 @@ def text_scan(file_list,rex_n):
 	Given a list of files, search content of each file by the regular expression and return a list of matches
 	"""
 	result_list=[]
-	result_list.append([])
-	for x in file_list:
-		result=read_files(x,rex_n)
+	#result_list.append([])
+	for file in file_list:
+		result=read_files(file,rex_n)
 		if len(result)>0:
-			result_list.append([result,x])
+			result_list.append([result,file])
 	return result_list
 
 def text_scan_single(file_name,rex_n):

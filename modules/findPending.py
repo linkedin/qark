@@ -43,7 +43,7 @@ def start(queue,height):
 
 	for j in common.java_files:
 		count = count + 1
-		pub.sendMessage('progress', count1=None, count2=round(count*100/common.java_files.__len__()), count3=None)
+		pub.sendMessage('progress', bar='Pending Intents', percent=round(count*100/common.java_files.__len__()))
 		current_file=j
 		tree=parser.parse_file(j)
 		#TODO - Need to add scanning of the imports, to see if Intent or PendingIntent is extended, was working on it, 
