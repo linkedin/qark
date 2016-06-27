@@ -3,7 +3,7 @@ Name = plugin1
 Module = pass_plugin
 
 [Documentation]
-Author = John Smith
+Author = Nathan Walsh
 Version = 0.1
-Website = http://lotsofplugins.com
+Website = 
 Description = My first plugin

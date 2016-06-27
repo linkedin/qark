@@ -15,7 +15,7 @@ import logging
 class PluginOne(IPlugin):
     def target(self, queue):
         results = []
-        possibleFiles = common.text_scan(common.java_files, r'pass')
+        possibleFiles = common.text_scan(common.java_files, r'API_KEY')
         count = 0
         for f in possibleFiles:
             count += 1
@@ -23,14 +23,14 @@ class PluginOne(IPlugin):
             common.logger.debug("Text found, " + str(f))
             issue = ReportIssue()
             issue.setCategory(ExploitType.PLUGIN)
-            issue.setDetails("The string 'pass' appears in the file: %s\n%s" % (f[1], str(f[0])))
+            issue.setDetails("The string 'API_KEY' appears in the file: %s\n%s" % (f[1], str(f[0])))
             issue.setFile(str(f[1]))
             issue.setSeverity(Severity.VULNERABILITY)
             results.append(issue)
 
             issue = terminalPrint()
             issue.setLevel(Severity.VULNERABILITY)
-            issue.setData("The string 'pass' appears in the file: %s\n%s" % (f[1], str(f[0])))
+            issue.setData("The string 'API_KEY' appears in the file: %s\n%s" % (f[1], str(f[0])))
             results.append(issue)
         
         
@@ -38,10 +38,10 @@ class PluginOne(IPlugin):
             
 
     def getName(self):
-        return "Hardcoded passwords"
+        return "Hardcoded API Key Check"
 
     def getCategory(self):
-        return "PLUGIN ISSUES"
+        return "Hardcoded API keys"
 
     def getTarget(self):
         return self.target
