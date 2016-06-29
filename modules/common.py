@@ -454,6 +454,7 @@ def tree(l):
 	"""
 	Given a list of files, find the complete list of hierarchy of extensions and return the result as a list
 	"""
+	tmp_list = []
 	for c in l:
 		if len(c)>0:
 			tmp_list+=find_ext(str(c[0]))
