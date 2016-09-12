@@ -1,0 +1,11 @@
+android-sdk*/*
+env/*
+build/*
+lib/**/*.pyc
+lib/plyj/lextab.py
+logs/*
+modules/**/*.pyc
+report/*
+settings.properties
+parsetab.py
+parsetab.pyc
