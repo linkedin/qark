@@ -104,7 +104,7 @@ def apktool(pathToAPK):
 def progress_bar_update(bar, percent):
     lock.acquire()
 
-    global pbar_file_permission_done 
+    global pbar_file_permission_done
     if bar == "File Permissions" and percent >= 100 and not pbar_file_permission_done:
         pbar_file_permission_done = True
         bar = "File Permissions (check 1)"
@@ -338,7 +338,7 @@ def writeReportSection(results, category):
     elif category == "PLUGIN ISSUES":
         section = report.Section.PLUGIN
 
-    try: 
+    try:
         report.writeSection(section, results)
     except Exception as e:
         print e.message
@@ -357,7 +357,7 @@ def writeReportSection(results, category):
             if item.getLevel() == Severity.VULNERABILITY:
                 common.logger.log(common.VULNERABILITY_LEVEL,item.getData())
 
-    
+
 
 if __name__ == "__main__":
     ignore = os.system('clear')
@@ -731,10 +731,10 @@ if __name__ == "__main__":
 
         # TODO: change to list comprehension to make it more pythonic
         # all static writers included in every static analysis
-        writers = [common.Writer((0, height-8)), common.Writer((0, height-6)), common.Writer((0, height-4)), 
+        writers = [common.Writer((0, height-8)), common.Writer((0, height-6)), common.Writer((0, height-4)),
                     common.Writer((0, height-2)), common.Writer((0, height-10)), common.Writer((0, height-12)), common.Writer((0, height-14))]
         pbars = {}
-   
+
         # create dictionary for progress bars, pbars = { name: ProgressBar }
         for barNum in range(len(PROGRESS_BARS)-1):
             pbars[PROGRESS_BARS[barNum]] = ProgressBar(widgets=[PROGRESS_BARS[barNum], Percentage(), Bar()], maxval=100, fd=writers[barNum]).start()
@@ -747,7 +747,7 @@ if __name__ == "__main__":
             if 'Plugin issues' not in pbars:
                 pbars['Plugin issues'] = {}
 
-            pbars['Plugin issues'][plugin.plugin_object.getName()] = ProgressBar(widgets=[plugin.plugin_object.getName(), Percentage(), Bar()], maxval=100, fd=writer).start() 
+            pbars['Plugin issues'][plugin.plugin_object.getName()] = ProgressBar(widgets=[plugin.plugin_object.getName(), Percentage(), Bar()], maxval=100, fd=writer).start()
             placer += 2
 
         pub.subscribe(progress_bar_update, 'progress')
@@ -799,8 +799,8 @@ if __name__ == "__main__":
 
 
         results = [ (crypto_flaw_queue.get(), "CRYPTO ISSUES"),
-                    (find_broadcast_queue.get(), "BROADCAST ISSUES"), 
-                    (cert_queue.get(), "CERTIFICATE VALIDATION ISSUES"), 
+                    (find_broadcast_queue.get(), "BROADCAST ISSUES"),
+                    (cert_queue.get(), "CERTIFICATE VALIDATION ISSUES"),
                     (pending_intents_queue.get(), "PENDING INTENT ISSUES"),
                     (file_permission_queue.get(), "FILE PERMISSION ISSUES"),
                     (web_view_queue.get(), "WEB-VIEW ISSUES")
@@ -808,7 +808,7 @@ if __name__ == "__main__":
         if not plugin_queue.empty():
             for i in range(plugin_queue.qsize()):
                 results.append((plugin_queue.get(), "PLUGIN ISSUES"))
-                    
+
         for r in results:
             writeReportSection(r[0], r[1])
 
