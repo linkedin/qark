@@ -9,3 +9,5 @@ report/*
 settings.properties
 parsetab.py
 parsetab.pyc
+sampleApps/goatdroid/apktool
+sampleApps/goatdroid/goatdroid
