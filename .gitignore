@@ -1,0 +1,7 @@
+*.pyc
+logs
+report
+android-sdk*
+settings.properties
+*.swp
+build
