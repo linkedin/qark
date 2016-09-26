@@ -1,0 +1,20 @@
+!!brut.androlib.meta.MetaInfo
+apkFileName: goatdroid.apk
+compressionType: false
+doNotCompress:
+- arsc
+isFrameworkApk: false
+packageInfo: null
+sdkInfo:
+  minSdkVersion: '9'
+  targetSdkVersion: '15'
+sharedLibrary: false
+unknownFiles: {}
+usesFramework:
+  ids:
+  - 1
+  tag: null
+version: 2.1.0
+versionInfo:
+  versionCode: '1'
+  versionName: '1.0'

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.actionbarsherlock.internal.widget.FakeDialogPhoneWindow android:orientation="vertical" android:fitsSystemWindows="true"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <TextView android:gravity="center|left" android:id="@android:id/title" android:paddingLeft="16.0dip" android:paddingRight="16.0dip" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minHeight="@dimen/abs__alert_dialog_title_height" style="?android:attr/windowTitleStyle" />
+    <View android:id="@id/abs__titleDivider" android:background="@color/abs__holo_blue_light" android:layout_width="fill_parent" android:layout_height="2.0dip" />
+    <FrameLayout android:orientation="vertical" android:layout_width="wrap_content" android:layout_height="0.0dip" android:foreground="?windowContentOverlay" android:layout_weight="1.0">
+        <FrameLayout android:id="@id/abs__content" android:layout_width="fill_parent" android:layout_height="fill_parent" />
+    </FrameLayout>
+</com.actionbarsherlock.internal.widget.FakeDialogPhoneWindow>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="vertical" android:background="@drawable/background" android:layout_width="fill_parent" android:layout_height="fill_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <TextView android:id="@id/userName" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="25.0dip" android:text="" style="@style/TextFont" />
+    <TextView android:id="@id/fullName" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="" style="@style/TextFont" />
+    <TextView android:id="@id/textView2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="20.0dip" android:text="@string/accept_request_yes_no" style="@style/TextFont" />
+    <LinearLayout android:id="@id/linearLayout1" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginTop="10.0dip">
+        <Button android:textColor="#ffffffff" android:layout_gravity="center" android:id="@id/button1" android:background="@drawable/standard_button" android:layout_width="100.0dip" android:layout_height="25.0dip" android:layout_marginLeft="10.0dip" android:text="@string/yes" android:onClick="acceptFriendRequest" />
+        <Button android:textColor="#ffffffff" android:layout_gravity="center" android:id="@id/button2" android:background="@drawable/standard_button" android:layout_width="100.0dip" android:layout_height="25.0dip" android:layout_marginLeft="10.0dip" android:text="@string/no" android:onClick="denyFriendRequest" />
+    </LinearLayout>
+</LinearLayout>

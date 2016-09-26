@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.actionbarsherlock.internal.widget.IcsLinearLayout android:layout_gravity="center" android:id="@id/abs__activity_chooser_view_content" android:layout_width="wrap_content" android:layout_height="fill_parent" style="?attr/activityChooserViewStyle"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <FrameLayout android:layout_gravity="center" android:id="@id/abs__expand_activities_button" android:background="?actionBarItemBackground" android:focusable="true" android:addStatesFromChildren="true" android:layout_width="wrap_content" android:layout_height="fill_parent">
+        <ImageView android:layout_gravity="center" android:id="@id/abs__image" android:paddingLeft="12.0dip" android:paddingTop="2.0dip" android:paddingRight="12.0dip" android:paddingBottom="2.0dip" android:layout_width="56.0dip" android:layout_height="36.0dip" android:scaleType="fitCenter" android:adjustViewBounds="true" />
+    </FrameLayout>
+    <FrameLayout android:layout_gravity="center" android:id="@id/abs__default_activity_button" android:background="?actionBarItemBackground" android:focusable="true" android:addStatesFromChildren="true" android:layout_width="wrap_content" android:layout_height="fill_parent">
+        <ImageView android:layout_gravity="center" android:id="@id/abs__image" android:paddingLeft="12.0dip" android:paddingTop="2.0dip" android:paddingRight="12.0dip" android:paddingBottom="2.0dip" android:layout_width="56.0dip" android:layout_height="36.0dip" android:scaleType="fitCenter" android:adjustViewBounds="true" />
+    </FrameLayout>
+</com.actionbarsherlock.internal.widget.IcsLinearLayout>

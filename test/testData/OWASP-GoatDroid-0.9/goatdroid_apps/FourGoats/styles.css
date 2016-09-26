@@ -1,0 +1,115 @@
+* {margin: 0;
+   padding: 0;}
+   
+body {
+	font-family: "trebuchet MS" Arial, Helvetica, sans-serif;
+	text-align:center;
+	background-color: #e6ebf3;
+}
+
+#container {
+	width: 57em;
+	margin: 1em auto;
+	background-color: #FFFFFF;
+	font-size: .8em;
+	border: 1px solid #75778E;
+	text-align:left;
+	padding: 1em;
+}
+
+#header {
+	margin-bottom: 1em;
+	border: 1px solid #EFEFEF;
+	height: 10em;
+	background-color: #FEFDFD;
+	background-image: url(images/goatdroid_logo.jpg);
+	background-repeat: no-repeat;
+	background-position: right;
+}
+
+
+#content {
+	float: right;
+	width: 39.8em;
+	padding: 0.5em;
+	border: 1px solid #CCCCCC;
+	margin-top: 1em;
+	margin-bottom: 1em;
+	background-color: #FCFCFC;
+}
+
+#leftdiv{
+	padding: 0.5em;
+	margin-right: 42em;
+	background-color: #fcfcfc;
+	background-repeat: no-repeat;
+	background-position: right top;
+	margin-top: 1em;
+	border: 1px solid #CCCCCC;
+	margin-bottom: 1em;
+}  
+
+#footer {
+	clear: both;
+	padding: 0.5em;
+	background-color: #646675;
+	color: #FFFFFF;
+	text-align: center;
+	font-size: .9em;
+	border: 1px solid #CCCCCC;
+	margin-top: 1px;
+}
+
+p {
+	margin-top: 1em;
+	margin-bottom: 1em;
+	padding: .5em;
+    font-size: 1.35em;
+}
+
+ol {
+	margin-top: 1em;
+	margin-bottom: 1em;
+	padding: .5em;
+    font-size: 1.1em;
+} 
+
+ul {
+	margin-top: 1em;
+	margin-bottom: 1em;
+	padding: .5em;
+    font-size: 1.1em;
+} 
+
+h3 {
+	font-size: 1em;
+	padding: .5em;
+	color: #41A317;
+	border: 1px dotted #CCCCCC;
+	background-color: #F3F3F3;
+}
+
+h2 {
+	font-size: 2em;
+	padding: 0.5em;
+	margin-bottom: 1em;
+	color: #798196;
+	border: 1px solid #EEEEEE;
+}
+
+h1 {
+	font-size: 5.3em!important;
+	font-size: 3.3em;
+	padding: 0.5em;
+	margin-bottom: 1em;
+	color: #348017	;
+	font-family: "Times New Roman", Times, serif;
+}
+
+
+
+a:link {color: #676D79;}
+a:visited {color: #676D79}
+a:hover {color: #820606}
+a:active {color: #890000}
+

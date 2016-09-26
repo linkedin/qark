@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="vertical" android:background="@drawable/background" android:layout_width="fill_parent" android:layout_height="fill_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <TextView android:layout_gravity="center" android:id="@id/textView2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="25.0dip" android:text="@string/username" style="@style/TextFont" />
+    <EditText android:gravity="center" android:id="@id/userName" android:layout_width="fill_parent" android:layout_height="wrap_content" />
+    <TextView android:layout_gravity="center" android:id="@id/textView3" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="25.0dip" android:text="@string/password" style="@style/TextFont" />
+    <EditText android:gravity="center" android:id="@id/password" android:layout_width="fill_parent" android:layout_height="wrap_content" />
+    <Button android:textColor="#ffffffff" android:layout_gravity="center" android:id="@id/button1" android:background="@drawable/standard_button" android:layout_width="200.0dip" android:layout_height="25.0dip" android:layout_marginTop="25.0dip" android:text="@string/authenticate" android:onClick="doAuthenticateAPI" />
+</LinearLayout>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="vertical" android:fitsSystemWindows="true" android:layout_width="fill_parent" android:layout_height="fill_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <com.actionbarsherlock.internal.widget.ActionBarContainer android:id="@id/abs__action_bar_container" android:layout_width="fill_parent" android:layout_height="wrap_content" style="?attr/actionBarStyle">
+        <com.actionbarsherlock.internal.widget.ActionBarView android:id="@id/abs__action_bar" android:layout_width="fill_parent" android:layout_height="wrap_content" style="?attr/actionBarStyle" />
+        <com.actionbarsherlock.internal.widget.ActionBarContextView android:id="@id/abs__action_context_bar" android:visibility="gone" android:layout_width="fill_parent" android:layout_height="wrap_content" style="?attr/actionModeStyle" />
+    </com.actionbarsherlock.internal.widget.ActionBarContainer>
+    <com.actionbarsherlock.internal.nineoldandroids.widget.NineFrameLayout android:id="@id/abs__content" android:layout_width="fill_parent" android:layout_height="0.0dip" android:foreground="?windowContentOverlay" android:layout_weight="1.0" android:foregroundGravity="fill_horizontal|center|top" />
+</LinearLayout>

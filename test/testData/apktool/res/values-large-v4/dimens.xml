@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item type="dimen" name="abs__dialog_min_width_major">55.000008%</item>
+    <item type="dimen" name="abs__dialog_min_width_minor">79.99999%</item>
+</resources>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE taglib PUBLIC "-//Sun Microsystems, Inc.//DTD JSP Tag Library 1.2//EN" "http://java.sun.com/dtd/web-jsptaglibrary_1_2.dtd">
+<taglib>
+  <tlib-version>1.0</tlib-version>
+  <jsp-version>1.2</jsp-version>
+  <short-name>jerseyview</short-name>
+  <uri>urn:com:sun:jersey:api:view</uri>
+  <description>
+    The tag library contains tags that takes advantage of
+    the request dispatching mechanism.
+  </description>
+  <tag>
+    <name>include</name>
+    <tag-class>com.sun.jersey.server.impl.container.servlet.Include</tag-class>
+    <body-content>empty</body-content>
+    <attribute>
+      <name>page</name>
+      <required>yes</required>
+      <rtexprvalue>yes</rtexprvalue>
+    </attribute>
+    <attribute>
+      <name>resource</name>
+      <required>no</required>
+      <rtexprvalue>yes</rtexprvalue>
+    </attribute>
+  </tag>
+</taglib>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="vertical" android:background="@drawable/background" android:layout_width="fill_parent" android:layout_height="fill_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <LinearLayout android:orientation="horizontal" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginTop="75.0dip">
+        <Button android:background="#ffffffff" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="20.0dip" android:text="@string/checkins" android:drawableTop="@drawable/home_checkin" android:onClick="launchCheckins" />
+        <Button android:background="#ffffffff" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="40.0dip" android:text="@string/friends" android:drawableTop="@drawable/home_friends" android:onClick="launchFriends" />
+    </LinearLayout>
+    <LinearLayout android:orientation="horizontal" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginTop="75.0dip">
+        <Button android:background="#ffffffff" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="20.0dip" android:text="@string/rewards" android:drawableTop="@drawable/home_rewards" android:onClick="launchRewards" />
+        <Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="50.0dip" android:text="@string/manage_users" android:singleLine="false" android:drawableTop="@drawable/home_manage_users" android:onClick="launchManageUsers" />
+    </LinearLayout>
+</LinearLayout>

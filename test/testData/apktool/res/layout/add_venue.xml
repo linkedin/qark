@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="vertical" android:background="@drawable/background" android:layout_width="fill_parent" android:layout_height="fill_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <TextView android:layout_gravity="center" android:id="@id/textView2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="25.0dip" android:text="@string/venue_name" style="@style/TextFont" />
+    <EditText android:gravity="center" android:id="@id/venueName" android:layout_width="fill_parent" android:layout_height="wrap_content" style="@style/TextFont" />
+    <TextView android:layout_gravity="center" android:id="@id/textView3" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="25.0dip" android:text="@string/venue_website" style="@style/TextFont" />
+    <EditText android:gravity="center" android:id="@id/venueWebsite" android:layout_width="fill_parent" android:layout_height="wrap_content" style="@style/TextFont" />
+    <Button android:textColor="#ffffffff" android:layout_gravity="center" android:id="@id/button1" android:background="@drawable/standard_button" android:layout_width="200.0dip" android:layout_height="25.0dip" android:layout_marginTop="25.0dip" android:text="@string/add_and_checkin" android:onClick="addVenue" />
+</LinearLayout>

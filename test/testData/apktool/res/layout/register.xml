@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="vertical" android:background="@drawable/background" android:layout_width="fill_parent" android:layout_height="fill_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <TextView android:layout_gravity="center" android:id="@id/firstName" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="10.0dip" android:text="@string/first_name" style="@style/TextFont" />
+    <EditText android:gravity="center" android:id="@id/firstNameEdit" android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="" style="@style/TextFont" />
+    <TextView android:layout_gravity="center" android:id="@id/lastName" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/last_name" style="@style/TextFont" />
+    <EditText android:gravity="center" android:id="@id/lastNameEdit" android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="" style="@style/TextFont" />
+    <TextView android:layout_gravity="center" android:id="@id/userName" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/username" style="@style/TextFont" />
+    <EditText android:gravity="center" android:id="@id/userNameEdit" android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="" style="@style/TextFont" />
+    <TextView android:layout_gravity="center" android:id="@id/password" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/password" style="@style/TextFont" />
+    <EditText android:gravity="center" android:id="@id/passwordEdit" android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="" android:password="true" style="@style/TextFont" />
+    <TextView android:layout_gravity="center" android:id="@id/confirmPassword" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/confirm_password" style="@style/TextFont" />
+    <EditText android:gravity="center" android:id="@id/confirmPasswordEdit" android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="" android:password="true" style="@style/TextFont" />
+    <Button android:textColor="#ffffffff" android:layout_gravity="center" android:id="@id/button1" android:background="@drawable/standard_button" android:layout_width="200.0dip" android:layout_height="25.0dip" android:layout_marginTop="20.0dip" android:text="@string/register" android:onClick="submitRegistration" />
+</LinearLayout>

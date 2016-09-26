@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:icon="@drawable/settings" android:id="@id/preferences" android:title="Preferences" />
+    <item android:icon="@drawable/view_profile" android:id="@id/viewMyProfile" android:title="View My Profile" />
+    <item android:icon="@drawable/about" android:id="@id/about" android:title="About" />
+    <item android:icon="@drawable/sign_out" android:id="@id/logOut" android:title="Log Out" />
+</menu>

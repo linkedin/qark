@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="vertical" android:background="@drawable/background" android:layout_width="fill_parent" android:layout_height="fill_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <LinearLayout android:orientation="vertical" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginTop="75.0dip">
+        <Button android:layout_gravity="center" android:background="#ffffffff" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/reset_user_passwords" android:drawableTop="@drawable/admin_options_password_reset" android:onClick="launchResetUserPasswords" style="@style/TextFont" />
+    </LinearLayout>
+    <LinearLayout android:orientation="vertical" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginTop="75.0dip">
+        <Button android:layout_gravity="center" android:background="#ffffffff" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/delete_users" android:drawableTop="@drawable/admin_options_delete_users" android:onClick="launchDeleteUsers" style="@style/TextFont" />
+    </LinearLayout>
+</LinearLayout>
