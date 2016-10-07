@@ -10,3 +10,6 @@ sampleApps/goatdroid
 lib/plyj/lextab.py
 test/.coverage
 .coverage
+parsetab.py
+sampleApps
+lextab.py

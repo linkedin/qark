@@ -1,0 +1,2 @@
+recursive-include qark/lib *
+recursive-include qark *
