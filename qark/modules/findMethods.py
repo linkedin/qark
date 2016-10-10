@@ -6,18 +6,19 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.'''
 
 import lib.plyj.parser as plyj
-from modules import common
-from modules import filters
-from modules import findBoundServices
-from modules import findExtras
+import common
+import filters
+import findBoundServices
+import findExtras
 import lib.plyj.model as m
 import re, sys
 import logging
-from modules import externalMethodDeclarations,localMethodDeclarations
-from modules.common import ReportIssue, Severity
-from modules.createExploit import ExploitType
-from modules import report
-from modules import findSupers
+import externalMethodDeclarations
+import localMethodDeclarations
+from common import ReportIssue, Severity
+from createExploit import ExploitType
+import report
+import findSupers
 
 parser = plyj.Parser()
 tracker = []

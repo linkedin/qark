@@ -8,7 +8,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.'''
 import zipfile
 import os
 from genericpath import isdir
-from modules import common
+import common
 import subprocess
 import logging
 import shlex

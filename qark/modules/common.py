@@ -4,7 +4,7 @@
 Unless required by applicable law or agreed to in writing, software 
 distributed under the License is distributed on an "AS IS" BASIS, 
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.'''
-from modules.createExploit import ExploitType
+from createExploit import ExploitType
 
 """
 Module for common functions and common variables that are then used elsewhere in the code
@@ -20,10 +20,10 @@ import logging
 
 from IssueType import IssueType, IssueSeverity
 from collections import defaultdict
-from lib import colorama
+from qark.lib import colorama
 import glob
 import subprocess
-from lib.blessed import *
+from qark.lib.blessed import *
 
 
 VULNERABILITY_LEVEL = 60

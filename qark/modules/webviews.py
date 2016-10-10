@@ -9,7 +9,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 import zipfile
 import os
 from genericpath import isdir
-from modules import common
+import common
 from common import terminalPrint
 import subprocess
 import logging
@@ -18,9 +18,9 @@ import re
 import report
 from IssueType import IssueType, IssueSeverity
 from report import ReportIssue
-from modules.common import Severity, ReportIssue
+from common import Severity, ReportIssue
 from createExploit import ExploitType
-from lib.pubsub import pub
+from ..lib.pubsub import pub
 
 common.logger = logging.getLogger()
 logger = logging.getLogger(__name__)

@@ -13,11 +13,11 @@ import ast
 import string
 import ConfigParser
 from xml.dom import minidom
-from lib.BeautifulSoup import BeautifulSoup
+from ..lib.BeautifulSoup import BeautifulSoup
 from distutils.version import StrictVersion
-from modules.unpackAPK import unpack, find_manifest_in_unpacked_apk
+from unpackAPK import unpack, find_manifest_in_unpacked_apk
 import plistlib
-from modules import common
+import common
 from urllib2 import HTTPError
 from httplib import HTTPException
 import logging

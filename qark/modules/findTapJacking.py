@@ -6,10 +6,10 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.'''
 
 import os
-from modules import common
+import common
 from xml.dom import minidom
-import lib.plyj.parser as plyj
-import lib.plyj.model as m
+from ..lib.plyj.parser as plyj
+from ..lib.plyj.model as m
 import re
 
 tree=''

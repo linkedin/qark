@@ -7,9 +7,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.'''
 
 import lib.plyj.parser as plyj
 import lib.plyj.model as m
-from modules import common
+import common
 import re
-from modules import findExtras
+import findExtras
 
 parser = plyj.Parser()
 name=''

@@ -8,8 +8,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.'''
 import shutil
 import errno
 import os
-from modules import common
-from modules.common import logger
+import common
+from common import logger
 import fileinput
 
 class exploitType:

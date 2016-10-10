@@ -8,14 +8,14 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.'''
 import zipfile
 import os
 from genericpath import isdir
-from modules import common
+import common
 import subprocess
 import logging
 import shlex
 import re
-import lib.plyj.parser as plyj
-import lib.plyj.model as m
-from modules import constantResolver
+from ..lib.plyj import parser as plyj
+from  ..lib.plyj import model as m
+import constantResolver
 from xml.dom import minidom
 
 parser = plyj.Parser()

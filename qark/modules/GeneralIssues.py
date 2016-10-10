@@ -6,12 +6,11 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 '''
 
-from modules import common
-from modules import IssueType
-from modules import report
-from modules.IssueType import IssueType, IssueSeverity
+import common
+import IssueType
+import report
+from IssueType import IssueType, IssueSeverity
 import logging
-import modules.common
 
 common.logger = logging.getLogger()
 logger = logging.getLogger(__name__)

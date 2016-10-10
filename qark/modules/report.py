@@ -9,11 +9,11 @@ import os
 import sys
 import re
 
-from modules.common import Severity, ReportIssue
+from common import Severity, ReportIssue
 
 sys.path.insert(0, 'lib')
 from bs4 import BeautifulSoup
-from modules import common
+import common
 import logging
 import shutil
 import webviews

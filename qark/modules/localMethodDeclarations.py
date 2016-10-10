@@ -6,9 +6,9 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.'''
 
 
-import lib.plyj.parser as plyj
-from modules import common
-import lib.plyj.model as m
+from ..lib.plyj.parser as plyj
+import common
+from ..lib.plyj.model as m
 import logging
 
 parser = plyj.Parser()

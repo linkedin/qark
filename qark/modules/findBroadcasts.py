@@ -5,17 +5,17 @@ Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.'''
 
-import lib.plyj.parser as plyj
-from modules import common,report
-import lib.plyj.model as m
+from ..lib.plyj.parser as plyj
+import common,report
+from ..lib.plyj.model as m
 import re
 import logging
 from report import ReportIssue
-from modules.common import Severity, ReportIssue
+from common import Severity, ReportIssue
 from createExploit import ExploitType
-from lib.pubsub import pub
+from ..lib.pubsub import pub
 from common import terminalPrint
-import modules.common
+import common
 
 common.logger = logging.getLogger()
 logger = logging.getLogger(__name__)
