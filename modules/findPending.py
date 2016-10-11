@@ -1,3 +1,4 @@
+import pdb
 '''Copyright 2015 LinkedIn Corp. Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
  You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
  
@@ -41,12 +42,14 @@ def start(queue,height):
 	count = 0
 
 	#TODO - Look for use of fillIn method which can make this a much more exploitable condition
-
 	for j in common.java_files:
 		count = count + 1
 		pub.sendMessage('progress', bar='Pending Intents', percent=round(count*100/common.java_files.__len__()))
 		current_file=j
-		tree=parser.parse_file(j)
+		try:
+			tree=parser.parse_file(j)
+		except ValueError as e:
+			continue
 		#TODO - Need to add scanning of the imports, to see if Intent or PendingIntent is extended, was working on it, 
 		#but the one issue where it arose was non-trivial, so I gave up for now
 		if hasattr(tree,'type_declarations'):

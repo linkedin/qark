@@ -405,7 +405,6 @@ def nonAutomatedParseArgs():
     required_group.add_argument("-b", "--basesdk", dest="basesdk", help="specify the full path to the root directory of the android sdk")
 
     common.args = parser.parse_args()
-    pdb.set_trace()
     main()
 
 def runAutomated(pathToApk,pathToReport):
