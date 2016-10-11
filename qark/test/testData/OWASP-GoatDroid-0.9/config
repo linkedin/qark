@@ -1,7 +1,0 @@
-proxy_port=
-sdk_path=
-web_service_http_port=8888
-proxy_host=
-web_service_https_port=9888
-emulator_screen_size=
-devices_path=
