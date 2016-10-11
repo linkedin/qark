@@ -1,20 +1,16 @@
 from setuptools import setup, find_packages
+from pip.req import parse_requirements
+
+with open('requirements.txt') as f:
+    required = f.read().splitlines()
+
 setup(
     name = "qark",
     version = "1.2.19",
     packages = ['qark/modules','qark/lib', 'qark'],
     include_package_data = True,
 #     scripts = ['qark.py'],
-    install_requires = ['AxmlParserPY>=0.01',
-                        'blessed>=1.9.5',
-                        'blessings>=1.6',
-                        'beautifulsoup4>=4.4.0',
-                        'colorama>=0.3.3',
-                        'html5lib>=0.999999',
-                        'progressbar>=2.3',
-                        'pyfiglet>=0.7.4',
-                        'argparse>=1.3.0',
-                        'coloredlogs>=1.0.1'],
+    install_requires = required,
     package_data = {
         # If any package contains *.txt or *.rst files, include them:
         './': ['*.py'],
