@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<com.actionbarsherlock.internal.view.menu.ListMenuItemView android:paddingRight="16.0dip" android:layout_width="fill_parent" android:layout_height="?dropdownListPreferredItemHeight" android:minWidth="196.0dip"
-  xmlns:android="http://schemas.android.com/apk/res/android">
-    <RelativeLayout android:layout_gravity="center_vertical" android:duplicateParentState="true" android:layout_width="0.0dip" android:layout_height="wrap_content" android:layout_marginLeft="16.0dip" android:layout_weight="1.0">
-        <TextView android:textAppearance="?textAppearanceLargePopupMenu" android:ellipsize="marquee" android:id="@id/abs__title" android:fadingEdge="horizontal" android:duplicateParentState="true" android:layout_width="fill_parent" android:layout_height="wrap_content" android:singleLine="true" android:layout_alignParentLeft="true" android:layout_alignParentTop="true" />
-        <TextView android:textAppearance="?textAppearanceSmallPopupMenu" android:id="@id/abs__shortcut" android:duplicateParentState="true" android:layout_width="wrap_content" android:layout_height="wrap_content" android:singleLine="true" android:layout_below="@id/abs__title" android:layout_alignParentLeft="true" />
-    </RelativeLayout>
-</com.actionbarsherlock.internal.view.menu.ListMenuItemView>
