@@ -9,13 +9,13 @@ import qark.lib.plyj.parser as plyj
 import common
 import report
 import filters
-from ..lib.plyj.model as m
+import qark.lib.plyj.model as m
 import re,sys
 import logging
 from report import ReportIssue
 from common import Severity, ReportIssue
 from createExploit import ExploitType
-from ..lib.pubsub import pub
+from qark.lib.pubsub import pub
 from common import terminalPrint
 
 parser = plyj.Parser()

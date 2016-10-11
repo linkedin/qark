@@ -1,4 +1,3 @@
-import pdb
 import sys
 import os
 sys.path.append(os.path.abspath('../modules'))
@@ -6,7 +5,6 @@ sys.path.append(os.path.abspath('../'))
 sys.path.append(os.path.abspath('../lib'))
 import common
 import mock
-
 
 def mocked_getConfig():
     return './fakeConfigFile'

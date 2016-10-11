@@ -25,7 +25,7 @@ from collections import defaultdict
 from multiprocessing import Process
 from threading import Thread, Lock
 import report
-from ..lib.pubsub import pub
+from qark.lib.pubsub import pub
 
 
 lock = Lock()

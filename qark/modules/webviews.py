@@ -20,7 +20,7 @@ from IssueType import IssueType, IssueSeverity
 from report import ReportIssue
 from common import Severity, ReportIssue
 from createExploit import ExploitType
-from ..lib.pubsub import pub
+from qark.lib.pubsub import pub
 
 common.logger = logging.getLogger()
 logger = logging.getLogger(__name__)
