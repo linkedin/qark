@@ -1,4 +1,3 @@
-import pdb
 '''Copyright 2015 LinkedIn Corp. Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
  You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -405,7 +404,6 @@ def nonAutomatedParseArgs():
     required_group.add_argument("-b", "--basesdk", dest="basesdk", help="specify the full path to the root directory of the android sdk")
 
     common.args = parser.parse_args()
-    pdb.set_trace()
     main()
 
 def runAutomated(pathToApk,pathToReport):
