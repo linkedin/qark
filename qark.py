@@ -58,7 +58,7 @@ from modules import adb
 from yapsy.PluginManager import PluginManager
 #from yapsy.PluginManager import PluginManager
 
-package_name=''
+common.qark_package_name=''
 pbar_file_permission_done = False
 lock = Lock()
 PROGRESS_BARS = ['X.509 Validation', 'Pending Intents', 'File Permissions (check 1)', 'File Permissions (check 2)', 'Webview checks', 'Broadcast issues', 'Crypto issues', 'Plugin issues' ]
@@ -115,9 +115,9 @@ def progress_bar_update(bar, percent):
 
     # if the supplied bar name is not in the list then we assume it is a user plugin
     if bar in PROGRESS_BARS:
-        pbars[bar].update(percent)
+        common.qark_main_pbars[bar].update(percent)
     else:
-        pbars["Plugin issues"][bar].update(percent)
+        common.qark_main_pbars["Plugin issues"][bar].update(percent)
 
     lock.release()
 
@@ -133,29 +133,29 @@ def show_exports(compList,compType):
                 for index,component in enumerate(compList):
                     print str(index)+": "+str(component)
                     try:
-                        adb.show_adb_commands(str(component),compType,package_name)
+                        adb.show_adb_commands(str(component),compType,common.qark_package_name)
                     except Exception as e:
                         common.logger.error("Problem running adb.show_adb_commands, for Activities, in qark.py: " + str(e))
                 '''elif compType=='alias':
                     print "==>EXPORTED ACTIVITY ALIASES: "
-                    adb.show_adb_commands(component[1],compType,package_name)'''
+                    adb.show_adb_commands(component[1],compType,common.qark_package_name)'''
             elif compType=='service':
                 print "==>EXPORTED SERVICES: "
                 for index,component in enumerate(compList):
                     print str(index)+": "+str(component)
                     try:
-                        adb.show_adb_commands(str(component),compType,package_name)
+                        adb.show_adb_commands(str(component),compType,common.qark_package_name)
                     except Exception as e:
                         common.logger.error("Problem running adb.show_adb_commands, for Services, in qark.py: " + str(e))
                         '''if compType=='provider':
                             print "==>EXPORTED PROVIDERS: "
-                            adb.show_adb_commands(component[1],compType,package_name)'''
+                            adb.show_adb_commands(component[1],compType,common.qark_package_name)'''
             elif compType=='receiver':
                 print "==>EXPORTED RECEIVERS: "
                 for index,component in enumerate(compList):
                     print str(index)+": "+str(component)
                     try:
-                        adb.show_adb_commands(str(component),compType,package_name)
+                        adb.show_adb_commands(str(component),compType,common.qark_package_name)
                     except Exception as e:
                         common.logger.error("Problem running adb.show_adb_commands, for Receivers, in qark.py: " + str(e))
 
@@ -357,9 +357,8 @@ def writeReportSection(results, category):
             if item.getLevel() == Severity.VULNERABILITY:
                 common.logger.log(common.VULNERABILITY_LEVEL,item.getData())
 
-    
 
-if __name__ == "__main__":
+def nonAutomatedParseArgs():
     ignore = os.system('clear')
     f = Figlet(font='colossal')
     print f.renderText('Q A R K')
@@ -395,16 +394,54 @@ if __name__ == "__main__":
     advanced_mutual.add_argument("-c", "--codepath", dest="codepath", help="Enter the full path to the root folder containing java source. Required only when --source==2")
 
     optional.add_argument("-e", "--exploit", dest="exploit", help="1 to generate a targeted exploit APK, 0 to skip")
+#     optional.add_argument("-n", "--no-progress-bar", dest="noprogressbar", help="dont display progress bar for compatibility reasons", default=False, action='store_true')
     optional.add_argument("-i", "--install", dest="install", help="1 to install exploit APK on the device, 0 to skip")
     optional.add_argument("-d", "--debug", dest="debuglevel", help="Debug Level. 10=Debug, 20=INFO, 30=Warning, 40=Error")
     optional.add_argument("-v", "--version", dest="version", help="Print version info", action='store_true')
     optional.add_argument("-r", "--reportdir", dest="reportdir", help="Specify full path for output report directory. Defaults to /report")
     required_group = required.add_mutually_exclusive_group()
     required_group.add_argument("-t", "--acceptterms", dest="acceptterms", help="Automatically accept terms and conditions when downloading Android SDK")
-    required_group.add_argument("-b", "--basesdk", dest="basesdk", help="Specify the full path to the root directory of the Android SDK")
-
+    required_group.add_argument("-b", "--basesdk", dest="basesdk", help="specify the full path to the root directory of the android sdk")
 
     common.args = parser.parse_args()
+    main()
+
+def runAutomated(pathToApk,pathToReport):
+    ignore = os.system('clear')
+    f = Figlet(font='colossal')
+    print f.renderText('Q A R K')
+
+
+    common.logger = logging.getLogger()
+    common.rootDir = os.path.dirname(os.path.realpath(__file__))
+
+    #Initialize system
+    #Verify that settings.properties always exists
+    if not os.path.exists(os.path.dirname(os.path.realpath(__file__)) + "/settings.properties"):
+        f = open(os.path.dirname(os.path.realpath(__file__)) + "/settings.properties",'w')
+        f.close()
+
+    #
+    common.writeKey("rootDir", common.rootDir)
+
+    common.initialize_logger()
+    common.args = argparse.Namespace() 
+    common.args.exploit = 0
+    common.args.install = 0
+    common.args.source = 1
+    common.args.reportDir = pathToReport
+    common.args.apkpath = pathToApk
+    common.args.debuglevel = None
+    common.args.acceptterms = None
+    common.args.autodetect = None
+    common.args.basesdk = None
+    common.args.codepath = None
+    common.args.manifest = None
+    common.args.version = False
+    common.interactive_mode = False
+    main()
+
+def main():
 
     if len(sys.argv) > 1:
         common.interactive_mode = False
@@ -598,6 +635,8 @@ if __name__ == "__main__":
         common.logger.info("You only had 2 options and you still messed up. Let me choose option 2 for you")
     #Only application and manifest elements are required: http://developer.android.com/guide/topics/manifest/manifest-intro.html
     try:
+#    	THIS SECTION IS THE ONE AFTER VIEWING MANIFEST BEFORE DECOMPILATION
+#		THIS CONTAINS THE CODE THAT FINDS ACTIVITIES THAT HAVEN'T BEEN PROTECTED BY ANY PERMISSIONS	
         determine_min_sdk()
 
         common.print_terminal_header("APP COMPONENT ATTACK SURFACE")
@@ -619,10 +658,10 @@ if __name__ == "__main__":
         act_priv_list, act_exp_list, act_exp_perm_list, act_prot_broad_list, report_data, results=common.check_export('activity',True)
 
         #Normalizing activity names for use in exploit APK, so all will be absolute
-        act_priv_list=common.normalizeActivityNames(act_priv_list,package_name)
-        act_exp_list=common.normalizeActivityNames(act_exp_list,package_name)
-        act_exp_perm_list=common.normalizeActivityNames(act_exp_perm_list,package_name)
-        act_prot_broad_list=common.normalizeActivityNames(act_prot_broad_list,package_name)
+        act_priv_list=common.normalizeActivityNames(act_priv_list,common.qark_package_name)
+        act_exp_list=common.normalizeActivityNames(act_exp_list,common.qark_package_name)
+        act_exp_perm_list=common.normalizeActivityNames(act_exp_perm_list,common.qark_package_name)
+        act_prot_broad_list=common.normalizeActivityNames(act_prot_broad_list,common.qark_package_name)
 
         report_badger("appcomponents", results)
         common.print_terminal(report_data)
@@ -733,21 +772,24 @@ if __name__ == "__main__":
         # all static writers included in every static analysis
         writers = [common.Writer((0, height-8)), common.Writer((0, height-6)), common.Writer((0, height-4)), 
                     common.Writer((0, height-2)), common.Writer((0, height-10)), common.Writer((0, height-12)), common.Writer((0, height-14))]
-        pbars = {}
+        common.qark_main_pbars = {}
+#         if common.args.noprogressbar:
+#         	print('Progress bars disabled. Running...')
    
-        # create dictionary for progress bars, pbars = { name: ProgressBar }
+        # create dictionary for progress bars, common.qark_main_pbars = { name: ProgressBar }
+#         else:
         for barNum in range(len(PROGRESS_BARS)-1):
-            pbars[PROGRESS_BARS[barNum]] = ProgressBar(widgets=[PROGRESS_BARS[barNum], Percentage(), Bar()], maxval=100, fd=writers[barNum]).start()
+            common.qark_main_pbars[PROGRESS_BARS[barNum]] = ProgressBar(widgets=[PROGRESS_BARS[barNum], Percentage(), Bar()], maxval=100, fd=writers[barNum]).start()
 
         # create writer and progress bar for each plugin
         placer = 0
         for plugin in manager.getAllPlugins():
             writer = common.Writer((0, height-(16+placer)))
             writers.append(writer)
-            if 'Plugin issues' not in pbars:
-                pbars['Plugin issues'] = {}
+            if 'Plugin issues' not in common.qark_main_pbars:
+                common.qark_main_pbars['Plugin issues'] = {}
 
-            pbars['Plugin issues'][plugin.plugin_object.getName()] = ProgressBar(widgets=[plugin.plugin_object.getName(), Percentage(), Bar()], maxval=100, fd=writer).start() 
+            common.qark_main_pbars['Plugin issues'][plugin.plugin_object.getName()] = ProgressBar(widgets=[plugin.plugin_object.getName(), Percentage(), Bar()], maxval=100, fd=writer).start() 
             placer += 2
 
         pub.subscribe(progress_bar_update, 'progress')
@@ -880,7 +922,7 @@ if __name__ == "__main__":
 
     for a in common.xmldoc.getElementsByTagName('manifest'):
         if 'package' in a.attributes.keys():
-            package_name=a.attributes['package'].value
+            common.qark_package_name=a.attributes['package'].value
 
 
     try:
@@ -954,7 +996,7 @@ if __name__ == "__main__":
                                 extras_list+=tmp_extra
                     common.dedup(extras_list)
                     if re.match(r'^\..*',str(i)):
-                        i=str(package_name)+str(i)
+                        i=str(common.qark_package_name)+str(i)
                     exploit.setExportedActivity(str(i))
                     for j in range(0,len(extras_list)):
                         extras_list[j] = str(extras_list[j]).replace('\"','')
@@ -1049,3 +1091,7 @@ if __name__ == "__main__":
 
     print "Goodbye!"
     raise SystemExit
+
+if __name__ == "__main__":
+	nonAutomatedParseArgs()
+	#runAutomated('/Users/dhaugh/Documents/mobilevulnkit_trunk/mobilevulnkit/qark/test/testData/goatdroid.apk',None)

@@ -5,3 +5,8 @@ android-sdk*
 settings.properties
 *.swp
 build
+run
+sampleApps/goatdroid
+lib/plyj/lextab.py
+test/.coverage
+.coverage
