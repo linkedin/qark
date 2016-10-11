@@ -1,0 +1,15 @@
+In order to test, you must have virtualenv installed for python 2.7. 
+
+Create a virtual environment in the qark root directory
+	virtualenv .
+
+Activate the virtualenv
+	. bin/activate
+
+Install mock and pytest in the virtualenv
+	pip install mock pytest
+
+go to the test directory and run pytest
+	cd test && py.test
+
+

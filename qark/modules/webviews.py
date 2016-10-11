@@ -9,7 +9,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 import zipfile
 import os
 from genericpath import isdir
-from modules import common
+import common
 from common import terminalPrint
 import subprocess
 import logging
