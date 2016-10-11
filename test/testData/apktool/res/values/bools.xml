@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <bool name="abs__action_bar_embed_tabs">false</bool>
-    <bool name="abs__split_action_bar_is_narrow">true</bool>
-    <bool name="abs__action_bar_expanded_action_views_exclusive">true</bool>
-    <bool name="abs__config_showMenuShortcutsWhenKeyboardPresent">false</bool>
-    <bool name="abs__config_actionMenuItemAllCaps">true</bool>
-    <bool name="abs__config_allowActionMenuItemTextWithIcon">false</bool>
-</resources>
