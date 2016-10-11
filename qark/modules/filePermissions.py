@@ -10,8 +10,8 @@ from IssueType import IssueType, IssueSeverity
 from report import ReportIssue
 from common import Severity, ReportIssue
 from createExploit import ExploitType
-from qark.lib.progressbar import *
-from qark.lib.pubsub import pub
+from lib.progressbar import *
+from lib.pubsub import pub
 from common import terminalPrint
 import logging
 

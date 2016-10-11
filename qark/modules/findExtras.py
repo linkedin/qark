@@ -14,7 +14,7 @@ import logging
 import shlex
 import re
 from lib.plyj import parser as plyj
-import qark.lib.plyj.model as m
+import lib.plyj.model as m
 import constantResolver
 from xml.dom import minidom
 

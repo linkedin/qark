@@ -20,10 +20,10 @@ import logging
 
 from IssueType import IssueType, IssueSeverity
 from collections import defaultdict
-from qark.lib import colorama
+from lib import colorama
 import glob
 import subprocess
-from qark.lib.blessed import *
+from lib.blessed import *
 
 
 VULNERABILITY_LEVEL = 60

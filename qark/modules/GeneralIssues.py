@@ -22,14 +22,14 @@ def verify_allow_backup(app):
     try:
         if 'android:allowBackup' in app[0].attributes.keys():
             if app[0].attributes['android:allowBackup'].value == 'true':
-                report.write_badger("manifest-issues", modules.common.Severity.WARNING, common.config.get('qarkhelper', 'WARN_BACK'))
+                report.write_badger("manifest-issues", common.Severity.WARNING, common.config.get('qarkhelper', 'WARN_BACK'))
 
                 logger.warn(common.config.get('qarkhelper', 'WARN_BACK'))
             else:
-                report.write_badger("manifest-issues", modules.common.Severity.INFO, common.config.get('qarkhelper', 'BACK_OK'))
+                report.write_badger("manifest-issues", common.Severity.INFO, common.config.get('qarkhelper', 'BACK_OK'))
                 logger.info(common.config.get('qarkhelper', 'BACK_OK'))
         else:
-            report.write_badger("manifest-issues", modules.common.Severity.INFO, common.config.get('qarkhelper', 'WARN_BACK_MISSING'))
+            report.write_badger("manifest-issues", common.Severity.INFO, common.config.get('qarkhelper', 'WARN_BACK_MISSING'))
             logger.warn(common.config.get('qarkhelper', 'WARN_BACK_MISSING'))
         return
     except Exception as e:
@@ -45,11 +45,11 @@ def verify_custom_permissions():
             if (node.attributes['android:protectionLevel'].value == 'signature' or node.attributes['android:protectionLevel'].value == 'signatureOrSystem'):
                 #TODO - Add API check to ignore this for unaffected versions
                 if common.minSdkVersion<21:
-                    report.write_badger("manifest-issues", modules.common.Severity.WARNING,  "Permission: " + node.attributes['android:name'].value + common.config.get('qarkhelper', 'PERM_SNATCH_SIG'))
+                    report.write_badger("manifest-issues", common.Severity.WARNING,  "Permission: " + node.attributes['android:name'].value + common.config.get('qarkhelper', 'PERM_SNATCH_SIG'))
                     logger.warn("Permission: " + node.attributes['android:name'].value + " " + common.config.get('qarkhelper', 'PERM_SNATCH_SIG') )
         else:
             #need to research if this represents some type of error condition
-            report.write_badger("manifest-issues", modules.common.Severity.INFO, common.config.get('qarkhelper', 'NO_PERM_PROT'))
+            report.write_badger("manifest-issues", common.Severity.INFO, common.config.get('qarkhelper', 'NO_PERM_PROT'))
             logger.debug(common.config.get('qarkhelper', 'NO_PERM_PROT'))
     return
 
@@ -59,7 +59,7 @@ def verify_debuggable(app):
     '''
     if 'android:debuggable' in app[0].attributes.keys():
         if app[0].attributes['android:debuggable'].value == 'true':
-            report.write_badger("manifest-issues", modules.common.Severity.VULNERABILITY,  "The android:debuggable flag is manually set to true in the AndroidManifest.xml. This will cause your application to be debuggable in production builds and can result in data leakage and other security issues. It is not necessary to set the android:debuggable flag in the manifest, it will be set appropriately automatically by the tools. More info: http://developer.android.com/guide/topics/manifest/application-element.html#debug")
+            report.write_badger("manifest-issues", common.Severity.VULNERABILITY,  "The android:debuggable flag is manually set to true in the AndroidManifest.xml. This will cause your application to be debuggable in production builds and can result in data leakage and other security issues. It is not necessary to set the android:debuggable flag in the manifest, it will be set appropriately automatically by the tools. More info: http://developer.android.com/guide/topics/manifest/application-element.html#debug")
             common.logger.log(common.VULNERABILITY_LEVEL, "The android:debuggable flag is manually set to true in the AndroidManifest.xml. This will cause your application to be debuggable in production builds and can result in data leakage and other security issues. It is not necessary to set the android:debuggable flag in the manifest, it will be set appropriately automatically by the tools. More info: http://developer.android.com/guide/topics/manifest/application-element.html#debug")
 
     return
