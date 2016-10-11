@@ -5,15 +5,15 @@ Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.'''
 
-from ..lib.plyj.parser as plyj
+import qark.lib.plyj.parser as plyj
 import common,report
-from ..lib.plyj.model as m
+import qark.lib.plyj.model as m
 import re
 import logging
 from report import ReportIssue
 from common import Severity, ReportIssue
 from createExploit import ExploitType
-from ..lib.pubsub import pub
+from qark.lib.pubsub import pub
 from common import terminalPrint
 import common
 

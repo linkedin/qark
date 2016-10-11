@@ -7,16 +7,16 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.'''
 
 import common
 import report
-from ..lib.plyj.parser as plyj
-from ..lib.plyj.model as m
+import qark.lib.plyj.parser as plyj
+import qark.lib.plyj.model as m
 import re,sys
 import logging
-from ..lib.progressbar import *
+from qark.lib.progressbar import *
 from multiprocessing import Process
 from report import ReportIssue
 from common import Severity, ReportIssue
 from createExploit import ExploitType
-from ..lib.pubsub import pub
+from qark.lib.pubsub import pub
 from common import terminalPrint
 
 parser = plyj.Parser()

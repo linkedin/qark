@@ -13,7 +13,7 @@ import ast
 import string
 import ConfigParser
 from xml.dom import minidom
-from ..lib.BeautifulSoup import BeautifulSoup
+from bs4 import BeautifulSoup
 from distutils.version import StrictVersion
 from unpackAPK import unpack, find_manifest_in_unpacked_apk
 import plistlib
