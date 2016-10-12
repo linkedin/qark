@@ -20,7 +20,11 @@ from collections import defaultdict
 from xml.dom import minidom
 from modules.IssueType import IssueType, IssueSeverity
 import traceback
-from modules import common,findExtras,webviews, report, unpackAPK
+from modules import common
+from modules import findExtras
+from modules import webviews
+from modules import report
+from modules import unpackAPK
 import lib.axmlparserpy.axmlprinter as axmlprinter
 from modules.DetermineMinSDK import determine_min_sdk
 from modules import sdkManager
