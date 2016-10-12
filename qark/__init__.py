@@ -1,4 +1,4 @@
 import modules 
 import lib
-import qark
+import qarkMain
 from qarkMain import runAutomated
