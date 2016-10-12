@@ -1,0 +1,11 @@
+Metadata-Version: 1.0
+Name: qark
+Version: 1.2.19
+Summary: Android static code analyzer
+Home-page: https://www.github.com/linkedin/qark
+Author: Tushar Dalvi & Tony Trummer
+Author-email: tushardalvi@gmail.com, tonytrummer@hotmail.com
+License: Apache 2.0
+Description: UNKNOWN
+Keywords: android security qark exploit
+Platform: UNKNOWN

@@ -1,4 +1,6 @@
 *.pyc
+*.png
+*.jpg
 logs
 report
 android-sdk*
@@ -10,3 +12,7 @@ sampleApps/goatdroid
 lib/plyj/lextab.py
 test/.coverage
 .coverage
+parsetab.py
+sampleApps
+lextab.py
+qark/test/testData/*
