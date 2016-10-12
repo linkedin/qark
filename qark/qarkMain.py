@@ -4,7 +4,7 @@
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.'''
-
+from __future__ import absolute_import
 import os
 import re
 import sys
@@ -18,34 +18,35 @@ import ast
 import string
 from collections import defaultdict
 from xml.dom import minidom
-from modules.IssueType import IssueType, IssueSeverity
+from qark.modules.IssueType import IssueSeverity
+from qark.modules.IssueType import IssueType
 import traceback
-from modules import common
-from modules import findExtras
-from modules import webviews
-from modules import report
-from modules import unpackAPK
+from qark.modules import common
+from qark.modules import findExtras
+from qark.modules import webviews
+from qark.modules import report
+from qark.modules import unpackAPK
 import lib.axmlparserpy.axmlprinter as axmlprinter
-from modules.DetermineMinSDK import determine_min_sdk
-from modules import sdkManager
-from modules import createSploit
-from modules import createExploit
-from modules import writeExploit
-from modules import intentTracer
-from modules import findMethods
-from modules import findPending
-from modules import findBroadcasts
-from modules import findTapJacking
-from modules import filePermissions
-from modules import exportedPreferenceActivity
-from modules import useCheckPermission
-from modules import cryptoFlaws
-from modules import certValidation
-from modules import GeneralIssues
-from modules import contentProvider
-from modules.contentProvider import *
-from modules import filters
-from modules.common import terminalPrint, Severity, ReportIssue
+from qark.modules.DetermineMinSDK import determine_min_sdk
+from qark.modules import sdkManager
+from qark.modules import createSploit
+from qark.modules import createExploit
+from qark.modules import writeExploit
+from qark.modules import intentTracer
+from qark.modules import findMethods
+from qark.modules import findPending
+from qark.modules import findBroadcasts
+from qark.modules import findTapJacking
+from qark.modules import filePermissions
+from qark.modules import exportedPreferenceActivity
+from qark.modules import useCheckPermission
+from qark.modules import cryptoFlaws
+from qark.modules import certValidation
+from qark.modules import GeneralIssues
+from qark.modules import contentProvider
+from qark.modules.contentProvider import *
+from qark.modules import filters
+from qark.modules.common import terminalPrint, Severity, ReportIssue
 import logging
 import time
 import shutil
@@ -53,12 +54,12 @@ from lib import argparse
 from lib.pyfiglet import Figlet
 from threading import Thread, Lock
 from Queue import Queue
-from modules.report import Severity, ReportIssue
-from modules.createExploit import ExploitType
+from qark.modules.report import Severity, ReportIssue
+from qark.modules.createExploit import ExploitType
 from lib.pubsub import pub
 import subprocess
 from lib.progressbar import ProgressBar, Percentage, Bar
-from modules import adb
+from qark.modules import adb
 from yapsy.PluginManager import PluginManager
 #from yapsy.PluginManager import PluginManager
 

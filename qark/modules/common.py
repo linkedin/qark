@@ -1,15 +1,14 @@
+from __future__ import absolute_import
 '''Copyright 2015 LinkedIn Corp. Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
  You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
  
 Unless required by applicable law or agreed to in writing, software 
 distributed under the License is distributed on an "AS IS" BASIS, 
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.'''
-from createExploit import ExploitType
 
 """
 Module for common functions and common variables that are then used elsewhere in the code
 """
-
 import os
 import re
 import sys
@@ -17,13 +16,14 @@ import ConfigParser
 from xml.dom import minidom
 import fileinput
 import logging
-
-from IssueType import IssueType, IssueSeverity
 from collections import defaultdict
-from lib import colorama
 import glob
 import subprocess
-from lib.blessed import *
+
+from qark.modules.IssueType import IssueType, IssueSeverity
+from qark.lib import colorama
+from qark.lib.blessed import *
+from qark.modules.createExploit import ExploitType
 
 
 VULNERABILITY_LEVEL = 60
