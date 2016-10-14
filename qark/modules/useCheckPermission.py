@@ -6,7 +6,7 @@ Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS, 
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.'''
 
-import common
+from qark.modules import common
 
 def use_check_permission():
 	common.logger.info("Sorry, we haven't completed the check for use_check_permission yet. Check for updates soon.")

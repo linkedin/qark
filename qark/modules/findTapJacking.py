@@ -7,11 +7,12 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.'''
 
 import os
-import common
+import re
 from xml.dom import minidom
+
 import lib.plyj.parser as plyj
 import lib.plyj.model as m
-import re
+from qark.modules import common
 
 tree=''
 currentFile=''

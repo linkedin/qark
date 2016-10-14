@@ -7,7 +7,6 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.'''
 
 
-import common
 import os, platform
 import urllib2
 import sys
@@ -18,6 +17,8 @@ import shlex
 import stat
 from subprocess import Popen, PIPE, STDOUT
 import re,shutil, tarfile
+
+from qark.modules import common
 
 common.logger = logging.getLogger()
 logger = logging.getLogger(__name__)

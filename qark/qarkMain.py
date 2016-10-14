@@ -1,32 +1,40 @@
+from __future__ import absolute_import
 '''Copyright 2015 LinkedIn Corp. Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
  You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.'''
-from __future__ import absolute_import
+
 import os
 import re
 import sys
+sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)) + '/lib')
 import stat
 import fnmatch
-sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)) + '/lib')
-
-from subprocess import Popen, PIPE, STDOUT
+import subprocess
 import urllib2
 import ast
 import string
+from subprocess import Popen, PIPE, STDOUT
 from collections import defaultdict
 from xml.dom import minidom
+import traceback
+import logging
+import time
+import shutil
+from threading import Thread, Lock
+from Queue import Queue
+# sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)) + '/lib')
+
 from qark.modules.IssueType import IssueSeverity
 from qark.modules.IssueType import IssueType
-import traceback
 from qark.modules import common
 from qark.modules import findExtras
 from qark.modules import webviews
 from qark.modules import report
 from qark.modules import unpackAPK
-import lib.axmlparserpy.axmlprinter as axmlprinter
+import qark.lib.axmlparserpy.axmlprinter as axmlprinter
 from qark.modules.DetermineMinSDK import determine_min_sdk
 from qark.modules import sdkManager
 from qark.modules import createSploit
@@ -46,21 +54,15 @@ from qark.modules import GeneralIssues
 from qark.modules import contentProvider
 from qark.modules.contentProvider import *
 from qark.modules import filters
-from qark.modules.common import terminalPrint, Severity, ReportIssue
-import logging
-import time
-import shutil
-from lib import argparse
-from lib.pyfiglet import Figlet
-from threading import Thread, Lock
-from Queue import Queue
 from qark.modules.report import Severity, ReportIssue
 from qark.modules.createExploit import ExploitType
-from lib.pubsub import pub
-import subprocess
-from lib.progressbar import ProgressBar, Percentage, Bar
+from qark.modules.common import terminalPrint, Severity, ReportIssue
 from qark.modules import adb
-from yapsy.PluginManager import PluginManager
+from qark.lib import argparse
+from qark.lib.pyfiglet import Figlet
+from qark.lib.pubsub import pub
+from qark.lib.progressbar import ProgressBar, Percentage, Bar
+from lib.yapsy.PluginManager import PluginManager
 #from yapsy.PluginManager import PluginManager
 
 common.qark_package_name=''

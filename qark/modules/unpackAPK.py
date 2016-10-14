@@ -9,7 +9,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.'''
 import zipfile
 import os
 from genericpath import isdir
-import common
 import subprocess
 import logging
 import shlex
@@ -17,16 +16,17 @@ import threading
 import re
 import shutil
 import time
-from lib.progressbar import *
-import time
-from lib import blessings
-from common import logger
 from subprocess import Popen, PIPE, STDOUT
 from collections import defaultdict
 from multiprocessing import Process
 from threading import Thread, Lock
-import report
-from lib.pubsub import pub
+
+from qark.lib.progressbar import *
+from qark.lib import blessings
+from qark.modules.common import logger
+from qark.modules import report
+from qark.modules import common
+from qark.lib.pubsub import pub
 
 
 lock = Lock()

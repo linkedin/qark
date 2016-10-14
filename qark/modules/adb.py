@@ -6,10 +6,11 @@ Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.'''
 
-import common
-import findExtras
-import report
 import re
+
+from qark.modules import common
+from qark.modules import findExtras
+from qark.modules import report
 
 def show_adb_commands(component,compType,packageName):
 	#Print ADB commands for exploitation

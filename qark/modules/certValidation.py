@@ -6,19 +6,20 @@ Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS, 
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.'''
 
-import common
-import report
-import lib.plyj.parser as plyj
-import lib.plyj.model as m
 import re,sys
 import logging
-from lib.progressbar import *
 from multiprocessing import Process
-from report import ReportIssue
-from common import Severity, ReportIssue
-from createExploit import ExploitType
-from lib.pubsub import pub
-from common import terminalPrint
+
+from qark.modules import common
+from qark.modules import report
+import qark.lib.plyj.parser as plyj
+import qark.lib.plyj.model as m
+from qark.lib.progressbar import *
+from qark.modules.report import ReportIssue
+from qark.modules.common import Severity, ReportIssue
+from qark.modules.createExploit import ExploitType
+from qark.lib.pubsub import pub
+from qark.modules.common import terminalPrint
 
 parser = plyj.Parser()
 tree=''

@@ -9,17 +9,18 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.'''
 """
 Module for common functions and common variables that are then used elsewhere in the code
 """
+import fileinput
 import os
 import re
 import sys
+import pprint
 import ConfigParser
-from xml.dom import minidom
-import fileinput
 import logging
 from collections import defaultdict
 import glob
 import subprocess
 
+from xml.dom import minidom
 from qark.modules.IssueType import IssueType, IssueSeverity
 from qark.lib import colorama
 from qark.lib.blessed import *

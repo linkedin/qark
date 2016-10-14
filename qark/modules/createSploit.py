@@ -8,10 +8,11 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.'''
 
 import shutil
 import errno
-import os
-import common
-from common import logger
 import fileinput
+import os
+
+from qark.modules import common
+from qark.modules.common import logger
 
 class exploitType:
     """

@@ -6,15 +6,17 @@ Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS, 
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.'''
 
-import report,common
-from IssueType import IssueType, IssueSeverity
-from report import ReportIssue
-from common import Severity, ReportIssue
-from createExploit import ExploitType
-from lib.progressbar import *
-from lib.pubsub import pub
-from common import terminalPrint
 import logging
+
+from qark.modules import report
+from qark.modules import common
+from qark.modules.IssueType import IssueType, IssueSeverity
+from qark.modules.report import ReportIssue
+from qark.modules.common import Severity, ReportIssue
+from qark.modules.createExploit import ExploitType
+from qark.lib.progressbar import *
+from qark.lib.pubsub import pub
+from qark.modules.common import terminalPrint
 
 def start(queue,height):
 	results = []

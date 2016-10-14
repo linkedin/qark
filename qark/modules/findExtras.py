@@ -9,15 +9,16 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.'''
 import zipfile
 import os
 from genericpath import isdir
-import common
 import subprocess
 import logging
 import shlex
 import re
-from lib.plyj import parser as plyj
-import lib.plyj.model as m
-import constantResolver
 from xml.dom import minidom
+
+from qark.lib.plyj import parser as plyj
+import qark.lib.plyj.model as m
+from qark.modules import constantResolver
+from qark.modules import common
 
 parser = plyj.Parser()
 tree=''
