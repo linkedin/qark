@@ -62,7 +62,7 @@ from qark.lib import argparse
 from qark.lib.pyfiglet import Figlet
 from qark.lib.pubsub import pub
 from qark.lib.progressbar import ProgressBar, Percentage, Bar
-from lib.yapsy.PluginManager import PluginManager
+from qark.lib.yapsy.PluginManager import PluginManager
 #from yapsy.PluginManager import PluginManager
 
 common.qark_package_name=''

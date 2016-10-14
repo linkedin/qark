@@ -9,8 +9,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.'''
 from xml.dom import minidom
 import re
 
-import lib.plyj.parser as plyj
-import lib.plyj.model as m
+import qark.lib.plyj.parser as plyj
+import qark.lib.plyj.model as m
 from qark.modules import common
 
 parser = plyj.Parser()
