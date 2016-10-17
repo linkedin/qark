@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 '''
 Copyright 2015 LinkedIn Corp. Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
  You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
@@ -9,18 +10,18 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 import zipfile
 import os
 from genericpath import isdir
-import common
-from common import terminalPrint
 import subprocess
 import logging
 import shlex
 import re
-import report
-from IssueType import IssueType, IssueSeverity
-from report import ReportIssue
-from common import Severity, ReportIssue
-from createExploit import ExploitType
-from lib.pubsub import pub
+from qark.modules import report
+from qark.modules.IssueType import IssueType, IssueSeverity
+from qark.modules.report import ReportIssue
+from qark.modules.common import Severity, ReportIssue
+from qark.modules.createExploit import ExploitType
+from qark.lib.pubsub import pub
+from qark.modules import common
+from qark.modules.common import terminalPrint
 
 common.logger = logging.getLogger()
 logger = logging.getLogger(__name__)

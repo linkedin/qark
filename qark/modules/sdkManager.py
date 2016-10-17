@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 '''Copyright 2015 LinkedIn Corp. Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
  You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
  
@@ -6,7 +7,6 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.'''
 
 
-import common
 import os, platform
 import urllib2
 import sys
@@ -17,6 +17,8 @@ import shlex
 import stat
 from subprocess import Popen, PIPE, STDOUT
 import re,shutil, tarfile
+
+from qark.modules import common
 
 common.logger = logging.getLogger()
 logger = logging.getLogger(__name__)

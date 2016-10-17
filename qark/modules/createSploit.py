@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 '''Copyright 2015 LinkedIn Corp. Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
  You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
  
@@ -7,10 +8,11 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.'''
 
 import shutil
 import errno
-import os
-import common
-from common import logger
 import fileinput
+import os
+
+from qark.modules import common
+from qark.modules.common import logger
 
 class exploitType:
     """

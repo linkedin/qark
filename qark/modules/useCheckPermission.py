@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 '''Copyright 2015 LinkedIn Corp. Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
  You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
  
@@ -5,7 +6,7 @@ Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS, 
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.'''
 
-import common
+from qark.modules import common
 
 def use_check_permission():
 	common.logger.info("Sorry, we haven't completed the check for use_check_permission yet. Check for updates soon.")

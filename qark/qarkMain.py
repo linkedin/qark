@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 '''Copyright 2015 LinkedIn Corp. Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
  You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -8,54 +9,60 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.'''
 import os
 import re
 import sys
+sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)) + '/lib')
 import stat
 import fnmatch
-sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)) + '/lib')
-
-from subprocess import Popen, PIPE, STDOUT
+import subprocess
 import urllib2
 import ast
 import string
+from subprocess import Popen, PIPE, STDOUT
 from collections import defaultdict
 from xml.dom import minidom
-from modules.IssueType import IssueType, IssueSeverity
 import traceback
-from modules import common,findExtras,webviews, report, unpackAPK
-import lib.axmlparserpy.axmlprinter as axmlprinter
-from modules.DetermineMinSDK import determine_min_sdk
-from modules import sdkManager
-from modules import createSploit
-from modules import createExploit
-from modules import writeExploit
-from modules import intentTracer
-from modules import findMethods
-from modules import findPending
-from modules import findBroadcasts
-from modules import findTapJacking
-from modules import filePermissions
-from modules import exportedPreferenceActivity
-from modules import useCheckPermission
-from modules import cryptoFlaws
-from modules import certValidation
-from modules import GeneralIssues
-from modules import contentProvider
-from modules.contentProvider import *
-from modules import filters
-from modules.common import terminalPrint, Severity, ReportIssue
 import logging
 import time
 import shutil
-from lib import argparse
-from lib.pyfiglet import Figlet
 from threading import Thread, Lock
 from Queue import Queue
-from modules.report import Severity, ReportIssue
-from modules.createExploit import ExploitType
-from lib.pubsub import pub
-import subprocess
-from lib.progressbar import ProgressBar, Percentage, Bar
-from modules import adb
-from yapsy.PluginManager import PluginManager
+# sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)) + '/lib')
+
+from qark.modules.IssueType import IssueSeverity
+from qark.modules.IssueType import IssueType
+from qark.modules import common
+from qark.modules import findExtras
+from qark.modules import webviews
+from qark.modules import report
+from qark.modules import unpackAPK
+from qark.lib.axmlparserpy import axmlprinter 
+from qark.modules.DetermineMinSDK import determine_min_sdk
+from qark.modules import sdkManager
+from qark.modules import createSploit
+from qark.modules import createExploit
+from qark.modules import writeExploit
+from qark.modules import intentTracer
+from qark.modules import findMethods
+from qark.modules import findPending
+from qark.modules import findBroadcasts
+from qark.modules import findTapJacking
+from qark.modules import filePermissions
+from qark.modules import exportedPreferenceActivity
+from qark.modules import useCheckPermission
+from qark.modules import cryptoFlaws
+from qark.modules import certValidation
+from qark.modules import GeneralIssues
+from qark.modules import contentProvider
+from qark.modules.contentProvider import *
+from qark.modules import filters
+from qark.modules.report import Severity, ReportIssue
+from qark.modules.createExploit import ExploitType
+from qark.modules.common import terminalPrint, Severity, ReportIssue
+from qark.modules import adb
+from qark.lib import argparse
+from qark.lib.pyfiglet import Figlet
+from qark.lib.pubsub import pub
+from qark.lib.progressbar import ProgressBar, Percentage, Bar
+from qark.lib.yapsy.PluginManager import PluginManager
 #from yapsy.PluginManager import PluginManager
 
 common.qark_package_name=''

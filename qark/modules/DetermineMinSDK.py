@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 '''Copyright 2015 LinkedIn Corp. Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
  You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -12,15 +13,17 @@ import urllib2
 import ast
 import string
 import ConfigParser
+import logging
+import plistlib
+
 from xml.dom import minidom
 from bs4 import BeautifulSoup
 from distutils.version import StrictVersion
-from unpackAPK import unpack, find_manifest_in_unpacked_apk
-import plistlib
-import common
+from qark.modules.unpackAPK import unpack
+from qark.modules.unpackAPK import find_manifest_in_unpacked_apk
+from qark.modules import common
 from urllib2 import HTTPError
 from httplib import HTTPException
-import logging
 
 common.logger = logging.getLogger()
 logger = logging.getLogger(__name__)

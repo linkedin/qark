@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 '''Copyright 2015 LinkedIn Corp. Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
  You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -8,7 +9,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.'''
 import zipfile
 import os
 from genericpath import isdir
-import common
 import subprocess
 import logging
 import shlex
@@ -16,16 +16,17 @@ import threading
 import re
 import shutil
 import time
-from lib.progressbar import *
-import time
-from lib import blessings
-from common import logger
 from subprocess import Popen, PIPE, STDOUT
 from collections import defaultdict
 from multiprocessing import Process
 from threading import Thread, Lock
-import report
-from lib.pubsub import pub
+
+from qark.lib.progressbar import *
+from qark.lib import blessings
+from qark.modules.common import logger
+from qark.modules import report
+from qark.modules import common
+from qark.lib.pubsub import pub
 
 
 lock = Lock()
