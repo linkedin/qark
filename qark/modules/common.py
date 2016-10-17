@@ -49,8 +49,8 @@ manifestName = "AndroidManifest.xml"
 apkPath = ""
 pathToManifest = ""
 config = ConfigParser.RawConfigParser()
-script_location=os.path.dirname(os.path.realpath(sys.argv[0]))
-script_location+='/modules/config.properties'
+script_location=os.path.dirname(__file__)
+script_location+='/config.properties'
 config.read(script_location)
 manifest = ""
 java_files = []

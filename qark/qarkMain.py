@@ -34,7 +34,7 @@ from qark.modules import findExtras
 from qark.modules import webviews
 from qark.modules import report
 from qark.modules import unpackAPK
-import qark.lib.axmlparserpy.axmlprinter as axmlprinter
+from qark.lib.axmlparserpy import axmlprinter 
 from qark.modules.DetermineMinSDK import determine_min_sdk
 from qark.modules import sdkManager
 from qark.modules import createSploit
