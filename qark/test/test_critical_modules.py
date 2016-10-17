@@ -54,7 +54,6 @@ def test_findPending():
     setup()
 
     output = Queue()
-    pdb.set_trace()
     findPending.start(output, 3) #2nd var doesn't do anything
     fpOut = output.get()
     fpTup = [x if type(x) is str else terminalPrintToTuple(x) if x.__class__.__name__ == 'terminalPrint' else reportIssueToTuple(x) for x in fpOut]
