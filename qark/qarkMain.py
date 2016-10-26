@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+import pdb
 '''Copyright 2015 LinkedIn Corp. Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
  You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -373,6 +374,7 @@ def nonAutomatedParseArgs():
 
     common.logger = logging.getLogger()
     common.rootDir = os.path.dirname(os.path.realpath(__file__))
+    common.runningAutomated = False
 
     #Initialize system
     #Verify that settings.properties always exists
@@ -413,14 +415,19 @@ def nonAutomatedParseArgs():
     common.args = parser.parse_args()
     main()
 
-def runAutomated(pathToApk,pathToReport):
+#exploitDir currently doesn't do anything
+def runAutomated(pathToApk, pathToReport, pathToLog, exploitDir):
     ignore = os.system('clear')
     f = Figlet(font='colossal')
     print f.renderText('Q A R K')
 
+    sys.stdout = open(pathToLog, 'w')
 
     common.logger = logging.getLogger()
+    common.runningAutomated = True
     common.rootDir = os.path.dirname(os.path.realpath(__file__))
+#     common.exploitLocation = exploitDir
+
 
     #Initialize system
     #Verify that settings.properties always exists
@@ -433,10 +440,10 @@ def runAutomated(pathToApk,pathToReport):
 
     common.initialize_logger()
     common.args = argparse.Namespace() 
-    common.args.exploit = 0
+    common.args.exploit = 1
     common.args.install = 0
     common.args.source = 1
-    common.args.reportDir = pathToReport
+    common.args.reportdir = pathToReport
     common.args.apkpath = pathToApk
     common.args.debuglevel = None
     common.args.acceptterms = None
@@ -501,7 +508,8 @@ def main():
     report.reset()
     common.set_environment_variables()
     #Copy the exploit code into a separate temp directory
-    if not os.path.exists(common.getConfig("rootDir") + "/build"):
+    buildFolder = common.getConfig("rootDir") + "/build"
+    if not os.path.exists(buildFolder):
         shutil.copytree(common.getConfig("rootDir") + "/exploitAPKs", common.getConfig("rootDir") + "/build")
 
     common.logger.info(common.config.get('qarkhelper', 'STARTUP'))
@@ -985,7 +993,7 @@ def main():
         type_list=['String','StringArray','StringArrayList','Boolean','BooleanArray','Int','Float','Long','LongArray','[]','','IntArray','IntegerArrayList','FloatArray','Double','Char','CharArray','CharSequence','CharSequenceArray','CharSequenceArrayList','Byte','ByteArray', 'Bundle','Short','ShortArray','Serializable','Parcelable','ParcelableArrayList','ParcelableArray','unknownType']
         shutil.rmtree(common.getConfig("rootDir") +'/build')
         if str(createSploit.copy_template(common.getConfig("rootDir") + '/exploitAPKs/qark/',common.getConfig("rootDir") + '/build/qark')) is not 'ERROR':
-            common.exploitLocation = common.getConfig("rootDir") + '/build/qark'
+            common.exploitLocation = common.getConfig("rootDir") + '/build/qark' if common.exploitLocation == '' else common.exploitLocation
             if len(prov_exp_list)>0:
                 common.logger.info("Sorry, we're still working on the providers")
             if len(act_exp_list)>0:
@@ -1067,11 +1075,12 @@ def main():
             if common.interactive_mode:
                 install=raw_input("Do you want to install this to your device? (y/n)").lower()
             else:
+#             	pdb.set_trace()
                 install_option = common.args.install
                 if install_option:
                     install = "y"
                 else:
-                    install_option = "n"
+                    install = "n"
             if install=='y':
                 apkList = list_all_apk()
                 for apk in apkList:
