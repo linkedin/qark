@@ -375,6 +375,7 @@ def nonAutomatedParseArgs():
     common.logger = logging.getLogger()
     common.rootDir = os.path.dirname(os.path.realpath(__file__))
     common.runningAutomated = False
+    common.exploitLocation = ''
 
     #Initialize system
     #Verify that settings.properties always exists
@@ -426,7 +427,7 @@ def runAutomated(pathToApk, pathToReport, pathToLog, exploitDir):
     common.logger = logging.getLogger()
     common.runningAutomated = True
     common.rootDir = os.path.dirname(os.path.realpath(__file__))
-#     common.exploitLocation = exploitDir
+    common.exploitLocation = exploitDir
 
 
     #Initialize system
@@ -991,9 +992,14 @@ def main():
         # Exploit all vulnerabilities
         print "Generating exploit payloads for all vulnerabilities"
         type_list=['String','StringArray','StringArrayList','Boolean','BooleanArray','Int','Float','Long','LongArray','[]','','IntArray','IntegerArrayList','FloatArray','Double','Char','CharArray','CharSequence','CharSequenceArray','CharSequenceArrayList','Byte','ByteArray', 'Bundle','Short','ShortArray','Serializable','Parcelable','ParcelableArrayList','ParcelableArray','unknownType']
-        shutil.rmtree(common.getConfig("rootDir") +'/build')
-        if str(createSploit.copy_template(common.getConfig("rootDir") + '/exploitAPKs/qark/',common.getConfig("rootDir") + '/build/qark')) is not 'ERROR':
-            common.exploitLocation = common.getConfig("rootDir") + '/build/qark' if common.exploitLocation == '' else common.exploitLocation
+        actual_root_dir = common.getConfig("rootDir") if common.exploitLocation == '' else common.exploitLocation
+        common.exploitLocation = actual_root_dir + '/build/qark'
+        try:
+            shutil.rmtree(actual_root_dir +'/build')
+        except: 
+            # this probs means that the dir didn't exsit
+            print('[DEBUG] the directory at {} doesn\'t exist'.format(actual_root_dir + '/build'))
+        if str(createSploit.copy_template(common.getConfig("rootDir") + '/exploitAPKs/qark/', actual_root_dir + '/build/qark')) is not 'ERROR':
             if len(prov_exp_list)>0:
                 common.logger.info("Sorry, we're still working on the providers")
             if len(act_exp_list)>0:
@@ -1088,12 +1094,12 @@ def main():
                         uninstall(str(apk).split("/")[-1].rstrip(".apk"))
                 common.logger.info("Installing...")
                 try:
-                    common.logger.info("The apk can be found in the "+common.getConfig("rootDir")+"/build/qark directory")
-                    subprocess.call("adb install " + common.getConfig("rootDir") + "/build/qark/app/build/outputs/apk/app-debug.apk",shell=True)
+                    common.logger.info("The apk can be found in the "+actual_root_dir+"/build/qark directory")
+                    subprocess.call("adb install " + actual_root_dir + "/build/qark/app/build/outputs/apk/app-debug.apk",shell=True)
                 except Exception as e:
                     common.logger.error("Problems installing exploit APK: " + str(e))
             else:
-                common.logger.info("The apk can be found in the "+common.getConfig("rootDir")+"/build/qark directory")
+                common.logger.info("The apk can be found in the "+actual_root_dir+"/build/qark directory")
     elif exploit_choice==2:
         if common.reportInitSuccess:
             print "An html report of the findings is located in : " + common.reportDir
