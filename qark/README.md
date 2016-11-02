@@ -33,7 +33,7 @@ The sampleApps folder contains sample APKs that you can test against QARK
 ##Requirements
 - python 2.7.6
 - JRE 1.6+ (preferably 1.7+)
-- OSX or Ubuntu Linux (Others may work, but not fully tested)
+- OSX or RHEL6.6 (Others may work, but not fully tested)
 
 ##Documentation
 
@@ -85,4 +85,4 @@ Copyright 2015 LinkedIn Corp. Licensed under the Apache License, Version 2.0 (th
 Unless required by applicable law or agreed to in writing, software  distributed under the License is distributed on an "AS IS" BASIS,  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 
 ##Recent Updates
-Qark has recently been refactored to be packagable and runnable from other processes via the runAutomated function in qarkMain.py
+Qark has recently been refactored. qark.py has been renamed to qarkMain.py and is now packagable and runnable from other processes via the runAutomated function in qarkMain.py
