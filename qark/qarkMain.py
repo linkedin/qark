@@ -1,5 +1,4 @@
 from __future__ import absolute_import
-import pdb
 '''Copyright 2015 LinkedIn Corp. Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
  You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -427,7 +426,7 @@ def runAutomated(pathToApk, pathToReport, pathToLog, exploitDir):
     common.logger = logging.getLogger()
     common.runningAutomated = True
     common.rootDir = os.path.dirname(os.path.realpath(__file__))
-    common.exploitLocation = exploitDir
+    common.buildLocation = exploitDir
 
 
     #Initialize system
@@ -992,8 +991,8 @@ def main():
         # Exploit all vulnerabilities
         print "Generating exploit payloads for all vulnerabilities"
         type_list=['String','StringArray','StringArrayList','Boolean','BooleanArray','Int','Float','Long','LongArray','[]','','IntArray','IntegerArrayList','FloatArray','Double','Char','CharArray','CharSequence','CharSequenceArray','CharSequenceArrayList','Byte','ByteArray', 'Bundle','Short','ShortArray','Serializable','Parcelable','ParcelableArrayList','ParcelableArray','unknownType']
-        actual_root_dir = common.getConfig("rootDir") if common.exploitLocation == '' else common.exploitLocation
-        common.exploitLocation = actual_root_dir + '/build/qark'
+        actual_root_dir = common.getConfig("rootDir") if common.buildLocation == '' else common.buildLocation  # actual_root_dir is exploit destination
+        common.exploitLocation = actual_root_dir + '/build/qark' 
         try:
             shutil.rmtree(actual_root_dir +'/build')
         except: 
@@ -1081,7 +1080,6 @@ def main():
             if common.interactive_mode:
                 install=raw_input("Do you want to install this to your device? (y/n)").lower()
             else:
-#             	pdb.set_trace()
                 install_option = common.args.install
                 if install_option:
                     install = "y"

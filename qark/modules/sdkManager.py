@@ -178,7 +178,7 @@ def build_apk(path):
     Builds the APK when path the the source is available
     """
     print "------------ Building Exploit APK ------------"
-    currentDir = common.getConfig("rootDir")
+    currentDir = common.getConfig("rootDir") if common.buildLocation == '' else common.buildLocation
     os.chdir(currentDir + "/build/" + path)
     properties = open('local.properties','w+')
     os.chdir(currentDir)
