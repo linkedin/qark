@@ -2,18 +2,29 @@
 
 **Q**uick **A**ndroid **R**eview **K**it - This tool is designed to look for several security related Android application vulnerabilities, either in source code or packaged APKs. The tool is also capable of creating "Proof-of-Concept" deployable APKs and/or ADB commands, capable of exploiting many of the vulnerabilities it finds. There is no need to root the test device, as this tool focuses on vulnerabilities that can be exploited under otherwise secure conditions.
 
+## Setup
+In order to get qark running, it must be present on your python path. 
+If not, it may lead to module not found errors.
+This can be done for your current shell by running the following:
+```
+export PYTHONPATH={qark root directory}:$PYTHONPATH
+```
+
+It can also be added permanently by adding the line to your .bashrc (.bash_profile if you're on OSX)
+
+
 ## Usage
 
 To run in interactive mode:
 ```
-$ python qark.py
+$ python qarkMain.py
 ```
 
 To run in headless mode:
 ```
-$ python qark.py --source 1 --pathtoapk /Users/foo/qark/sampleApps/goatdroid/goatdroid.apk --exploit 1 --install 1
+$ python qarkMain.py --source 1 --pathtoapk /Users/foo/qark/sampleApps/goatdroid/goatdroid.apk --exploit 1 --install 1
 or
-$ python qark.py --source 2 -c /Users/foo/qark/sampleApps/goatdroid/goatdroid --manifest /Users/foo/qark/sampleApps/goatdroid/goatdroid/AndroidManifest.xml --exploit 1 --install 1
+$ python qarkMain.py --source 2 -c /Users/foo/qark/sampleApps/goatdroid/goatdroid --manifest /Users/foo/qark/sampleApps/goatdroid/goatdroid/AndroidManifest.xml --exploit 1 --install 1
 ```
 
 The sampleApps folder contains sample APKs that you can test against QARK
@@ -22,7 +33,7 @@ The sampleApps folder contains sample APKs that you can test against QARK
 ##Requirements
 - python 2.7.6
 - JRE 1.6+ (preferably 1.7+)
-- OSX or Ubuntu Linux (Others may work, but not fully tested)
+- OSX or RHEL6.6 (Others may work, but not fully tested)
 
 ##Documentation
 
@@ -72,3 +83,6 @@ Copyright 2015 LinkedIn Corp.  All rights reserved.
 Copyright 2015 LinkedIn Corp. Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.  You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software  distributed under the License is distributed on an "AS IS" BASIS,  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+
+##Recent Updates
+Qark has recently been refactored. qark.py has been renamed to qarkMain.py and is now packagable and runnable from other processes via the runAutomated function in qarkMain.py
