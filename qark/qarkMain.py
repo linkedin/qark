@@ -415,8 +415,8 @@ def nonAutomatedParseArgs():
     common.args = parser.parse_args()
     main()
 
-#exploitDir currently doesn't do anything
-def runAutomated(pathToApk, pathToReport, pathToLog, exploitDir):
+#buildDir currently doesn't do anything
+def runAutomated(pathToApk, pathToReport, pathToLog, buildDir):
     ignore = os.system('clear')
     f = Figlet(font='colossal')
     print f.renderText('Q A R K')
@@ -426,7 +426,7 @@ def runAutomated(pathToApk, pathToReport, pathToLog, exploitDir):
     common.logger = logging.getLogger()
     common.runningAutomated = True
     common.rootDir = os.path.dirname(os.path.realpath(__file__))
-    common.buildLocation = exploitDir
+    common.buildLocation = buildDir
 
 
     #Initialize system
