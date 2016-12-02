@@ -23,7 +23,7 @@ import subprocess
 from xml.dom import minidom
 from qark.modules.IssueType import IssueType, IssueSeverity
 from qark.lib import colorama
-from qark.lib.blessed import *
+from qark.lib.blessed import Terminal
 from qark.modules.createExploit import ExploitType
 
 
@@ -61,6 +61,7 @@ rootDir = ""
 reportDir = ""
 interactive_mode = True
 source_or_apk = 1
+buildLocation = ""
 exploitLocation = ""
 apkPathChoice = 0
 apkList = []
