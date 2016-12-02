@@ -8,7 +8,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.'''
 
 import re
 
-from qark.modules import common
+from modules import common
 
 def find_content_providers():
     """

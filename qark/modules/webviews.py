@@ -14,14 +14,13 @@ import subprocess
 import logging
 import shlex
 import re
-from qark.modules import report
-from qark.modules.IssueType import IssueType, IssueSeverity
-from qark.modules.report import ReportIssue
-from qark.modules.common import Severity, ReportIssue
-from qark.modules.createExploit import ExploitType
-from qark.lib.pubsub import pub
-from qark.modules import common
-from qark.modules.common import terminalPrint
+from .IssueType import IssueType, IssueSeverity
+from .report import ReportIssue
+from .common import Severity, ReportIssue
+from .createExploit import ExploitType
+from lib.pubsub import pub
+from . import common
+from .common import terminalPrint
 
 common.logger = logging.getLogger()
 logger = logging.getLogger(__name__)

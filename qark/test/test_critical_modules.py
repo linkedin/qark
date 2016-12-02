@@ -5,17 +5,15 @@ import mock
 import pytest
 from Queue import Queue
 import ConfigParser
-sys.path.append(os.path.abspath('../modules'))
-sys.path.append(os.path.abspath('../'))
-sys.path.append(os.path.abspath('../lib'))
 
-from qark.modules import common
-from qark.modules import  filePermissions
-from qark.modules import  webviews
-from qark.modules import  cryptoFlaws
-from qark.modules import  certValidation
-from qark.modules import  findPending
-from qark.modules import  findBroadcasts
+from modules import common
+from modules import  filePermissions
+from modules import  webviews
+from modules import  cryptoFlaws
+from modules import  certValidation
+from modules import  findPending
+from modules import  findBroadcasts
+from modules import report
 
 
 def get_all_java_files():

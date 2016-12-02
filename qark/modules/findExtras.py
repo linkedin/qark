@@ -15,10 +15,10 @@ import shlex
 import re
 from xml.dom import minidom
 
-from qark.lib.plyj import parser as plyj
-import qark.lib.plyj.model as m
-from qark.modules import constantResolver
-from qark.modules import common
+from lib.plyj import parser as plyj
+import lib.plyj.model as m
+from modules import constantResolver
+from modules import common
 
 parser = plyj.Parser()
 tree=''

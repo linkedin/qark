@@ -10,16 +10,16 @@ import re,sys
 import logging
 from multiprocessing import Process
 
-from qark.modules import common
-from qark.modules import report
-import qark.lib.plyj.parser as plyj
-import qark.lib.plyj.model as m
-from qark.lib.progressbar import *
-from qark.modules.report import ReportIssue
-from qark.modules.common import Severity, ReportIssue
-from qark.modules.createExploit import ExploitType
-from qark.lib.pubsub import pub
-from qark.modules.common import terminalPrint
+from modules import common
+from modules import report
+import lib.plyj.parser as plyj
+import lib.plyj.model as m
+from lib.progressbar import *
+from modules.report import ReportIssue
+from modules.common import Severity, ReportIssue
+from modules.createExploit import ExploitType
+from lib.pubsub import pub
+from modules.common import terminalPrint
 
 parser = plyj.Parser()
 tree=''

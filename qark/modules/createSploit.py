@@ -11,8 +11,8 @@ import errno
 import fileinput
 import os
 
-from qark.modules import common
-from qark.modules.common import logger
+from modules import common
+from modules.common import logger
 
 class exploitType:
     """

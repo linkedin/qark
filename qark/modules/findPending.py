@@ -8,16 +8,16 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.'''
 
 import re,sys
 import logging
-import qark.lib.plyj.parser as plyj
-import qark.lib.plyj.model as m
-from qark.lib.progressbar import *
-from qark.lib.pubsub import pub
-from qark.modules.report import ReportIssue
-from qark.modules.common import Severity, ReportIssue
-from qark.modules.createExploit import ExploitType
-from qark.modules import common
-from qark.modules import report
-from qark.modules.common import terminalPrint
+import lib.plyj.parser as plyj
+import lib.plyj.model as m
+from lib.progressbar import *
+from lib.pubsub import pub
+from modules.report import ReportIssue
+from modules.common import Severity, ReportIssue
+from modules.createExploit import ExploitType
+from modules import common
+from modules import report
+from modules.common import terminalPrint
 
 common.logger = logging.getLogger()
 
