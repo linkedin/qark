@@ -19,9 +19,9 @@ import plistlib
 from xml.dom import minidom
 from bs4 import BeautifulSoup
 from distutils.version import StrictVersion
-from qark.modules.unpackAPK import unpack
-from qark.modules.unpackAPK import find_manifest_in_unpacked_apk
-from qark.modules import common
+from modules.unpackAPK import unpack
+from modules.unpackAPK import find_manifest_in_unpacked_apk
+from modules import common
 from urllib2 import HTTPError
 from httplib import HTTPException
 

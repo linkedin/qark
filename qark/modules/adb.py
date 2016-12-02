@@ -8,9 +8,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.'''
 
 import re
 
-from qark.modules import common
-from qark.modules import findExtras
-from qark.modules import report
+from modules import common
+from modules import findExtras
+from modules import report
 
 def show_adb_commands(component,compType,packageName):
 	#Print ADB commands for exploitation

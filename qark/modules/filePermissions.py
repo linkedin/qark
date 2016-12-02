@@ -8,15 +8,15 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.'''
 
 import logging
 
-from qark.modules import report
-from qark.modules import common
-from qark.modules.IssueType import IssueType, IssueSeverity
-from qark.modules.report import ReportIssue
-from qark.modules.common import Severity, ReportIssue
-from qark.modules.createExploit import ExploitType
-from qark.lib.progressbar import *
-from qark.lib.pubsub import pub
-from qark.modules.common import terminalPrint
+from modules import report
+from modules import common
+from modules.IssueType import IssueType, IssueSeverity
+from modules.report import ReportIssue
+from modules.common import Severity, ReportIssue
+from modules.createExploit import ExploitType
+from lib.progressbar import *
+from lib.pubsub import pub
+from modules.common import terminalPrint
 
 def start(queue,height):
 	results = []

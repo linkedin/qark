@@ -14,7 +14,7 @@ import logging
 import shlex
 import re
 
-import qark.modules.common
+import modules.common
 
 #find Intent Extras
 def find_extras(stub_file_name,path):

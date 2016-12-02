@@ -7,10 +7,10 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.'''
 import re
 
-import qark.lib.plyj.parser as plyj
-import qark.lib.plyj.model as m
-from qark.modules import common
-from qark.modules import findExtras
+import lib.plyj.parser as plyj
+import lib.plyj.model as m
+from modules import common
+from modules import findExtras
 
 parser = plyj.Parser()
 name=''

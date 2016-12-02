@@ -8,10 +8,10 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 '''
 import logging
 
-from qark.modules import common
-from qark.modules import IssueType
-from qark.modules import report
-from qark.modules.IssueType import IssueType, IssueSeverity
+from modules import common
+from modules import IssueType
+from modules import report
+from modules.IssueType import IssueType, IssueSeverity
 
 common.logger = logging.getLogger()
 logger = logging.getLogger(__name__)
