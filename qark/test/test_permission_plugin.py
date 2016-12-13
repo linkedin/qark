@@ -1,7 +1,7 @@
 from modules import common
 from plugins.permission_plugin import PermissionPlugin
 
-manifest_loc = './testData/plugins/app_manifest'
+manifest_loc = './fixtures/app_manifest'
 permissionPlugin = PermissionPlugin()
 
 
