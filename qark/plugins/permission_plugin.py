@@ -1,6 +1,7 @@
 import sys
 import os
 import re
+import qarkMain
 
 sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)) + '../lib')
 
@@ -18,9 +19,12 @@ class PermissionPlugin(IPlugin):
         perm_regex = r'<permission.*?>'
         # matches permissions with protection level set to "dangerous"
         dang_regex = r'android:protectionLevel=[\'\"]dangerous[\'\"]'
+        # find full path to app manifest
+        manifestPath = qarkMain.find_manifest_in_source()
 
         # finds all user created permissions
         perm_list = re.findall(perm_regex, common.manifest)
+
 
         # plugin scan results
         results = []
@@ -34,7 +38,7 @@ class PermissionPlugin(IPlugin):
             issue = ReportIssue()
             issue.setCategory(ExploitType.PLUGIN)
             issue.setSeverity(Severity.VULNERABILITY)
-            issue.setFile(common.pathToManifest)
+            issue.setFile(manifestPath)
 
             details = ""
             if re.search(dang_regex, item):
