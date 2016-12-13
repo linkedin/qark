@@ -13,39 +13,44 @@ from lib.pubsub import pub
 
 
 class PermissionPlugin(IPlugin):
+    # matches 0 or 1 (?) of any number of any character after "<permission"
+    permission_regex = r'<permission.*?>'
+    # matches permissions with protection level set to "dangerous"
+    dangerous_regex = r'android:protectionLevel=[\'\"]dangerous[\'\"]'
+
+    def getUserCreatedPermissions(self):
+        return re.findall(self.permission_regex, common.manifest)
+
+    def isDangerousPermission(self, permission):
+        # if re.search returns None, then permission is not dangerous
+        return re.search(self.dangerous_regex, permission) is not None
+
     def target(self, queue):
+        permissions = self.getUserCreatedPermissions()
 
-        # matches 0 or 1 (?) of any number of any character after "<permission"
-        perm_regex = r'<permission.*?>'
-        # matches permissions with protection level set to "dangerous"
-        dang_regex = r'android:protectionLevel=[\'\"]dangerous[\'\"]'
-        # find full path to app manifest
-        manifestPath = qarkMain.find_manifest_in_source()
-
-        # finds all user created permissions
-        perm_list = re.findall(perm_regex, common.manifest)
-
+        # full path to app manifest
+        manifest_path = qarkMain.find_manifest_in_source()
 
         # plugin scan results
         results = []
         count = 0
-        for item in perm_list:
+        for permission in permissions:
             count += 1
             # update progress bar
-            pub.sendMessage('progress', bar=self.getName(), percent=round(count * 100 / len(perm_list)))
+            pub.sendMessage('progress', bar=self.getName(), percent=round(count * 100 / len(permissions)))
 
             # put results in HTML report
             issue = ReportIssue()
             issue.setCategory(ExploitType.PLUGIN)
             issue.setSeverity(Severity.VULNERABILITY)
-            issue.setFile(manifestPath)
+            issue.setFile(manifest_path)
 
             details = ""
-            if re.search(dang_regex, item):
+            if self.isDangerousPermission(permission):
                 # found permission with protection level set to "dangerous"
-                details += "User created permission with DANGEROUS protection level: %s" % item
+                details += "User created permission with DANGEROUS protection level: %s" % permission
             else:
-                details += "User created permission: %s" % item
+                details += "User created permission: %s" % permission
 
             issue.setDetails(details)
             results.append(issue)
