@@ -3,5 +3,10 @@ python:
   - "2.7"
 install:
   - pip install -r requirements.txt
+before_script:
+  - pwd
+  - cd ./qark/test
+  - export PYTHONPATH=../:$PYTHONPATH
+
 script:
-  - (cd ./qark/qark/test && export PYTHONPATH=../:$PYTHONPATH && python -m pytest ./qark/test)
+  - python -m pytest
