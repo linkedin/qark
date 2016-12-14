@@ -1,0 +1,9 @@
+[Core]
+Name = User Created Permission Checker
+Module = permission_plugin
+
+[Documentation]
+Author = Thomas Zhang
+Version = 0.1
+Website = https://github.com/linkedin/qark/
+Description = Checks for user created permissions
