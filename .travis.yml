@@ -3,7 +3,7 @@ python:
   - "2.7"
 install:
   - pip install -r requirements.txt
-  - pip install python-coveralls
+  - pip install pytest-cov python-coveralls
 before_script:
   - cd ./qark/test
   - export PYTHONPATH=../:$PYTHONPATH
