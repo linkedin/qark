@@ -13,7 +13,7 @@ def mocked_getConfig():
 def test_set_environment_variables(mocked):
     common.rootDir = './'
     with mock.patch.dict('os.environ'):
-        del os.environ['ANDROID_HOME']
+        os.environ.pop('ANDROID_HOME', None)
         assert 'ANDROID_HOME' not in os.environ
         common.set_environment_variables()
         assert 'ANDROID_HOME' in os.environ
