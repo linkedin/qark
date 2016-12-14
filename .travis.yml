@@ -3,8 +3,11 @@ python:
   - "2.7"
 install:
   - pip install -r requirements.txt
+  - pip install python-coveralls
 before_script:
   - cd ./qark/test
   - export PYTHONPATH=../:$PYTHONPATH
 script:
-  - python -m pytest
+  - py.test --cov modules --cov-report term-missing
+after_success:
+  - coveralls
