@@ -4,4 +4,4 @@ python:
 install:
   - pip install -r requirements.txt
 script:
-  - (cd ./qark/test && export PYTHONPATH=../:$PYTHONPATH && python -m pytest ./qark/test)
+  - (cd ./qark/qark/test && export PYTHONPATH=../:$PYTHONPATH && python -m pytest ./qark/test)
