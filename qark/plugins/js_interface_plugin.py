@@ -15,8 +15,8 @@ class JsInterfacePlugin(IPlugin):
     webViewRegex = r'android.webkit.WebView'
 
     # regexes to get WebView names
-    argRegex = r'(android\.webkit\.)?WebView\s(.*?)[,)]'
-    declRegex = r'(android\.webkit\.)?WebView\s(.*?)[;|\s]=?'
+    argRegex = r'(android\.webkit\.)?WebView\s(\w*?)[,)]'
+    declRegex = r'(android\.webkit\.)?WebView\s(\w*?)[;|\s]=?'
 
     # regexes to match addJavascriptInterface() calls
     inlineRegex = r'new\s(android\.webkit\.)?WebView\(.*?\)\.addJavascriptInterface\(.*?\)'
@@ -48,11 +48,11 @@ class JsInterfacePlugin(IPlugin):
         regex = r'%s\.addJavascriptInterface\(.*?\)' % webViewVarName
         return re.search(regex, fileBody) is not None
 
-    def createIssueDetails(self, fileName, matchStr):
-        return 'addJavascriptInterface() called on instance of WebView in file: %s\n%s\n' \
+    def createIssueDetails(self, fileName):
+        return 'addJavascriptInterface() called on instance of WebView in file: %s\n' \
                'This allows Javascript to invoke operations that are normally reserved for Android applications.' \
                'Expose addJavascriptInterface() only to web pages from which all input is trustworthy.' \
-               % (fileName, matchStr)
+               % fileName
 
     def target(self, queue):
         # get all decompiled files that contains usages of WebView
@@ -66,19 +66,18 @@ class JsInterfacePlugin(IPlugin):
 
             # get decompiled file body
             fileName = f[1]
-            matchStr = f[0]
             with open(fileName, 'r') as fi:
                 fileBody = fi.read()
 
             if self.containsInlineJavascriptInterfaceCall(fileBody):
-                PluginUtil.reportIssue(fileName, self.createIssueDetails(fileName, matchStr), results)
+                PluginUtil.reportIssue(fileName, self.createIssueDetails(fileName), results)
                 break
 
             # get all possible WebView variable names and see if addJavascriptInterface() is invoked on any of them
             webViewVarNames = self.getWebViewArgNames(fileBody) + self.getWebViewDeclarationNames(fileBody)
             for webViewVarName in webViewVarNames:
                 if self.containsJavascriptInterfaceCall(fileBody, webViewVarName):
-                    PluginUtil.reportIssue(fileName, self.createIssueDetails(fileName, matchStr), results)
+                    PluginUtil.reportIssue(fileName, self.createIssueDetails(fileName), results)
                     break
 
         queue.put(results)
