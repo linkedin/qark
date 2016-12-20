@@ -24,7 +24,7 @@ class PhoneIdentifierPlugin(IPlugin):
         # get all decompiled files that contains usages of TelephonyManager
         files = common.text_scan(common.java_files, self.telephonyManagerRegex)
 
-        results = []
+        res = []
         count = 0
         for f in files:
             count += 1
@@ -37,20 +37,20 @@ class PhoneIdentifierPlugin(IPlugin):
 
             # report if file contains inline call
             if PluginUtil.contains(self.inlineRegex, fileBody):
-                PluginUtil.reportIssue(fileName, self.createIssueDetails(fileName), results)
+                PluginUtil.reportIssue(fileName, self.createIssueDetails(fileName), res)
                 break
 
             # report if any TelephonyManager variables invokes calls to get phone identifiers
             for varName in PluginUtil.returnGroupMatches(self.varNameRegex, 2, fileBody):
                 if PluginUtil.contains(r'%s\.(getLine1Number|getDeviceId)\(.*?\)' % varName, fileBody):
-                    PluginUtil.reportIssue(fileName, self.createIssueDetails(fileName), results)
+                    PluginUtil.reportIssue(fileName, self.createIssueDetails(fileName), res)
                     break
 
-        queue.put(results)
+        queue.put(res)
 
     def createIssueDetails(self, fileName):
-        return 'Access of phone identifiers, such as phone number or IMEI, is detected in file: %s\n' \
-               'Avoid storing or transmitting this data directly.' \
+        return 'Access of phone identifiers, such as phone number or IMEI, is detected in file: %s.\n' \
+               'Avoid storing or transmitting this data.' \
                % fileName
 
     def getName(self):
