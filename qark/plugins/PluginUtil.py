@@ -1,18 +1,33 @@
+import re
+
 from modules.common import ReportIssue, Severity, terminalPrint
 from modules.createExploit import ExploitType
 
 
-def reportIssue(fileName, details, results):
+# returns all matches of the given regex in the given group number in the supplied file
+def returnGroupMatches(regex, groupNum, fileBody):
+    res = []
+    for match in re.finditer(regex, fileBody):
+        res.append(match.group(groupNum))
+    return res
+
+
+# returns True if given file contains a regex match, False otherwise
+def contains(regex, fileBody):
+    return re.search(regex, fileBody) is not None
+
+
+def reportIssue(fileName, details, res):
     # put results in HTML report
     issue = ReportIssue()
     issue.setCategory(ExploitType.PLUGIN)
     issue.setSeverity(Severity.VULNERABILITY)
     issue.setFile(fileName)
     issue.setDetails(details)
-    results.append(issue)
+    res.append(issue)
 
     # put results in terminal output
     issue = terminalPrint()
     issue.setLevel(Severity.VULNERABILITY)
     issue.setData(details)
-    results.append(issue)
+    res.append(issue)
