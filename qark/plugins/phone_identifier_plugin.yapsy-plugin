@@ -6,4 +6,4 @@ Module = phone_identifier_plugin
 Author = Thomas Zhang
 Version = 0.1
 Website = https://github.com/linkedin/qark/
-Description = Checks for accesses to phone identifiers
+Description = Checks for accesses to phone number or IMEI

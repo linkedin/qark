@@ -1,60 +1,64 @@
+from plugins import PluginUtil
 from plugins.js_interface_plugin import JsInterfacePlugin
 
-manifest_loc = './fixtures/decompiledFile'
-jsInterfacePlugin = JsInterfacePlugin()
+plugin = JsInterfacePlugin()
 
 
-def testGetWebViewArgNames():
-    fileBody = 'void test(WebView webView) {}\n ' \
-               'void test2(WebView w, Class a) {}\n ' \
-               'void test3(android.webkit.WebView w2)'
-    names = jsInterfacePlugin.getWebViewArgNames(fileBody)
-    assert len(names) == 3
-    assert names[0] == 'webView'
-    assert names[1] == 'w'
-    assert names[2] == 'w2'
+def testWebViewRegex():
+    assert PluginUtil.contains(plugin.webViewRegex, 'import android.webkit.WebView') is True
 
 
-def testGetWebViewDeclNames():
-    fileBody = 'String a = ""; WebView w; android.webkit.WebView w2; WebView w3 = new WebView();'
-    names = jsInterfacePlugin.getWebViewDeclarationNames(fileBody)
-    assert len(names) == 3
-    assert names[0] == 'w'
-    assert names[1] == 'w2'
-    assert names[2] == 'w3'
+def testInlineWithPackageName():
+    text = 'new android.webkit.WebView().addJavascriptInterface();'
+    assert PluginUtil.contains(plugin.inlineRegex, text) is True
 
 
-def testContainsInlineJavascriptInterfaceCall():
-    fileBody1 = 'new WebView(c).addJavascriptInterface(d)'
-    fileBody2 = 'new android.webkit.WebView(c).addJavascriptInterface(d)'
-    assert jsInterfacePlugin.containsInlineJavascriptInterfaceCall(fileBody1) is True
-    assert jsInterfacePlugin.containsInlineJavascriptInterfaceCall(fileBody2) is True
+def testInlineWithoutPackageName():
+    text = 'new WebView().addJavascriptInterface();'
+    assert PluginUtil.contains(plugin.inlineRegex, text) is True
 
 
-def testDoesNotContainInlineJavascriptInterfaceCall():
-    fileBody1 = 'new WebView(c).method(d)'
-    fileBody2 = 'new android.webkit.WebView(c).method(d)'
-    assert jsInterfacePlugin.containsInlineJavascriptInterfaceCall(fileBody1) is False
-    assert jsInterfacePlugin.containsInlineJavascriptInterfaceCall(fileBody2) is False
+def testGetVarNameWithPackageName():
+    text = 'android.webkit.WebView webView;'
+    res = PluginUtil.returnGroupMatches(plugin.varNameRegex, 2, text)
+    assert len(res) == 1
+    assert res[0] == 'webView'
 
 
-def testContainsJavascriptInterfaceCall():
-    fileBody = 'webView.addJavascriptInterface(d)'
-    assert jsInterfacePlugin.containsJavascriptInterfaceCall(fileBody, 'webView') is True
+def testGetVarNameWithoutPackageName():
+    text = 'WebView webView;'
+    res = PluginUtil.returnGroupMatches(plugin.varNameRegex, 2, text)
+    assert len(res) == 1
+    assert res[0] == 'webView'
 
 
-def testDoesNotContainWebViewNameInJavascriptInterfaceCall():
-    fileBody = 'WebView localWebView = new WebView(paramContext);\n' \
-               'localWebView.addJavascriptInterface(new JsObject(null), "name");\n' \
-               'System.out.println(localWebView.getOriginalUrl());'
-    b = jsInterfacePlugin.containsJavascriptInterfaceCall(fileBody, 'local')
-    assert b is False
+def testGetVarNameMiddleArgument():
+    text = 'void func(int i, WebView webView, int j)'
+    res = PluginUtil.returnGroupMatches(plugin.varNameRegex, 2, text)
+    assert len(res) == 1
+    assert res[0] == 'webView'
+
+
+def testGetVarNameLastArgument():
+    text = 'void func(int i, WebView webView)'
+    res = PluginUtil.returnGroupMatches(plugin.varNameRegex, 2, text)
+    assert len(res) == 1
+    assert res[0] == 'webView'
+
+
+def testGetVarNameInstantiation():
+    text = 'WebView webView = new WebView(context);'
+    res = PluginUtil.returnGroupMatches(plugin.varNameRegex, 2, text)
+    assert len(res) == 1
+    assert res[0] == 'webView'
 
 
 if __name__ == '__main__':
-    testGetWebViewArgNames()
-    testGetWebViewDeclNames()
-    testContainsInlineJavascriptInterfaceCall()
-    testDoesNotContainInlineJavascriptInterfaceCall()
-    testContainsJavascriptInterfaceCall()
-    testDoesNotContainWebViewNameInJavascriptInterfaceCall()
+    testWebViewRegex()
+    testInlineWithPackageName()
+    testInlineWithoutPackageName()
+    testGetVarNameWithPackageName()
+    testGetVarNameWithoutPackageName()
+    testGetVarNameMiddleArgument()
+    testGetVarNameLastArgument()
+    testGetVarNameInstantiation()

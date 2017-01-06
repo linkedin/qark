@@ -18,11 +18,6 @@ def testInlineWithoutPackageName():
     assert PluginUtil.contains(plugin.inlineRegex, text) is True
 
 
-def testInlineGetPhoneNo():
-    text = '((android.telephony.TelephonyManager)paramContext.getSystemService("phone")).getLine1Number();'
-    assert PluginUtil.contains(plugin.inlineRegex, text) is True
-
-
 def testInlineGetDeviceId():
     text = '((android.telephony.TelephonyManager)paramContext.getSystemService("phone")).getDeviceId();'
     assert PluginUtil.contains(plugin.inlineRegex, text) is True
@@ -67,7 +62,6 @@ if __name__ == '__main__':
     testTelephonyManagerRegex()
     testInlineWithPackageName()
     testInlineWithoutPackageName()
-    testInlineGetPhoneNo()
     testInlineGetDeviceId()
     testGetVarNameWithPackageName()
     testGetVarNameWithoutPackageName()

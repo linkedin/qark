@@ -21,7 +21,7 @@ class PhoneIdentifierPlugin(IPlugin):
                   r'(getLine1Number|getDeviceId)'
 
     def target(self, queue):
-        # get all decompiled files that contains usages of TelephonyManager
+        # get all decompiled files that contains usage of TelephonyManager
         files = common.text_scan(common.java_files, self.telephonyManagerRegex)
 
         res = []
@@ -49,7 +49,7 @@ class PhoneIdentifierPlugin(IPlugin):
         queue.put(res)
 
     def createIssueDetails(self, fileName):
-        return 'Access of phone identifiers, such as phone number or IMEI, is detected in file: %s.\n' \
+        return 'Access of phone number or IMEI, is detected in file: %s.\n' \
                'Avoid storing or transmitting this data.' \
                % fileName
 
