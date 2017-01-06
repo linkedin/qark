@@ -1,0 +1,9 @@
+[Core]
+Name = Javascript Interface Checker
+Module = js_interface_plugin
+
+[Documentation]
+Author = Thomas Zhang
+Version = 0.1
+Website = https://github.com/linkedin/qark/
+Description = Checks for exposed Javascript interfaces in WebViews
