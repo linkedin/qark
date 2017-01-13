@@ -156,19 +156,30 @@ def decompile(path):
 	thread2.join(0)
 	thread3.join(0)
 
+	print('[DEBUG] C {}'.format(common.runningAutomated))
 	if not common.runningAutomated:
+		print('[DEBUG] G')
 		with common.term.cbreak():
+			print('[DEBUG] F')
 			val = None
 			while val not in (u'c', u'C'):
 				with common.term.location(0,common.term.height-3):
 					print "Decompilation may hang/take too long (usually happens when the source is obfuscated)."
 					print "At any time," + common.term.bold_underline_red_on_white('Press C to continue') + " and QARK will attempt to run SCA on whatever was decompiled."
 					val = common.term.inkey(timeout=1)
-	while True:
-		if not (thread1.is_alive() or thread2.is_alive() or thread3.is_alive()):
-			break
+					if not (thread1.is_alive() or thread2.is_alive() or thread3.is_alive()):
+						print('[DEBUG] E')
+						break
+	else:
+		print('[DEBUG] D')
+		while True:
+			if not (thread1.is_alive() or thread2.is_alive() or thread3.is_alive()):
+				print('[DEBUG] E')
+				break
+		print('[DEBUG] A')
 
 	if thread1.is_alive():
+		print('[DEBUG] B')
 		thread1.terminate()
 	if thread2.is_alive():
 		thread2.terminate()
@@ -210,6 +221,8 @@ def decompile(path):
 		logger.debug("Deleted " + dirname+"2")
 	except Exception as e:
 		logger.debug("Unable to delete redundant decompiled files (no impact on scan results): " + str(e))
+	
+	print('[DEBUG] H')
 
 
 def decompiler_update(cfr=None,jdcore=None,procyon=None):
