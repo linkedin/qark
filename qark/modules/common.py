@@ -21,10 +21,10 @@ import glob
 import subprocess
 
 from xml.dom import minidom
-from qark.modules.IssueType import IssueType, IssueSeverity
-from qark.lib import colorama
-from qark.lib.blessed import Terminal
-from qark.modules.createExploit import ExploitType
+from modules.IssueType import IssueType, IssueSeverity
+from lib import colorama
+from lib.blessed import *
+from modules.createExploit import ExploitType
 
 
 VULNERABILITY_LEVEL = 60

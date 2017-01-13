@@ -12,10 +12,10 @@ import re
 import logging
 import shutil
 
-from qark.modules.common import Severity, ReportIssue
+from modules.common import Severity, ReportIssue
 from bs4 import BeautifulSoup
-from qark.modules import common
-import qark.modules.webviews
+from modules import common
+import modules.webviews
 
 common.logger = logging.getLogger()
 logger = logging.getLogger(__name__)

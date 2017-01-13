@@ -18,7 +18,7 @@ import stat
 from subprocess import Popen, PIPE, STDOUT
 import re,shutil, tarfile
 
-from qark.modules import common
+from modules import common
 
 common.logger = logging.getLogger()
 logger = logging.getLogger(__name__)

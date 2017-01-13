@@ -8,10 +8,10 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.'''
 
 import re,os
 
-import qark.lib.plyj.model as m
-import qark.lib.plyj.parser as plyj
-from qark.modules import common
-from qark.modules import report
+import lib.plyj.model as m
+import lib.plyj.parser as plyj
+from modules import common
+from modules import report
 
 parser = plyj.Parser()
 

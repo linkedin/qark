@@ -9,18 +9,18 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.'''
 import re, sys
 import logging
 
-import qark.lib.plyj.model as m
-import qark.lib.plyj.parser as plyj
-from qark.modules import common
-from qark.modules import filters
-from qark.modules import findBoundServices
-from qark.modules import findExtras
-from qark.modules import externalMethodDeclarations
-from qark.modules import localMethodDeclarations
-from qark.modules.common import ReportIssue, Severity
-from qark.modules.createExploit import ExploitType
-from qark.modules import report
-from qark.modules import findSupers
+import lib.plyj.model as m
+import lib.plyj.parser as plyj
+from modules import common
+from modules import filters
+from modules import findBoundServices
+from modules import findExtras
+from modules import externalMethodDeclarations
+from modules import localMethodDeclarations
+from modules.common import ReportIssue, Severity
+from modules.createExploit import ExploitType
+from modules import report
+from modules import findSupers
 
 parser = plyj.Parser()
 tracker = []

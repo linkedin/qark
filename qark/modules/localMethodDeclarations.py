@@ -9,9 +9,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.'''
 
 import logging
 
-import qark.lib.plyj.parser as plyj
-import qark.lib.plyj.model as m
-from qark.modules import common
+import lib.plyj.parser as plyj
+import lib.plyj.model as m
+from modules import common
 
 parser = plyj.Parser()
 #Until we can match types, we can only match name and param count

@@ -3,7 +3,7 @@
 import ply.lex as lex
 import ply.yacc as yacc
 from .model import *
-from qark.modules import common
+from modules import common
 
 class MyLexer(object):
 
