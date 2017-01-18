@@ -26,6 +26,7 @@ The sampleApps folder contains sample APKs that you can test against QARK
 - python 2.7.6
 - JRE 1.6+ (preferably 1.7+)
 - OSX or RHEL6.6 (Others may work, but not fully tested)
+- On ubuntu, lib32z1 lib32ncurses5 lib32stdc++6 (can be installed with apt-get)
 
 ##Documentation
 
