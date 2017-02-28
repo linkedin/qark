@@ -29,6 +29,7 @@ The sampleApps folder contains sample APKs that you can test against QARK
 - For debian/ubuntu/mint distros, install lib32z1, lib32ncurses5 and lib32stdc++6 packages using apt-get
 	These can be installed by running ```sudo apt-get install lib32z1 lib32ncurses5 lib32stdc++6```
 - You will also need some python packages that can be installed by running ```pip install -r requirements.txt```
+
 ##Documentation
 
 QARK is an easy to use tool capable of finding common security vulnerabilities in Android applications. Unlike commercial products, it is 100% free to use. QARK features educational information allowing security reviewers to locate precise, in-depth explanations of the vulnerabilities. QARK automates the use of multiple decompilers, leveraging their combined outputs, to produce superior results, when decompiling APKs. Finally, the major advantage QARK has over traditional tools, that just point you to possible vulnerabilities, is that it can produce ADB commands, or even fully functional APKs, that turn hypothetical vulnerabilities into working "POC" exploits.
