@@ -1,5 +1,0 @@
-#!/bin/env python
-import qark
-
-qark.runAutomated('/home/dhaugh/qark/qark/test/testData/goatdroid.apk', '/home/dhaugh/qark/qark/testAutomated', '/home/dhaugh/qark/qark/testAutomated/log.txt', '/home/dhaugh/qark/qark/testAutomated') 
-
