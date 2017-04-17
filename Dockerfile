@@ -24,6 +24,7 @@ RUN pip install -r requirements.txt
 RUN mkdir /apk
 VOLUME /apk
 
-# By default QARK can start to analyze apks on the mounted volume. The subject to discuss.
+# By default QARK can start to analyze apks on the mounted volume.
+# Report will be on the same folder.
 WORKDIR /qark/qark
-# CMD python qarkMain.py --source 1 --pathtoapk /apk/*.apk --exploit 0 --basepath /qark/android-sdk-linux -r /apk/
+# CMD python qarkMain.py --source 1 --pathtoapk /apk/*.apk --exploit 0 --basepath /qark/android-sdk-linux --reportdir /apk/
