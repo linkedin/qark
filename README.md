@@ -26,6 +26,9 @@ The sampleApps folder contains sample APKs that you can test against QARK
 - python 2.7.6
 - JRE 1.6+ (preferably 1.7+)
 - OSX or RHEL6.6 (Others may work, but not fully tested)
+- For debian/ubuntu/mint distros, install lib32z1, lib32ncurses5 and lib32stdc++6 packages using apt-get
+	These can be installed by running ```sudo apt-get install lib32z1 lib32ncurses5 lib32stdc++6```
+- You will also need some python packages that can be installed by running ```pip install -r requirements.txt```
 
 ##Documentation
 

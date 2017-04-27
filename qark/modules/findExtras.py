@@ -22,63 +22,68 @@ from modules import common
 
 parser = plyj.Parser()
 tree=''
-extras=[]
+extras=[]  
 extras.append([])
 
+
+def append_java_if_needed(file_name):
+	if file_name.split('.')[-1] !='java':
+		file_name+='.java'
+	return file_name
+
+
+def parse_java_file_tree(j):  #parses the given java file
+	try:
+		return parser.parse_file(j)
+	except Exception as e:
+		common.logger.error("Tree exception: " + str(e))
+		return None
+	
 #find Intent Extras
 #TODO - At some point we need to consolidate the finding of extras to one function
 def find_extras(stub_file_name,entry):
 	"""
 	Find all extras given a filename
 	"""
-	global tree
+	global tree  # BUG - globals are bad
 	global extras
 
 	extras=[]
-	extras.append([])
+	extras.append([])  # BUG - duplicated 
 
 	common.logger.info("Checking for extras in this file: " + str(stub_file_name) + " from this entry point: " + str(entry))
 	unmatched=True
 
 	#TODO add data types to the extras, so we can provide better suggestions
 	for j in common.java_files:
-		dots=stub_file_name.split('.')
-		dot_length=dots.__len__()
-		if dots[dot_length-1] !='java':
-			stub_file_name+='.java'
+		stub_file_name = append_java_if_needed(stub_file_name)
 		if re.search(r''+str(stub_file_name)+r'$',str(j)):
 			unmatched=False
-			try:
-				tree = parser.parse_file(j)
-			except Exception as e:
-				common.logger.error("Tree exception: " + str(e))
+			tree = parse_java_file_tree(j)
+
 			if tree is not None:
 				for type_decl in tree.type_declarations:
 					if type(type_decl) is m.ClassDeclaration:
-						entries = []
-						for t in type_decl.body:
+						for t in type_decl.body:  # t is a
 							if type(t) is m.MethodDeclaration:
 								#Checks whether the discovered MethodDeclaration is a component entry point (lifecycle method)
 								if type(entry) is list:
 									for n in entry:
-										if hasattr(t, 'name'):
-											if str(t.name) == str(n):
-												#This branch never appears to get excercised
-												#Now I need to recurse over this mdecl to find methods, then check if they match any of the extra strings above
-												try:
-													find_methods_for_extras(t,j,entry)
-												except Exception as e:
-													common.logger.error("Problem trying to find extras: " + str(e))
+										if hasattr(t, 'name') and str(t.name) == str(n):
+											#This branch never appears to get excercised
+											#Now I need to recurse over this mdecl to find methods, then check if they match any of the extra strings above
+											try:
+												find_methods_for_extras(t,j,entry)  # BUG - this function doesn't throw or raise any exceptions
+											except Exception as e:
+												common.logger.error("Problem trying to find extras: " + str(e))
 
 								else:
-									if str(t.name) == str(entry):
-										if hasattr(t, 'name'):
-											if str(t.name) == str(entry):
-												#Now I need to recurse over this mdecl to find methods, then check if they match any of the extra strings above
-												try:
-													find_methods_for_extras(t,j,entry)
-												except Exception as e:
-													common.logger.error("Problem trying to find extras: " + str(e))
+									if str(t.name) == str(entry) and hasattr(t, 'name') and str(t.name) == str(entry):
+										#Now I need to recurse over this mdecl to find methods, then check if they match any of the extra strings above
+										try:
+											find_methods_for_extras(t,j,entry)
+										except Exception as e:
+											common.logger.error("Problem trying to find extras: " + str(e))
 
 			else:
 				common.logger.error("Could not create a tree to find extras in : " + str(j))
@@ -89,57 +94,27 @@ def find_extras(stub_file_name,entry):
 				common.logger.debug("No extras found in " + str(j) + " to suggest.\n")
 				common.parsingerrors.add(str(j))
 
-	if unmatched:
-		if str(j) not in common.file_not_found:
-			common.file_not_found.append(str(j))
-			#BUG - seems like a flow can come here without the fname; Ex: Flagship S - 4
-			try:
-				common.logger.error("Sorry, we could not find/parse a file named: " + str(j) + " while looking for extras\n")
-			except Exception as e:
-				common.logger.error("String printing issue in findExtras: " + str(e))
-	#Trying to get rid of empty first element
+# BUG - common.file_not_found is never used elsewhere in qark
+#         if unmatched:
+#             if str(j) not in common.file_not_found:
+#                 common.file_not_found.append(str(j))
+                #BUG - seems like a flow can come here without the fname; Ex: Flagship S - 4
+#                 try:
+#                     common.logger.error("Sorry, we could not find/parse a file named: " + str(j) + " while looking for extras\n")  # BUG - the logger is going to throw an exception??
+#                 except Exception as e:
+#                     common.logger.error("String printing issue in findExtras: " + str(e))
+        #Trying to get rid of empty first element
 	return extras
 
 def find_methods_for_extras(t,file_name,entry):
 	'''
 	Looks for any method invocations which extract data from Intents or Bundles
 	'''
-	rextras=[]
-	#These pull extras
-	#TODO - Need to add extra types
-	rextras.append('getExtras')
-	rextras.append('getStringExtra')
-	rextras.append('getIntExtra')
-	rextras.append('getIntArrayExtra')
-	rextras.append('getFloatExtra')
-	rextras.append('getFloatArrayExtra')
-	rextras.append('getDoubleExtra')
-	rextras.append('getDoubleArrayExtra')
-	rextras.append('getCharExtra')
-	rextras.append('getCharArrayExtra')
-	rextras.append('getByteExtra')
-	rextras.append('getByteArrayExtra')
-	rextras.append('getBundleExtra')
-	rextras.append('getBooleanExtra')
-	rextras.append('getBooleanArrayExtra')
-	rextras.append('getCharSequenceArrayExtra')
-	rextras.append('getCharSequenceArrayListExtra')
-	rextras.append('getCharSequenceExtra')
-	rextras.append('getIntegerArrayListExtra')
-	rextras.append('getLongArrayExtra')
-	rextras.append('getLongExtra')
-	rextras.append('getParcelableArrayExtra')
-	rextras.append('getParcelableArrayListExtra')
-	rextras.append('getParcelableExtra')
-	rextras.append('getSerializableExtra')
-	rextras.append('getShortArrayExtra')
-	rextras.append('getShortExtra')
-	rextras.append('getStringArrayExtra')
-	rextras.append('getStringArrayListExtra')
-	#These pull data from extras
-	rextras.append('getString')
-	rextras.append('getInt')
-	rextras.append('get')
+	rextras=['getExtras', 'getStringExtra', 'getIntExtra', 'getIntArrayExtra', 'getFloatExtra', 'getFloatArrayExtra', 'getDoubleExtra', 'getDoubleArrayExtra', 
+		'getCharExtra', 'getCharArrayExtra', 'getByteExtra', 'getByteArrayExtra', 'getBundleExtra', 'getBooleanExtra', 'getBooleanArrayExtra', 
+		'getCharSequenceArrayExtra', 'getCharSequenceArrayListExtra', 'getCharSequenceExtra', 'getIntegerArrayListExtra', 'getLongArrayExtra', 
+		'getLongExtra', 'getParcelableArrayExtra', 'getParcelableArrayListExtra', 'getParcelableExtra', 'getSerializableExtra', 'getShortArrayExtra', 
+		'getShortExtra', 'getStringArrayExtra', 'getStringArrayListExtra', 'getString', 'getInt', 'get',]
 
 	if type(t) is m.MethodInvocation:
 		if str(t.name) in rextras:
@@ -149,7 +124,6 @@ def find_methods_for_extras(t,file_name,entry):
 		find_methods_for_extras(t.target,file_name,entry)
 	elif type(t) is m.VariableDeclarator:
 		extras_from_vars(t,rextras,file_name)
-
 	elif type(t) is m.InstanceCreation:
 		extras_from_instances(t,rextras,file_name)
 	elif type(t) is list:
@@ -288,51 +262,13 @@ def extras_for_attack(token_type, method):
 	Identifies any extras to be included in the exploit app
 	'''
 
-	bundle_extras = []
-	bundle_extras.append("get")
-	bundle_extras.append("getBoolean")
-	bundle_extras.append("getBooleanArray")
-	bundle_extras.append("getDouble")
-	bundle_extras.append("getDoubleArray")
-	#TODO - more than one
-	bundle_extras.append("getInt")
-	bundle_extras.append("getIntArray")
-	bundle_extras.append("getLong")
-	bundle_extras.append("getLongArray")
-	#TODO - more than one
-	bundle_extras.append("getString")
-	bundle_extras.append("getStringArray")
-	bundle_extras.append("getIntArray")
+	bundle_extras = [ "get", "getBoolean", "getBooleanArray", "getDouble", "getDoubleArray", "getInt", "getIntArray", "getLong", "getLongArray", "getString", "getStringArray", "getIntArray",]
 
-	intent_extras = []
-	intent_extras.append("getBooleanArrayExtra")
-	intent_extras.append("getBundleExtra")
-	intent_extras.append("getByteArrayExtra")
-	intent_extras.append("getByteExtra")
-	intent_extras.append("getCharArrayExtra")
-	intent_extras.append("getCharExtra")
-	intent_extras.append("getCharSequenceArrayExtra")
-	intent_extras.append("getCharSequenceArrayListExtra")
-	intent_extras.append("getCharSequenceExtra")
-	intent_extras.append("getDoubleArrayExtra")
-	intent_extras.append("getDoubleExtra")
-	intent_extras.append("getExtras")
-	intent_extras.append("getFloatArrayExtra")
-	intent_extras.append("getFloatExtra")
-	intent_extras.append("getIntArrayExtra")
-	intent_extras.append("getIntExtra")
-	intent_extras.append("getIntegerArrayListExtra")
-	intent_extras.append("getLongArrayExtra")
-	intent_extras.append("getLongExtra")
-	intent_extras.append("getParcelableArrayExtra")
-	intent_extras.append("getParcelableArrayListExtra")
-	intent_extras.append("getParcelableExtra")
-	intent_extras.append("getSerializableExtra")
-	intent_extras.append("getShortArrayExtra")
-	intent_extras.append("getShortExtra")
-	intent_extras.append("getStringArrayExtra")
-	intent_extras.append("getStringArrayListExtra")
-	intent_extras.append("getStringExtra")
+	intent_extras = ["getBooleanArrayExtra", "getBundleExtra", "getByteArrayExtra", "getByteExtra", "getCharArrayExtra", "getCharExtra", 
+		"getCharSequenceArrayExtra", "getCharSequenceArrayListExtra", "getCharSequenceExtra", "getDoubleArrayExtra", "getDoubleExtra", "getExtras", 
+		"getFloatArrayExtra", "getFloatExtra", "getIntArrayExtra", "getIntExtra", "getIntegerArrayListExtra", "getLongArrayExtra", "getLongExtra", 
+		"getParcelableArrayExtra", "getParcelableArrayListExtra", "getParcelableExtra", "getSerializableExtra", "getShortArrayExtra", "getShortExtra", 
+		"getStringArrayExtra", "getStringArrayListExtra", "getStringExtra",]
 
 	#TODO - Need to deal with non-Extra data pulled from intents
 
@@ -343,21 +279,26 @@ def extras_for_attack(token_type, method):
 			if str(b) == str(method.name):
 				if str(b) not in extra:
 					extra.append(str(b))
-				for a in method.arguments:
+				for a in method.arguments:  # BUG - this second loop doesn't even use b for anything
 					if type(a) is m.Literal:
 						if str(a.value) not in extra:
 							extra.append(a.value)
+
+# if str(token_type) == "Bundle":
+#	 extra = [str(b) for b in bundle_extras if str(b) == str(method.name) and str(b) not in extra]
+#	 extra.extend([a.value for a in method.arguments if type(a) is m.literal and str(a.value) not in extra])
 	elif str(token_type) == "Intent":
 		for i in intent_extras:
 			if str(i) == str(method.name):
 				if str(i) not in extra:
 					extra.append(str(i))
-				for a in method.arguments:
+				for a in method.arguments:  # BUG - this second loop doesn't even use b for anything
 					if type(a) is m.Literal:
 						if str(a.value) not in extra:
 							extra.append(a.value)
-	else:
-		pass
+# elif str(token_type) == "Intent":
+#	 extra = [str(i) for i in intent_extras if str(i) == str(method.name) and str(i) not in extra]
+#	 extra.extend [a.value for a in method.arguments if type(a) is m.Literal and str(a.value) not in extra]
 	return extra
 
 def fallback_grep(file_name):
@@ -367,38 +308,17 @@ def fallback_grep(file_name):
 	"""
 	global extras
 
-	rextras=[]
-	rextras.append(r'getExtras\(\s*[0-9A-Za-z_\"\'.]+')
-	rextras.append(r'getStringExtra\(\s*[0-9A-Za-z_\"\'.]+')
-	rextras.append(r'getIntExtra\s*[0-9A-Za-z_\"\'.]+')
-	rextras.append(r'getIntArrayExtra\(\s*[0-9A-Za-z_\"\'.]+')
-	rextras.append(r'getFloatExtra\(\s*[0-9A-Za-z_\"\'.]+')
-	rextras.append(r'getFloatArrayExtra\(\s*[0-9A-Za-z_\"\'.]+')
-	rextras.append(r'getDoubleExtra\(\s*[0-9A-Za-z_\"\'.]+')
-	rextras.append(r'getDoubleArrayExtra\(\s*[0-9A-Za-z_\"\'.]+')
-	rextras.append(r'getCharExtra\(\s*[0-9A-Za-z_\"\'.]+')
-	rextras.append(r'getCharArrayExtra\(\s*[0-9A-Za-z_\"\'.]+')
-	rextras.append(r'getByteExtra\(\s*[0-9A-Za-z_\"\'.]+')
-	rextras.append(r'getByteArrayExtra\(\s*[0-9A-Za-z_\"\'.]+')
-	rextras.append(r'getBundleExtra\(\s*[0-9A-Za-z_\"\'.]+')
-	rextras.append(r'getBooleanExtra\(\s*[0-9A-Za-z_\"\'.]+')
-	rextras.append(r'getBooleanArrayExtra\(\s*[0-9A-Za-z_\"\'.]+')
-	rextras.append(r'getCharSequenceArrayExtra\(\s*[0-9A-Za-z_\"\'.]+')
-	rextras.append(r'getCharSequenceArrayListExtra\(\s*[0-9A-Za-z_\"\'.]+')
-	rextras.append(r'getCharSequenceExtra\(\s*[0-9A-Za-z_\"\'.]+')
-	rextras.append(r'getInterArrayListExtra\(\s*[0-9A-Za-z_\"\'.]+')
-	rextras.append(r'getLongArrayExtra\(\s*[0-9A-Za-z_\"\'.]+')
-	rextras.append(r'getLongExtra\(\s*[0-9A-Za-z_\"\'.]+')
-	rextras.append(r'getParcelableArrayExtra\(\s*[0-9A-Za-z_\"\'.]+')
-	rextras.append(r'getParcelableArrayListExtra\(\s*[0-9A-Za-z_\"\'.]+')
-	rextras.append(r'getParcelableExtra\(\s*[0-9A-Za-z_\"\'.]+')
-	rextras.append(r'getSeriablizableExtra\(\s*[0-9A-Za-z_\"\'.]+')
-	rextras.append(r'getShortArrayExtra\(\s*[0-9A-Za-z_\"\'.]+')
-	rextras.append(r'getShortExtra\(\s*[0-9A-Za-z_\"\'.]+')
-	rextras.append(r'getStringArrayExtra\(\s*[0-9A-Za-z_\"\'.]+')
-	rextras.append(r'getStringArrayListExtra\(\s*[0-9A-Za-z_\"\'.]+')
-	#These are not necessarily Intent extras, but may contain them
-	rextras.append(r'getString\(\s*[0-9A-Za-z_\"\'.]+')
+	rextras=[r'getExtras\(\s*[0-9A-Za-z_\"\'.]+', r'getStringExtra\(\s*[0-9A-Za-z_\"\'.]+', r'getIntExtra\s*[0-9A-Za-z_\"\'.]+', 
+		r'getIntArrayExtra\(\s*[0-9A-Za-z_\"\'.]+', r'getFloatExtra\(\s*[0-9A-Za-z_\"\'.]+', r'getFloatArrayExtra\(\s*[0-9A-Za-z_\"\'.]+', 
+		r'getDoubleExtra\(\s*[0-9A-Za-z_\"\'.]+', r'getDoubleArrayExtra\(\s*[0-9A-Za-z_\"\'.]+', r'getCharExtra\(\s*[0-9A-Za-z_\"\'.]+', 
+		r'getCharArrayExtra\(\s*[0-9A-Za-z_\"\'.]+', r'getByteExtra\(\s*[0-9A-Za-z_\"\'.]+', r'getByteArrayExtra\(\s*[0-9A-Za-z_\"\'.]+', 
+		r'getBundleExtra\(\s*[0-9A-Za-z_\"\'.]+', r'getBooleanExtra\(\s*[0-9A-Za-z_\"\'.]+', r'getBooleanArrayExtra\(\s*[0-9A-Za-z_\"\'.]+', 
+		r'getCharSequenceArrayExtra\(\s*[0-9A-Za-z_\"\'.]+', r'getCharSequenceArrayListExtra\(\s*[0-9A-Za-z_\"\'.]+', 
+		r'getCharSequenceExtra\(\s*[0-9A-Za-z_\"\'.]+', r'getInterArrayListExtra\(\s*[0-9A-Za-z_\"\'.]+', r'getLongArrayExtra\(\s*[0-9A-Za-z_\"\'.]+', 
+		r'getLongExtra\(\s*[0-9A-Za-z_\"\'.]+', r'getParcelableArrayExtra\(\s*[0-9A-Za-z_\"\'.]+', r'getParcelableArrayListExtra\(\s*[0-9A-Za-z_\"\'.]+', 
+		r'getParcelableExtra\(\s*[0-9A-Za-z_\"\'.]+', r'getSeriablizableExtra\(\s*[0-9A-Za-z_\"\'.]+', r'getShortArrayExtra\(\s*[0-9A-Za-z_\"\'.]+', 
+		r'getShortExtra\(\s*[0-9A-Za-z_\"\'.]+', r'getStringArrayExtra\(\s*[0-9A-Za-z_\"\'.]+', r'getStringArrayListExtra\(\s*[0-9A-Za-z_\"\'.]+', 
+		r'getString\(\s*[0-9A-Za-z_\"\'.]+',]
 
 	#TODO add data types to the extras, so we can provide better suggestions
 	for r in rextras:
