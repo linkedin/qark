@@ -1,9 +1,11 @@
 FROM python:2.7
-LABEL maintainer <ilya@ilyaglotov.com>
+LABEL url "https://www.github.com/linkedin/qark"
 
 # Install JRE
-RUN apt-get update && apt-get -y install openjdk-7-jre-headless \
-    curl
+RUN apt-get update && \
+    apt-get -y install openjdk-7-jre-headless \
+    curl \
+  && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir /qark
 WORKDIR /qark
@@ -12,7 +14,9 @@ WORKDIR /qark
 ENV ANDROID_SDK_VERSION r24.3.4
 ENV HOST_OS linux
 ENV ANDROID_SDK_PACKAGE="android-sdk_${ANDROID_SDK_VERSION}-${HOST_OS}.tgz"
-RUN curl -s https://dl.google.com/android/${ANDROID_SDK_PACKAGE} -o ${ANDROID_SDK_PACKAGE}
+RUN curl -s https://dl.google.com/android/${ANDROID_SDK_PACKAGE} \
+    -o ${ANDROID_SDK_PACKAGE} \
+  && apt-get purge -y curl
 RUN tar xzf ${ANDROID_SDK_PACKAGE}
 
 # Install QARK dependencies
