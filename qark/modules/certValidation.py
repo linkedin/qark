@@ -68,6 +68,11 @@ def validate(queue,height):
                             except Exception as e:
                                 common.logger.error("Unable to run recursive_insecure_trust_manager in certValidation.py: " + str(e))
                             try:
+                                recursive_insecure_ssl_error_handling(t, j, results)
+                            except Exception as e:
+                                common.logger.error(
+                                    "Unable to run recursive_insecure_ssl_error_handling in certValidation.py " + str(e))
+                            try:
                                 recursive_allow_all_hostname_verifier(t,j,results)
                             except Exception as e:
                                 common.logger.error("Unable to run recursive_allow_all_hostname_verifier in certValidation.py: " + str(e))
@@ -127,6 +132,33 @@ def recursive_insecure_trust_manager(t,filename,results):
     elif hasattr(t,'_fields'):
         for f in t._fields:
             recursive_insecure_trust_manager(getattr(t,f),filename,results)
+    return
+
+# onReceivedSSLError check - Need to run this check on a goat app to verify its working
+def recursive_insecure_ssl_error_handling(t, filename, results):
+    if type(t) is m.MethodDeclaration:
+        if str(t.name) == 'onReceivedSslError':
+            if "proceed" in str(t.body):
+                issue = ReportIssue()
+                issue.setCategory(ExploitType.CERTIFICATE)
+                issue.setDetails("Unsafe implementation of onReceivedSslError handler found in: " + str(
+                    filename) + ". Specifically, the implementation ignores all SSL certificate validation errors, making your app vulnerable to man-in-the-middle attacks. To properly handle SSL certificate validation, change your code to invoke SslErrorHandler.cancel(). For details, please see: https://developer.android.com/reference/android/webkit/WebViewClient.html")
+                issue.setFile(filename)
+                issue.setSeverity(Severity.WARNING)
+                results.append(issue)
+
+                issue = terminalPrint()
+                issue.setLevel(Severity.WARNING)
+                issue.setData("Unsafe implementation of onReceivedSslError handler found in: " + str(
+                    filename) + ". Specifically, the implementation ignores all SSL certificate validation errors, making your app vulnerable to man-in-the-middle attacks. To properly handle SSL certificate validation, change your code to invoke SslErrorHandler.cancel(). For details, please see: https://developer.android.com/reference/android/webkit/WebViewClient.html")
+                results.append(issue)
+
+    elif type(t) is list:
+        for x in t:
+            recursive_insecure_ssl_error_handling(x, filename, results)
+    elif hasattr(t, '_fields'):
+        for f in t._fields:
+            recursive_insecure_ssl_error_handling(getattr(t, f), filename, results)
     return
 
 def recursive_allow_all_hostname_verifier(t,filename,results):

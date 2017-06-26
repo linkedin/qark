@@ -1,0 +1,9 @@
+[Core]
+Name = Insecure Content Provider
+Module = Insecure_Content_Provider
+
+[Documentation]
+Author = Sarvesh Kapre
+Version = 0.1
+Website = https://github.com/linkedin/qark/
+Description = Content Provider not secure enough, Path permission in Content Provider, Attacking Content Provider
