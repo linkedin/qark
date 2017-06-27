@@ -134,7 +134,7 @@ def recursive_insecure_trust_manager(t,filename,results):
             recursive_insecure_trust_manager(getattr(t,f),filename,results)
     return
 
-# onReceivedSSLError check - Need to run this check on a goat app to verify its working
+# onReceivedSSLError check
 def recursive_insecure_ssl_error_handling(t, filename, results):
     if type(t) is m.MethodDeclaration:
         if str(t.name) == 'onReceivedSslError':

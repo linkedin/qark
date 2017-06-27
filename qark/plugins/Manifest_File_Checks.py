@@ -39,6 +39,11 @@ class PermissionPlugin(IPlugin):
                 if re.findall(uri_regex, line) or re.findall(uri1_regex, line):
                     PluginUtil.reportIssue(fileName, self.createIssueDetails1(line), res)
 
+        # Check for google safebrowsing API
+        if "WebView" in f.splitlines():
+            if "EnableSafeBrowsing" and "true" not in f.splitlines():
+                PluginUtil.reportIssue(fileName, self.createIssueDetails2(fileName), res)
+
         # send all results back to main thread
         queue.put(res)
 
@@ -53,6 +58,12 @@ class PermissionPlugin(IPlugin):
         return '%s \nInsecure path permission set in the manifest.\n' \
                'If path prefix / means entire file system of android has access.\n' \
                % line
+
+    def createIssueDetails2(self, fileName):
+        return 'To provide users with a safer browsing experience, you can configure your apps' \
+                'WebView objects to verify URLs using Google Safe Browsing. \n When this security measure is enabled,'\
+                'your app shows users a warning when they attempt to navigate to a potentially unsafe website. \n %s'\
+               % fileName
 
     def getName(self):
         # The name to be displayed against the progressbar
