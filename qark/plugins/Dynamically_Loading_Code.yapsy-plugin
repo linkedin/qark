@@ -1,0 +1,9 @@
+[Core]
+Name = Check logging Issues
+Module = Dynamically_Loading_Code
+
+[Documentation]
+Author = Sarvesh Kapre
+Version = 0.1
+Website = https://github.com/linkedin/qark/
+Description = Checks for code which is loaded at runtime

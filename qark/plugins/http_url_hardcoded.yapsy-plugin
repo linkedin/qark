@@ -1,0 +1,9 @@
+[Core]
+Name = Check logging Issues
+Module = http_url_hardcoded
+
+[Documentation]
+Author = Sarvesh Kapre
+Version = 0.1
+Website = https://github.com/linkedin/qark/
+Description = Checks for hardcoded http url's

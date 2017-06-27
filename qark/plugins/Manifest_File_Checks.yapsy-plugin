@@ -1,0 +1,10 @@
+[Core]
+Name = Additional checks in Manifest file
+Module = Manifest_File_Checks
+
+[Documentation]
+Author = Sarvesh Kapre
+Version = 0.1
+Website = https://github.com/linkedin/qark/
+Description = Content Provider not secure enough, Path permission in Content Provider, Attacking Content Provider,
+                Google SafeBrowsing API check
