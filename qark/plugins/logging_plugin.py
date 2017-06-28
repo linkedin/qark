@@ -12,6 +12,9 @@ from modules.common import terminalPrint
 
 class LoggingIssuesPlugin(IPlugin):
 
+    debug_regex = r'Log\.d'
+    verbose_regex = r'Log\.v'
+
     def target(self, queue):
         # get all decompiled files that contains usage of WebView
         files = common.java_files
@@ -65,8 +68,8 @@ class LoggingIssuesPlugin(IPlugin):
                 with open(f, 'r') as fi:
                     filename = fi.read()
                     file_name = str(f)
-                reg = re.findall('Log\.d', filename)
-                reg1 = re.findall('Log\.v', filename)
+                reg = re.findall(self.debug_regex, filename)
+                reg1 = re.findall(self.verbose_regex, filename)
                 if len(reg) > 0:
                     len_reg.append(str(reg))
                     PluginUtil.reportIssue(filename, self.createIssueDetails(file_name), res)
