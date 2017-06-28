@@ -18,8 +18,8 @@ class DynamicallyLoadingCodePlugin(IPlugin):
     def target(self, queue):
         # get all decompiled files that contains usage of WebView
         files = common.java_files
-        parser = plyj.Parser()
         global parser
+        parser = plyj.Parser()
         global tree
         global fileName
         tree = ''
