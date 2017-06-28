@@ -11,7 +11,7 @@ from modules import common
 from lib.pubsub import pub
 
 
-class PermissionPlugin(IPlugin):
+class ManifestFilePlugin(IPlugin):
 
     def target(self, queue):
         f = str(common.manifest)
@@ -27,7 +27,8 @@ class PermissionPlugin(IPlugin):
             pub.sendMessage('progress', bar=self.getName(), percent=round(count * 100 / len(f.splitlines())))
             if "provider" in line:
                 if "exported" and "true" in line:
-                    if not any(re.findall(r'readPermission|writePermission|signature', line)):
+                    permission_regex1 = r'readPermission|writePermission|signature'
+                    if not any(re.findall(permission_regex1, line)):
                         PluginUtil.reportIssue(fileName, self.createIssueDetails(line), res)
 
         for line in f.splitlines():
@@ -35,7 +36,8 @@ class PermissionPlugin(IPlugin):
             uri_regex = r'android:path=[\'\"]/[\'\"]'
             # Matches android:pathPrefix which is set to "/"
             uri1_regex = r'android:pathPrefix=[\'\"]/[\'\"]'
-            if any(re.findall(r'grant-uri-permission|path-permission', line)):
+            permission_regex2 = r'grant-uri-permission|path-permission'
+            if any(re.findall(permission_regex2, line)):
                 if re.findall(uri_regex, line) or re.findall(uri1_regex, line):
                     PluginUtil.reportIssue(fileName, self.createIssueDetails1(line), res)
 
