@@ -18,9 +18,13 @@ def testuri_regex3():
 def testuri_regex4():
     assert PluginUtil.contains(plugin.http_url_regex, 'HTTP://www.linkedin.com/') is False
 
+def testuri_regex5():
+    assert PluginUtil.contains(plugin.http_url_regex, 'http://example.com/') is True
+
 if __name__ == '__main__':
     testuri_regex()
     testuri_regex1()
     testuri_regex2()
     testuri_regex3()
     testuri_regex4()
+    testuri_regex5()
