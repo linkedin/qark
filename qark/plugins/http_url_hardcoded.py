@@ -6,7 +6,9 @@ from modules import common
 from lib.pubsub import pub
 import lib.plyj.parser as plyj
 
-class HarcodedHTTPUrl(IPlugin):
+class HardcodedHTTPUrl(IPlugin):
+
+    http_url_regex = r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
 
     def target(self, queue):
         # get all decompiled files that contains usage of WebView
@@ -34,7 +36,7 @@ class HarcodedHTTPUrl(IPlugin):
                 for import_decl in tree.import_declarations:
                     if 'HttpURLConnection' in import_decl.name.value or 'URL' in import_decl.name.value:
                         textfile = open(fileName, 'r').read()
-                        url = re.findall('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', textfile)
+                        url = re.findall(self.http_url_regex, textfile)
                         url_string = " \n".join(url)
                         PluginUtil.reportIssue(fileName, self.createIssueDetails((fileName, url_string)), res)
                         break
