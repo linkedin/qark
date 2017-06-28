@@ -10,7 +10,10 @@ import lib.plyj.parser as plyj
 import lib.plyj.model as m
 from modules.common import terminalPrint
 
-class DynamicalPlugin(IPlugin):
+class DynamicallyLoadingCodePlugin(IPlugin):
+
+    dex_class_loader = r'DexClassLoader'
+    class_loader = r'loadClass'
 
     def target(self, queue):
         # get all decompiled files that contains usage of WebView
@@ -33,8 +36,8 @@ class DynamicalPlugin(IPlugin):
 
             try:
                 for import_decl in tree.import_declarations:
-                    if 'DexClassLoader' in import_decl.name.value:
-                        if "loadClass" in str(tree):
+                    if self.dex_class_loader in import_decl.name.value:
+                        if self.class_loader in str(tree):
                             PluginUtil.reportIssue(fileName, self.createIssueDetails(fileName), res)
             except Exception as e:
                 continue
