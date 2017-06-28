@@ -7,7 +7,7 @@ def testlog_regex():
     assert PluginUtil.contains(plugin.debug_regex, 'Log.d') is True
 
 def testlog_regex1():
-    assert PluginUtil.contains(plugin.debug_regex, 'd') is True
+    assert PluginUtil.contains(plugin.debug_regex, 'd') is False
 
 def testlog_regex2():
     assert PluginUtil.contains(plugin.verbose_regex, 'Log.v') is True
