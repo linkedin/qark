@@ -8,7 +8,7 @@ import lib.plyj.parser as plyj
 
 class HardcodedHTTPUrl(IPlugin):
 
-    http_url_regex = r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
+    http_url_regex = r'http://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
 
     def target(self, queue):
         # get all decompiled files that contains usage of WebView
