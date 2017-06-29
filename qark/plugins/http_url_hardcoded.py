@@ -35,11 +35,16 @@ class HardcodedHTTPUrl(IPlugin):
                 url = []
                 for import_decl in tree.import_declarations:
                     if 'HttpURLConnection' in import_decl.name.value or 'URL' in import_decl.name.value:
-                        textfile = open(fileName, 'r').read()
-                        url = re.findall(self.http_url_regex, textfile)
-                        url_string = " \n".join(url)
-                        PluginUtil.reportIssue(fileName, self.createIssueDetails((fileName, url_string)), res)
-                        break
+                        textfile = str(open(fileName, 'r').read())
+                        search = "http://"
+                        http_result = re.findall('\\b'+search+'\\b', textfile)
+                        if len(http_result) > 0:
+                            url = re.findall(self.http_url_regex, textfile)
+                            url_string = " \n".join(url)
+                            PluginUtil.reportIssue(fileName, self.createIssueDetails((fileName, url_string)), res)
+                            break
+                        else:
+                            continue
             except Exception as e:
                 continue
         queue.put(res)
