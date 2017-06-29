@@ -19,7 +19,6 @@ class HardcodedHTTPUrl(IPlugin):
         global fileName
         tree = ''
         res = []
-        results = []
         count = 0
         for f in files:
             count += 1

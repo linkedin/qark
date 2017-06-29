@@ -8,7 +8,6 @@ from modules import common
 from lib.pubsub import pub
 import lib.plyj.parser as plyj
 import lib.plyj.model as m
-from modules.common import terminalPrint
 
 class LoggingIssuesPlugin(IPlugin):
 
@@ -18,18 +17,14 @@ class LoggingIssuesPlugin(IPlugin):
     def target(self, queue):
         # get all decompiled files that contains usage of WebView
         files = common.java_files
+        global parser, tree, fileName, verbose, debug, string_filename_d, string_filename_v
         parser = plyj.Parser()
-        global parser
-        global tree
-        global fileName, verbose, debug
         len_d = []
         len_v = []
         len_filename_d = []
-        global string_filename_d
         len_filename_v = []
-        global string_filename_v
-        tree = ''
         res = []
+        tree = ''
         count = 0
         for f in files:
             count += 1
@@ -54,6 +49,7 @@ class LoggingIssuesPlugin(IPlugin):
             except Exception as e:
                 continue
 
+        # Join all the filename and path containing debug and verbose logging
         string_filename_d = " \n".join(len_filename_d)
         string_filename_v = " \n".join(len_filename_v)
         queue.put(res)
@@ -69,15 +65,13 @@ class LoggingIssuesPlugin(IPlugin):
         if len(len_d) > 0 or len(len_v) > 0:
             x = str(len(len_d))
             y = str(len(len_v))
-
-            PluginUtil.reportIssue(fileName, self.createIssueDetails1((x,y)), res)
+            PluginUtil.reportIssue(fileName, self.createIssueDetails1((x, y)), res)
 
         global reg, reg1, filename
         len_reg = []
         len_reg1 = []
-        # Sometimes Log functions may be called from a constructor and hence maybe skipped by above tree
+        # Sometimes Log functions may be called from a constructor and hence maybe skipped by tree
         if len(len_d) == 0 and len(len_v) == 0:
-
             for f in files:
                 with open(f, 'r') as fi:
                     filename = fi.read()

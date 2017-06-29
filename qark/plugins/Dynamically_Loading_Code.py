@@ -7,8 +7,6 @@ from plugins import PluginUtil
 from modules import common
 from lib.pubsub import pub
 import lib.plyj.parser as plyj
-import lib.plyj.model as m
-from modules.common import terminalPrint
 
 class DynamicallyLoadingCodePlugin(IPlugin):
 
@@ -18,10 +16,8 @@ class DynamicallyLoadingCodePlugin(IPlugin):
     def target(self, queue):
         # get all decompiled files that contains usage of WebView
         files = common.java_files
-        global parser
+        global parser, tree, fileName
         parser = plyj.Parser()
-        global tree
-        global fileName
         tree = ''
         res = []
         count = 0
@@ -33,7 +29,6 @@ class DynamicallyLoadingCodePlugin(IPlugin):
                 tree = parser.parse_file(f)
             except Exception as e:
                 continue
-
             try:
                 for import_decl in tree.import_declarations:
                     if self.dex_class_loader in import_decl.name.value:
