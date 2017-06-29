@@ -21,6 +21,9 @@ def testuri_regex4():
 def testuri_regex5():
     assert PluginUtil.contains(plugin.http_url_regex, 'http://example.com/') is True
 
+def testuri_regex6():
+    assert PluginUtil.contains(plugin.http_url_regex, '(http|https)://www.linkedin.com/profile/view[?]id=([^&]+)') is False
+
 if __name__ == '__main__':
     testuri_regex()
     testuri_regex1()
@@ -28,3 +31,4 @@ if __name__ == '__main__':
     testuri_regex3()
     testuri_regex4()
     testuri_regex5()
+    testuri_regex6()
