@@ -24,6 +24,10 @@ class LoggingIssuesPlugin(IPlugin):
         global fileName, verbose, debug
         len_d = []
         len_v = []
+        len_filename_d = []
+        global string_filename_d
+        len_filename_v = []
+        global string_filename_v
         tree = ''
         res = []
         count = 0
@@ -43,19 +47,29 @@ class LoggingIssuesPlugin(IPlugin):
                             if type(t) is m.MethodDeclaration:
                                 if str(t.name) == 'v':
                                     len_v.append(str(t.name))
-                                    PluginUtil.reportIssue(fileName, self.createIssueDetails(fileName), res)
+                                    len_filename_v.append(fileName)
                                 elif str(t.name) == 'd':
                                         len_d.append(str(t.name))
-                                        PluginUtil.reportIssue(fileName, self.createIssueDetails(fileName), res)
+                                        len_filename_d.append(fileName)
             except Exception as e:
                 continue
+
+        string_filename_d = " \n".join(len_filename_d)
+        string_filename_v = " \n".join(len_filename_v)
         queue.put(res)
+
+        if len(len_filename_d) > 0:
+            PluginUtil.reportIssue(fileName, self.createIssueDetails2(string_filename_d), res)
+
+        if len(len_filename_v) > 0:
+            PluginUtil.reportIssue(fileName, self.createIssueDetails3(string_filename_v), res)
 
         # Give the count of verbose/debug logs.
         # Written separately so that issue description is mentioned once and not repeated for each warning.
         if len(len_d) > 0 or len(len_v) > 0:
             x = str(len(len_d))
             y = str(len(len_v))
+
             PluginUtil.reportIssue(fileName, self.createIssueDetails1((x,y)), res)
 
         global reg, reg1, filename
@@ -72,18 +86,22 @@ class LoggingIssuesPlugin(IPlugin):
                 reg1 = re.findall(self.verbose_regex, filename)
                 if len(reg) > 0:
                     len_reg.append(str(reg))
-                    PluginUtil.reportIssue(filename, self.createIssueDetails(file_name), res)
+                    PluginUtil.reportIssue(filename, self.createIssueDetails2(file_name), res)
                 if len(reg1) > 0:
                     len_reg1.append(str(reg1))
-                    PluginUtil.reportIssue(filename, self.createIssueDetails(file_name), res)
+                    PluginUtil.reportIssue(filename, self.createIssueDetails3(file_name), res)
 
         if len(len_reg) > 0 or len(len_reg1) > 0:
             x = str(len(len_reg))
             y = str(len(len_reg1))
             PluginUtil.reportIssue(filename, self.createIssueDetails1((x, y)), res)
 
-    def createIssueDetails(self, fileName):
-        return 'Verbose/Debug logs are detected in file: %s.\n' \
+    def createIssueDetails2(self, string_filename_d):
+        return 'Debug logs are detected in file: \n %s.\n' \
+               % string_filename_d
+
+    def createIssueDetails3(self, fileName):
+        return 'Verbose logs are detected in file: \n %s.\n' \
                % fileName
 
     def createIssueDetails1(self, (x, y)):
