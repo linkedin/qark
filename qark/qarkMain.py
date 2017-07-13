@@ -34,7 +34,7 @@ from modules import findExtras
 from modules import webviews
 from modules import report
 from modules import unpackAPK
-from lib.axmlparserpy import axmlprinter 
+from lib.axmlparserpy import axmlprinter
 from modules.DetermineMinSDK import determine_min_sdk
 from modules import sdkManager
 from modules import createSploit
@@ -111,7 +111,7 @@ def apktool(pathToAPK):
 def progress_bar_update(bar, percent):
     lock.acquire()
 
-    global pbar_file_permission_done 
+    global pbar_file_permission_done
     if bar == "File Permissions" and percent >= 100 and not pbar_file_permission_done:
         pbar_file_permission_done = True
         bar = "File Permissions (check 1)"
@@ -214,12 +214,19 @@ def process_manifest(manifest):
                 exit()
             common.logger.error(str(e) + "\r\nThat didnt work. Try providing an absolute path to the file\n")
 
+def hasmode(filename, mode):
+    st = os.stat(filename)
+    return (st.st_mode & mode)
+
+def setmode(filename, mode):
+    st = os.stat(filename)
+    os.chmod(filneame, st.st_mode | mode)
 
 def list_all_apk():
     result = []
     adb = common.getConfig('AndroidSDKPath') + "platform-tools/adb"
     st = os.stat(adb)
-    os.chmod(adb, st.st_mode | stat.S_IEXEC)
+    if not hasmode(adb, stat.S_IEXEC): setmode(adb, stat.S_IEXEC)
     while True:
         p1 = Popen([adb, 'devices'], stdout=PIPE, stdin=PIPE, stderr=STDOUT)
         a = 0
@@ -249,7 +256,7 @@ def uninstall(package):
     result = []
     adb = common.getConfig('AndroidSDKPath') + "platform-tools/adb"
     st = os.stat(adb)
-    os.chmod(adb, st.st_mode | stat.S_IEXEC)
+    if not hasmode(adb, stat.S_IEXEC): setmode(adb, stat.S_IEXEC)
     while True:
         p1 = Popen([adb, 'devices'], stdout=PIPE, stdin=PIPE, stderr=STDOUT)
         a = 0
@@ -271,7 +278,7 @@ def uninstall(package):
 def pull_apk(pathOnDevice):
     adb = common.getConfig('AndroidSDKPath') + "platform-tools/adb"
     st = os.stat(adb)
-    os.chmod(adb, st.st_mode | stat.S_IEXEC)
+    if not hasmode(adb, stat.S_IEXEC): setmode(adb, stat.S_IEXEC)
     if not os.path.exists('temp' + "/"):
         os.makedirs('temp' + "/")
     p0 = Popen([adb, 'pull', pathOnDevice, 'temp/'+str(pathOnDevice).split('/')[-1]], stdout=PIPE, stdin=PIPE, stderr=STDOUT)
@@ -345,7 +352,7 @@ def writeReportSection(results, category):
     elif category == "PLUGIN ISSUES":
         section = report.Section.PLUGIN
 
-    try: 
+    try:
         report.writeSection(section, results)
     except Exception as e:
         print e.message
@@ -432,7 +439,7 @@ def runAutomated(pathToApk,pathToReport):
     common.writeKey("rootDir", common.rootDir)
 
     common.initialize_logger()
-    common.args = argparse.Namespace() 
+    common.args = argparse.Namespace()
     common.args.exploit = 0
     common.args.install = 0
     common.args.source = 1
@@ -643,7 +650,7 @@ def main():
     #Only application and manifest elements are required: http://developer.android.com/guide/topics/manifest/manifest-intro.html
     try:
 #    	THIS SECTION IS THE ONE AFTER VIEWING MANIFEST BEFORE DECOMPILATION
-#		THIS CONTAINS THE CODE THAT FINDS ACTIVITIES THAT HAVEN'T BEEN PROTECTED BY ANY PERMISSIONS	
+#		THIS CONTAINS THE CODE THAT FINDS ACTIVITIES THAT HAVEN'T BEEN PROTECTED BY ANY PERMISSIONS
         determine_min_sdk()
 
         common.print_terminal_header("APP COMPONENT ATTACK SURFACE")
@@ -777,12 +784,12 @@ def main():
 
         # TODO: change to list comprehension to make it more pythonic
         # all static writers included in every static analysis
-        writers = [common.Writer((0, height-8)), common.Writer((0, height-6)), common.Writer((0, height-4)), 
+        writers = [common.Writer((0, height-8)), common.Writer((0, height-6)), common.Writer((0, height-4)),
                     common.Writer((0, height-2)), common.Writer((0, height-10)), common.Writer((0, height-12)), common.Writer((0, height-14))]
         common.qark_main_pbars = {}
 #         if common.args.noprogressbar:
 #         	print('Progress bars disabled. Running...')
-   
+
         # create dictionary for progress bars, common.qark_main_pbars = { name: ProgressBar }
 #         else:
         for barNum in range(len(PROGRESS_BARS)-1):
@@ -796,7 +803,7 @@ def main():
             if 'Plugin issues' not in common.qark_main_pbars:
                 common.qark_main_pbars['Plugin issues'] = {}
 
-            common.qark_main_pbars['Plugin issues'][plugin.plugin_object.getName()] = ProgressBar(widgets=[plugin.plugin_object.getName(), Percentage(), Bar()], maxval=100, fd=writer).start() 
+            common.qark_main_pbars['Plugin issues'][plugin.plugin_object.getName()] = ProgressBar(widgets=[plugin.plugin_object.getName(), Percentage(), Bar()], maxval=100, fd=writer).start()
             placer += 2
 
         pub.subscribe(progress_bar_update, 'progress')
@@ -848,8 +855,8 @@ def main():
 
 
         results = [ (crypto_flaw_queue.get(), "CRYPTO ISSUES"),
-                    (find_broadcast_queue.get(), "BROADCAST ISSUES"), 
-                    (cert_queue.get(), "CERTIFICATE VALIDATION ISSUES"), 
+                    (find_broadcast_queue.get(), "BROADCAST ISSUES"),
+                    (cert_queue.get(), "CERTIFICATE VALIDATION ISSUES"),
                     (pending_intents_queue.get(), "PENDING INTENT ISSUES"),
                     (file_permission_queue.get(), "FILE PERMISSION ISSUES"),
                     (web_view_queue.get(), "WEB-VIEW ISSUES")
@@ -857,7 +864,7 @@ def main():
         if not plugin_queue.empty():
             for i in range(plugin_queue.qsize()):
                 results.append((plugin_queue.get(), "PLUGIN ISSUES"))
-                    
+
         for r in results:
             writeReportSection(r[0], r[1])
 
