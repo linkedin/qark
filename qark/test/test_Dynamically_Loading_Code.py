@@ -16,10 +16,10 @@ def test_regex3():
     assert PluginUtil.contains(plugin.CLASS_LOADER, 'Classload') is False
 
 def test_regex4():
-    assert PluginUtil.contains(plugin.CLASS_LOADER, 'registerReceiver') is True
+    assert PluginUtil.contains(plugin.DYNAMIC_BROADCAST_RECEIVER, 'registerReceiver') is True
 
 def test_regex5():
-    assert PluginUtil.contains(plugin.CLASS_LOADER, 'RegisterReceiver') is False
+    assert PluginUtil.contains(plugin.DYNAMIC_BROADCAST_RECEIVER, 'RegisterReceiver') is False
 
 
 

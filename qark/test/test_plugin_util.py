@@ -30,7 +30,7 @@ def testNotContains():
 
 def testReportIssue():
     res = []
-    PluginUtil.reportIssue('fileName', 'details', res)
+    PluginUtil.reportVulnerability('fileName', 'details', res)
     assert len(res) == 2
     assert res[0].getCategory() == ExploitType.PLUGIN
     assert res[0].getSeverity() == Severity.VULNERABILITY
@@ -39,6 +39,27 @@ def testReportIssue():
     assert res[1].getLevel() == Severity.VULNERABILITY
     assert res[1].getData() == 'details'
 
+def testReportIssue1():
+    res = []
+    PluginUtil.reportWarning('fileName', 'details', res)
+    assert len(res) == 2
+    assert res[0].getCategory() == ExploitType.PLUGIN
+    assert res[0].getSeverity() == Severity.WARNING
+    assert res[0].getFile() == 'fileName'
+    assert res[0].getDetails() == 'details'
+    assert res[1].getLevel() == Severity.WARNING
+    assert res[1].getData() == 'details'
+
+def testReportIssue2():
+    res = []
+    PluginUtil.reportInfo('fileName', 'details', res)
+    assert len(res) == 2
+    assert res[0].getCategory() == ExploitType.PLUGIN
+    assert res[0].getSeverity() == Severity.INFO
+    assert res[0].getFile() == 'fileName'
+    assert res[0].getDetails() == 'details'
+    assert res[1].getLevel() == Severity.INFO
+    assert res[1].getData() == 'details'
 
 if __name__ == '__main__':
     testZeroGroupMatches()
@@ -47,3 +68,5 @@ if __name__ == '__main__':
     testContains()
     testNotContains()
     testReportIssue()
+    testReportIssue1()
+    testReportIssue2()
