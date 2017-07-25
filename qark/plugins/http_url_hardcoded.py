@@ -6,12 +6,15 @@ from modules import common
 from lib.pubsub import pub
 import lib.plyj.parser as plyj
 
+
 class HardcodedHTTPUrl(IPlugin):
 
     http_url_regex = r'http://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
 
+    def __init__(self):
+        self.name = 'Hardcoded HTTP url'
+
     def target(self, queue):
-        # get all decompiled files that contains usage of WebView
         files = common.java_files
         global parser
         parser = plyj.Parser()
@@ -22,11 +25,11 @@ class HardcodedHTTPUrl(IPlugin):
         count = 0
         for f in files:
             count += 1
-            pub.sendMessage('progress', bar=self.getName(), percent=round(count * 100 / len(files)))
+            pub.sendMessage('progress', bar=self.name, percent=round(count * 100 / len(files)))
             fileName = str(f)
             try:
                 tree = parser.parse_file(f)
-            except Exception as e:
+            except Exception:
                 continue
 
             try:
@@ -37,24 +40,23 @@ class HardcodedHTTPUrl(IPlugin):
                         textfile = str(open(fileName, 'r').read())
                         search = "http://"
                         http_result = re.findall('\\b'+search+'\\b', textfile)
-                        if len(http_result) > 0:
+                        if http_result:
                             url = re.findall(self.http_url_regex, textfile)
-                            url_string = " \n".join(url)
-                            PluginUtil.reportIssue(fileName, self.createIssueDetails((fileName, url_string)), res)
+                            http_url_list = " \n".join(url)
+                            PluginUtil.reportInfo(fileName, self.HardcodedHTTPUrlsIssueDetails((fileName, http_url_list)), res)
                             break
                         else:
                             continue
-            except Exception as e:
+            except Exception:
                 continue
         queue.put(res)
 
-    def createIssueDetails(self, (fileName, url_string)):
-        return 'Application contains hardcoded http url %s. \n %s \n' \
-               'Does not matter if HSTS is implemented \n' \
-                % (fileName, url_string)
+    def HardcodedHTTPUrlsIssueDetails(self, (fileName, http_url_list)):
+        return 'Application contains hardcoded http url \n%s. \n%s \n' \
+               'Ignore if HSTS is implemented \n' \
+                % (fileName, http_url_list)
 
     def getName(self):
-        # The name to be displayed against the progressbar
         return "Hardcoded HTTP url"
 
     def getCategory(self):

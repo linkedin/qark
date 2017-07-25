@@ -1,6 +1,4 @@
-import sys
-import os
-import re
+import sys, os, re
 import qarkMain
 
 sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)) + '../lib')
@@ -12,64 +10,110 @@ from lib.pubsub import pub
 
 
 class ManifestFilePlugin(IPlugin):
-    # Matches android:path which is set to "/"
-    uri_regex = r'android:path=[\'\"]/[\'\"]'
-    # Matches android:pathPrefix which is set to "/"
-    uri1_regex = r'android:pathPrefix=[\'\"]/[\'\"]'
-    permission_regex2 = r'grant-uri-permission|path-permission'
-    permission_regex1 = r'readPermission|writePermission|signature'
+
+    PATH_USAGE = r'android:path='
+    # Regex to check the launch mode of activity and task
+    LAUNCH_MODE = r'android:launchMode=[\'\"]singleTask[\'\"]'
+    TASK_REPARENTING = r'android:allowTaskReparenting=[\'\"]true[\'\"]'
+    RECEIVER_REGEX = r'<receiver.*?>'
+    PRIORITY_REGEX = r'priority'
+
+    def __init__(self):
+        self.name = 'Manifest File Checks'
+
+    def UserCreatedReceivers(self):
+        return re.findall(self.RECEIVER_REGEX, common.manifest)
 
     def target(self, queue):
         f = str(common.manifest)
-        # plugin scan results
         res = []
         count = 0
+        ordered_broadcast = []
+        path_variable_list =[]
+        launch_mode_list =[]
         global fileName
         # full path to app manifest
         fileName = qarkMain.find_manifest_in_source()
+
+        receivers = self.UserCreatedReceivers()
+        for receiver in receivers:
+            if "exported" and "true" in str(receiver):
+                if not any(re.findall(self.PRIORITY_REGEX, str(receiver))):
+                    ordered_broadcast.append(str(receiver))
+
+        # Arrange exported broadcast receiver without priority set in column format
+        list_orderedBR = " \n".join(ordered_broadcast)
+        if ordered_broadcast:
+            PluginUtil.reportWarning(fileName, self.OrderedBroadcastIssueDetails(list_orderedBR), res)
+
         for line in f.splitlines():
             count += 1
             # update progress bar
-            pub.sendMessage('progress', bar=self.getName(), percent=round(count * 100 / len(f.splitlines())))
-            if "provider" in line:
-                if "exported" and "true" in line:
-                    if not any(re.findall(self.permission_regex1, line)):
-                        PluginUtil.reportIssue(fileName, self.createIssueDetails(line), res)
+            pub.sendMessage('progress', bar=self.name, percent=round(count * 100 / len(f.splitlines())))
 
-        for line in f.splitlines():
-            if any(re.findall(self.permission_regex2, line)):
-                if re.findall(self.uri_regex, line) or re.findall(self.uri1_regex, line):
-                    PluginUtil.reportIssue(fileName, self.createIssueDetails1(line), res)
+            if any(re.findall(self.PATH_USAGE, line)):
+                path_variable_list.append(line)
+
+            if any(re.findall(self.LAUNCH_MODE, line)):
+                launch_mode_list.append(line)
+
+            if any(re.findall(self.TASK_REPARENTING, line)):
+                PluginUtil.reportInfo(fileName, self.TaskReparentingIssue(fileName), res)
+
+        # Arrange identified path variable and launch mode usage in column format
+        path_variable = " \n".join(path_variable_list)
+        launch_mode_variable = "\n".join(launch_mode_list)
+
+        if path_variable_list:
+            PluginUtil.reportWarning(fileName, self.PathUsageIssue(path_variable), res)
+
+        if launch_mode_list:
+            PluginUtil.reportInfo(fileName, self.LaunchModeIssue(launch_mode_variable), res)
 
         # Check for google safebrowsing API
         if "WebView" in f.splitlines():
             if "EnableSafeBrowsing" and "true" not in f.splitlines():
-                PluginUtil.reportIssue(fileName, self.createIssueDetails2(fileName), res)
+                PluginUtil.reportInfo(fileName, self.SafebrowsingIssueDetails(fileName), res)
 
         # send all results back to main thread
         queue.put(res)
 
-    def createIssueDetails(self, line):
-        return '%s \nIf your content provider is just for your apps use then set it to be android:exported=false in the manifest.\n' \
-               'If you are intentionally exporting the content provider then you should also specify one or more permissions for reading and writing. \n'\
-                'If you are using a content provider for sharing data between only your own apps, ' \
-                'it is preferable to use the android:protectionLevel attribute set to signature protection. \n'\
-               % line
+    def OrderedBroadcastIssueDetails(self, list_orderedBR):
+        return 'Data Injection due to exported Broadcast Receiver. ' \
+               'Default priority of exported receiver is 0. Since, the higher priority receivers respond first' \
+               ' and forward it to lower priority receivers, a malicious receiver with high priority can intercept the ' \
+               'message change it and forward it to lower priority receivers.\n%s\n' \
+               % list_orderedBR
 
-    def createIssueDetails1(self, line):
-        return '%s \nInsecure path permission set in the manifest.\n' \
-               'If path prefix / means entire file system of android has access.\n' \
-               % line
-
-    def createIssueDetails2(self, fileName):
+    def SafebrowsingIssueDetails(self, fileName):
         return 'To provide users with a safer browsing experience, you can configure your apps' \
                 'WebView objects to verify URLs using Google Safe Browsing. \n When this security measure is enabled,'\
-                'your app shows users a warning when they attempt to navigate to a potentially unsafe website. \n %s'\
+                'your app shows users a warning when they attempt to navigate to a potentially unsafe website. \n %s\n'\
                % fileName
 
+    def LaunchModeIssue(self, fileName):
+        return 'android:launchMode="singleTask". ' \
+               'This results in AMS either resuming the earlier activity' \
+               ' or loads it in a task with same affinity or' \
+               'the activity is started as a new task. This may result in Task Poisoning. \n' \
+               'https://www.usenix.org/system/files/conference/usenixsecurity15/sec15-paper-ren-chuangang.pdf \n%s \n ' \
+               % fileName
+
+    def TaskReparentingIssue(self, line):
+        return 'android:allowTaskReparenting="true".\n' \
+               'This allows an existing activity to be reparented to a new native task' \
+               ' i.e task having the same affinity as the activity.\n' \
+               'This may lead to UI spoofing attack on this application. \n' \
+               'https://www.usenix.org/system/files/conference/usenixsecurity15/sec15-paper-ren-chuangang.pdf \n%s \n ' \
+               % fileName
+
+    def PathUsageIssue(self, line):
+        return 'Be careful with the use of android:path in the <path-permission> tag\n' \
+               'android:path means that the permission applies to the exact path declared in android:path. This expression does not protect the sub-directories\n%s \n ' \
+               % line
+
     def getName(self):
-        # The name to be displayed against the progressbar
-        return "Insecure Content Provider"
+        return "Manifest File Checks"
 
     def getCategory(self):
         # Currently unused, but will be used later for clubbing issues from a specific plugin (when multiple plugins run at the same time)

@@ -6,5 +6,7 @@ Module = Manifest_File_Checks
 Author = Sarvesh Kapre
 Version = 0.1
 Website = https://github.com/linkedin/qark/
-Description = Content Provider not secure enough, Path permission in Content Provider, Attacking Content Provider,
-                Google SafeBrowsing API check
+Description = Verifies if the following checks are properly implemented
+                Inappropriate use of path variable such as "path" and "pathPrefix" to grant permissions
+                Detects Task poisoning and UI Spoofying potential issues
+                Checks if the application is vulnerable to data injection by abusing ordered broadcast feature

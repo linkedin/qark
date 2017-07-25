@@ -6,4 +6,5 @@ Module = Dynamically_Loading_Code
 Author = Sarvesh Kapre
 Version = 0.1
 Website = https://github.com/linkedin/qark/
-Description = Checks for code which is loaded at runtime
+Description =   1. Checks for loadClass method which loads code dynamically at runtime
+                2. Checks if the application register's a broadcast receiver dynamically

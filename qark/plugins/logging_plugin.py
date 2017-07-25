@@ -9,26 +9,29 @@ from lib.pubsub import pub
 import lib.plyj.parser as plyj
 import lib.plyj.model as m
 
+
 class LoggingIssuesPlugin(IPlugin):
 
     debug_regex = r'Log\.d'
     verbose_regex = r'Log\.v'
 
+    def __init__(self):
+        self.name = 'Detect exposed logs'
+
     def target(self, queue):
-        # get all decompiled files that contains usage of WebView
         files = common.java_files
-        global parser, tree, fileName, verbose, debug, string_filename_d, string_filename_v
+        global parser, tree, fileName, verbose, debug, debug_logs_path, verbose_logs_path
         parser = plyj.Parser()
-        len_d = []
-        len_v = []
-        len_filename_d = []
-        len_filename_v = []
+        debug_logs = []
+        verbose_logs = []
+        discovered_debug_logs = []
+        discovered_verbose_logs = []
         res = []
         tree = ''
         count = 0
         for f in files:
             count += 1
-            pub.sendMessage('progress', bar=self.getName(), percent=round(count * 100 / len(files)))
+            pub.sendMessage('progress', bar=self.name, percent=round(count * 100 / len(files)))
             fileName = str(f)
             try:
                 tree = parser.parse_file(f)
@@ -41,73 +44,72 @@ class LoggingIssuesPlugin(IPlugin):
                         for t in type_decl.body:
                             if type(t) is m.MethodDeclaration:
                                 if str(t.name) == 'v':
-                                    len_v.append(str(t.name))
-                                    len_filename_v.append(fileName)
+                                    verbose_logs.append(str(t.name))
+                                    discovered_verbose_logs.append(fileName)
                                 elif str(t.name) == 'd':
-                                        len_d.append(str(t.name))
-                                        len_filename_d.append(fileName)
-            except Exception as e:
+                                        debug_logs.append(str(t.name))
+                                        discovered_debug_logs.append(fileName)
+            except Exception:
                 continue
 
         # Join all the filename and path containing debug and verbose logging
-        string_filename_d = " \n".join(len_filename_d)
-        string_filename_v = " \n".join(len_filename_v)
+        debug_logs_path = " \n".join(discovered_debug_logs)
+        verbose_logs_path = " \n".join(discovered_verbose_logs)
         queue.put(res)
 
-        if len(len_filename_d) > 0:
-            PluginUtil.reportIssue(fileName, self.createIssueDetails2(string_filename_d), res)
+        if discovered_debug_logs:
+            PluginUtil.reportInfo(fileName, self.DebugLogsIssueDetails(debug_logs_path), res)
 
-        if len(len_filename_v) > 0:
-            PluginUtil.reportIssue(fileName, self.createIssueDetails3(string_filename_v), res)
+        if discovered_verbose_logs:
+            PluginUtil.reportInfo(fileName, self.VerboseLogsIssueDetails(verbose_logs_path), res)
 
-        # Give the count of verbose/debug logs.
+        # Provide the count of verbose/debug logs.
         # Written separately so that issue description is mentioned once and not repeated for each warning.
-        if len(len_d) > 0 or len(len_v) > 0:
-            x = str(len(len_d))
-            y = str(len(len_v))
-            PluginUtil.reportIssue(fileName, self.createIssueDetails1((x, y)), res)
+        if debug_logs or verbose_logs:
+            x = str(len(debug_logs))
+            y = str(len(verbose_logs))
+            PluginUtil.reportInfo(fileName, self.LogIssueDetails((x, y)), res)
 
         global reg, reg1, filename
         len_reg = []
         len_reg1 = []
         # Sometimes Log functions may be called from a constructor and hence maybe skipped by tree
-        if len(len_d) == 0 and len(len_v) == 0:
+        if len(debug_logs) == 0 and len(verbose_logs) == 0:
             for f in files:
                 with open(f, 'r') as fi:
                     filename = fi.read()
                     file_name = str(f)
                 reg = re.findall(self.debug_regex, filename)
                 reg1 = re.findall(self.verbose_regex, filename)
-                if len(reg) > 0:
+                if reg:
                     len_reg.append(str(reg))
-                    PluginUtil.reportIssue(filename, self.createIssueDetails2(file_name), res)
-                if len(reg1) > 0:
+                    PluginUtil.reportInfo(filename, self.DebugLogsIssueDetails(file_name), res)
+                if reg1:
                     len_reg1.append(str(reg1))
-                    PluginUtil.reportIssue(filename, self.createIssueDetails3(file_name), res)
+                    PluginUtil.reportInfo(filename, self.VerboseLogsIssueDetails(file_name), res)
 
-        if len(len_reg) > 0 or len(len_reg1) > 0:
+        if len_reg or len_reg1:
             x = str(len(len_reg))
             y = str(len(len_reg1))
-            PluginUtil.reportIssue(filename, self.createIssueDetails1((x, y)), res)
+            PluginUtil.reportInfo(filename, self.LogIssueDetails((x, y)), res)
 
-    def createIssueDetails2(self, string_filename_d):
-        return 'Debug logs are detected in file: \n %s.\n' \
+    def DebugLogsIssueDetails(self, string_filename_d):
+        return 'Debug logs are detected in file: \n%s.\n' \
                % string_filename_d
 
-    def createIssueDetails3(self, fileName):
-        return 'Verbose logs are detected in file: \n %s.\n' \
+    def VerboseLogsIssueDetails(self, fileName):
+        return 'Verbose logs are detected in file: \n%s.\n' \
                % fileName
 
-    def createIssueDetails1(self, (x, y)):
+    def LogIssueDetails(self, (x, y)):
         return 'This may allow potential leakage of information from Android applications. \n' \
                'Verbose/Debug should never be compiled into an application except during development \n'\
                'https://developer.android.com/reference/android/util/Log.html \n' \
-               ' %s debug logs and %s verbose logs were found in the application' \
+               '%s debug logs and %s verbose logs were found in the application\n' \
                % (x, y)
 
     def getName(self):
-        # The name to be displayed against the progressbar
-        return "Logging functions detected"
+        return "Detect exposed logs"
 
     def getCategory(self):
         # Currently unused, but will be used later for clubbing issues from a specific plugin (when multiple plugins run at the same time)

@@ -6,4 +6,4 @@ Module = http_url_hardcoded
 Author = Sarvesh Kapre
 Version = 0.1
 Website = https://github.com/linkedin/qark/
-Description = Checks for hardcoded http url's
+Description = Verifies, if the application has any hardcoded http uri's stored in it.
