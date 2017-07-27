@@ -29,39 +29,39 @@ def test_check_perm_regex7():
 
 def test_enforce_perm_regex():
     text = 'enforceCallingOrSelfPermission'
-    assert PluginUtil.contains(plugin.permission_regex1, text) is True
+    assert PluginUtil.contains(plugin.ENFORCE_PERMISSION, text) is True
 
 def test_enforce_perm_regex1():
     text = 'enforceCallingOrSelfUriPermission'
-    assert PluginUtil.contains(plugin.permission_regex1, text) is True
+    assert PluginUtil.contains(plugin.ENFORCE_PERMISSION, text) is True
 
 def test_enforce_perm_regex2():
     text = 'enforcePermission'
-    assert PluginUtil.contains(plugin.permission_regex1, text) is True
+    assert PluginUtil.contains(plugin.ENFORCE_PERMISSION, text) is True
 
 def test_enforce_perm_regex3():
     text = 'EnforceCallingOrSelfPermission'
-    assert PluginUtil.contains(plugin.permission_regex1, text) is False
+    assert PluginUtil.contains(plugin.ENFORCE_PERMISSION, text) is False
 
 def test_enforce_perm_regex4():
     text = 'enforceCalling'
-    assert PluginUtil.contains(plugin.permission_regex1, text) is False
+    assert PluginUtil.contains(plugin.ENFORCE_PERMISSION, text) is False
 
 def test_enforce_perm_regex5():
     text = 'enforceCallingOrSelfPermission("santos.benign.permission","Not allowed to start MyService")'
-    assert PluginUtil.contains(plugin.permission_regex1, text) is True
+    assert PluginUtil.contains(plugin.ENFORCE_PERMISSION, text) is True
 
 def test_enforce_perm_regex6():
     text = 'enforceCallingPermission'
-    assert PluginUtil.contains(plugin.permission_regex1, text) is False
+    assert PluginUtil.contains(plugin.ENFORCE_PERMISSION, text) is False
 
 def test_enforce_perm_regex7():
     text = 'enforceCallingOrSelfUriPermission("santos.benign.permission","Not allowed to start MyService")'
-    assert PluginUtil.contains(plugin.permission_regex1, text) is True
+    assert PluginUtil.contains(plugin.ENFORCE_PERMISSION, text) is True
 
 def test_enforce_perm_regex8():
     text = 'enforcePermission("santos.benign.permission","Not allowed to start MyService")'
-    assert PluginUtil.contains(plugin.permission_regex1, text) is True
+    assert PluginUtil.contains(plugin.ENFORCE_PERMISSION, text) is True
 
 
 if __name__ == '__main__':
