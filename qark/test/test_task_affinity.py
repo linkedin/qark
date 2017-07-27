@@ -24,7 +24,7 @@ def test_regex4():
     assert PluginUtil.contains(plugin.MULTIPLE_TASK, text) is False
 
 def test_regex5():
-    text = 'intent.setFlags(IntentFLAG_ACTIVITY_MULTIPLE_TASK);'
+    text = 'intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);'
     assert PluginUtil.contains(plugin.MULTIPLE_TASK, text) is False
 
 
