@@ -1,7 +1,7 @@
 from plugins import PluginUtil
-from plugins.task_affinity import TaskAffinityPlugin
+from plugins.task_affinity import WebViewChecksPlugin
 
-plugin = TaskAffinityPlugin()
+plugin = WebViewChecksPlugin()
 
 def test_regex1():
     text = 'setJavaScriptEnabled(false)'
