@@ -1,0 +1,10 @@
+[Core]
+Name = Check logging Issues
+Module = Dynamically_Loading_Code
+
+[Documentation]
+Author = Sarvesh Kapre
+Version = 0.1
+Website = https://github.com/linkedin/qark/
+Description =   1. Checks for loadClass method which loads code dynamically at runtime
+                2. Checks if the application register's a broadcast receiver dynamically

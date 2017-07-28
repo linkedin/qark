@@ -16,3 +16,5 @@ parsetab.py
 sampleApps
 lextab.py
 qark/test/testData/*
+.idea
+.DS_Store

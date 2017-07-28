@@ -1,0 +1,9 @@
+[Core]
+Name = Check logging Issues
+Module = http_url_hardcoded
+
+[Documentation]
+Author = Sarvesh Kapre
+Version = 0.1
+Website = https://github.com/linkedin/qark/
+Description = Verifies, if the application has any hardcoded http uri's stored in it.

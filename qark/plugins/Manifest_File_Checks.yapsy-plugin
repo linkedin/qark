@@ -1,0 +1,12 @@
+[Core]
+Name = Additional checks in Manifest file
+Module = Manifest_File_Checks
+
+[Documentation]
+Author = Sarvesh Kapre
+Version = 0.1
+Website = https://github.com/linkedin/qark/
+Description = Verifies if the following checks are properly implemented
+                Inappropriate use of path variable such as "path" and "pathPrefix" to grant permissions
+                Detects Task poisoning and UI Spoofying potential issues
+                Checks if the application is vulnerable to data injection by abusing ordered broadcast feature
