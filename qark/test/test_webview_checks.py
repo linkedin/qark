@@ -1,5 +1,5 @@
 from plugins import PluginUtil
-from plugins.task_affinity import WebViewChecksPlugin
+from plugins.webview_checks import WebViewChecksPlugin
 
 plugin = WebViewChecksPlugin()
 
