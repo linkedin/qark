@@ -13,6 +13,7 @@ class InsecureFunctionsPlugin(IPlugin):
     def __init__(self):
         self.name = 'Insecure functions'
 
+    # recursive function to check for the function name by traversing down the AST
     def recursive_insecure_call_function(self, t, filename, res):
 
         if type(t) is m.MethodDeclaration:
@@ -54,7 +55,6 @@ class InsecureFunctionsPlugin(IPlugin):
                                 common.logger.error(
                                     "Unable to run insecure function plugin " + str(e))
 
-            # This will check if app register's a broadcast receiver dynamically
             except Exception:
                 continue
         queue.put(res)
