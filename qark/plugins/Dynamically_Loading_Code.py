@@ -5,15 +5,50 @@ from plugins import PluginUtil
 from modules import common
 from lib.pubsub import pub
 import lib.plyj.parser as plyj
+import lib.plyj.model as m
 
 
 class DynamicallyLoadingCodePlugin(IPlugin):
     DEX_CLASS_LOADER = r'DexClassLoader'
     CLASS_LOADER = r'loadClass'
     DYNAMIC_BROADCAST_RECEIVER = r'registerReceiver'
+    global list_BR
+    list_BR = []
 
     def __init__(self):
         self.name = 'Dynamically loading code'
+
+    # recursive function to find the loadclass function name by traversing down the AST
+    def recursive_classloader_function(self, t, filename, res):
+        if type(t) is m.MethodDeclaration:
+            if str(t.name) == self.CLASS_LOADER:
+                PluginUtil.reportInfo(fileName, self.DexClassLoaderIssueDetails(fileName), res)
+            # if the function name is not found this might give a try to search the content of the method to avoid false neagtive
+            elif self.CLASS_LOADER in str(t):
+                PluginUtil.reportInfo(fileName, self.DexClassLoaderIssueDetails(fileName), res)
+
+        elif type(t) is list:
+            for x in t:
+                self.recursive_classloader_function(x, filename, res)
+        elif hasattr(t, '_fields'):
+            for f in t._fields:
+                self.recursive_classloader_function(getattr(t, f), filename, res)
+        return
+
+    # recursive function to find the register receiver function name by traversing down the AST
+    def recursive_register_receiver_function(self, t, filename, res):
+
+        if type(t) is m.MethodDeclaration:
+            if str(t.name) == self.DYNAMIC_BROADCAST_RECEIVER:
+                list_BR.append(fileName)
+
+        elif type(t) is list:
+            for x in t:
+                self.recursive_register_receiver_function(x, filename, res)
+        elif hasattr(t, '_fields'):
+            for f in t._fields:
+                self.recursive_register_receiver_function(getattr(t, f), filename, res)
+        return
 
     def target(self, queue):
         files = common.java_files
@@ -23,7 +58,7 @@ class DynamicallyLoadingCodePlugin(IPlugin):
         res = []
 
         #List of Broadcast Receiver
-        list_BR = []
+
         count = 0
         for f in files:
             count += 1
@@ -36,8 +71,14 @@ class DynamicallyLoadingCodePlugin(IPlugin):
             try:
                 for import_decl in tree.import_declarations:
                     if self.DEX_CLASS_LOADER in import_decl.name.value:
-                        if self.CLASS_LOADER in str(tree):
-                            PluginUtil.reportInfo(fileName, self.DexClassLoaderIssueDetails(fileName), res)
+                        for type_decl in tree.type_declarations:
+                            if type(type_decl) is m.ClassDeclaration:
+                                for t in type_decl.body:
+                                    try:
+                                        self.recursive_classloader_function(t, f, res)
+                                    except Exception as e:
+                                        common.logger.error(
+                                            "Unable to run class loader plugin " + str(e))
 
                 # This will check if app register's a broadcast receiver dynamically
                 if self.DYNAMIC_BROADCAST_RECEIVER in str(tree):
@@ -46,6 +87,19 @@ class DynamicallyLoadingCodePlugin(IPlugin):
             except Exception:
                 continue
 
+            try:
+                for type_decl in tree.type_declarations:
+                    if type(type_decl) is m.ClassDeclaration:
+                        for t in type_decl.body:
+                            try:
+                                self.recursive_register_receiver_function(t, f, res)
+                            except Exception as e:
+                                common.logger.error(
+                                    "Unable to run register receiver function plugin " + str(e))
+
+            # This will check if app register's a broadcast receiver dynamically
+            except Exception:
+                continue
         # Arrange the Broadcast Receivers created Dynamically in column format and store it in the variable -> Broadcast_Receiver
         Broadcast_Receiver = "\n".join(list_BR)
 
