@@ -1,0 +1,10 @@
+[Core]
+Name = Check logging Issues
+Module = logging_plugin
+
+[Documentation]
+Author = Sarvesh Kapre
+Version = 0.1
+Website = https://github.com/linkedin/qark/
+Description = Checks for debug and verbose logging functions and motivates to maintain safe logging practices.
+                These logs may accidentally leak sensitive information and hence it's use must be monitored.
