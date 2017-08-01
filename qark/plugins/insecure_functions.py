@@ -15,7 +15,6 @@ class InsecureFunctionsPlugin(IPlugin):
 
     # recursive function to check for the function name by traversing down the AST
     def recursive_insecure_call_function(self, t, filename, res):
-
         if type(t) is m.MethodDeclaration:
             if str(t.name) == self.CALL_FUNCTION:
                 PluginUtil.reportInfo(fileName, self.InsecureFunctionIssueDetails(fileName), res)
