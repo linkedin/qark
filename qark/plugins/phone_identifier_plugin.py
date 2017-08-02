@@ -37,18 +37,18 @@ class PhoneIdentifierPlugin(IPlugin):
 
             # report if file contains inline call
             if PluginUtil.contains(self.inlineRegex, fileBody):
-                PluginUtil.reportIssue(fileName, self.createIssueDetails(fileName), res)
+                PluginUtil.reportInfo(fileName, self.PhoneIdentifierIssueDetails(fileName), res)
                 break
 
             # report if any TelephonyManager variables invokes calls to get phone identifiers
             for varName in PluginUtil.returnGroupMatches(self.varNameRegex, 2, fileBody):
                 if PluginUtil.contains(r'%s\.(getLine1Number|getDeviceId)\(.*?\)' % varName, fileBody):
-                    PluginUtil.reportIssue(fileName, self.createIssueDetails(fileName), res)
+                    PluginUtil.reportInfo(fileName, self.PhoneIdentifierIssueDetails(fileName), res)
                     break
 
         queue.put(res)
 
-    def createIssueDetails(self, fileName):
+    def PhoneIdentifierIssueDetails(self, fileName):
         return 'Access of phone number or IMEI, is detected in file: %s.\n' \
                'Avoid storing or transmitting this data.' \
                % fileName
