@@ -24,19 +24,19 @@ class AccessControlCheckPlugin(IPlugin):
         tree = ''
         res = []
         count = 0
-        for f in files:
+        for file in files:
             count += 1
             pub.sendMessage('progress', bar=self.name, percent=round(count * 100 / len(files)))
-            file_name = str(f)
+            file_name = str(file)
             try:
-                tree = parser.parse_file(f)
+                tree = parser.parse_file(file)
             except Exception:
                 continue
             try:
                 for import_decl in tree.import_declarations:
                     if 'Service' in import_decl.name.value:
-                        with open(str(file_name)) as file_body:
-                            data = str(file_body.read())
+                        with open(file_name, 'r') as f:
+                            data = f.read()
                         if PluginUtil.contains(self.CHECK_PERMISSION, data):
                             PluginUtil.reportWarning(file_name, self.check_permission_issue(file_name), res)
                             break
