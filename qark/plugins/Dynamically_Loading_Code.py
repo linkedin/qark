@@ -1,4 +1,6 @@
-import sys, os, re
+import sys
+import os
+import re
 sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)) + '../lib')
 from yapsy.IPlugin import IPlugin
 from plugins import PluginUtil
@@ -12,112 +14,108 @@ class DynamicallyLoadingCodePlugin(IPlugin):
     DEX_CLASS_LOADER = r'DexClassLoader'
     CLASS_LOADER = r'loadClass'
     DYNAMIC_BROADCAST_RECEIVER = r'registerReceiver'
-    global list_BR
-    list_BR = []
+    global receivers_list
+    receivers_list = []
 
     def __init__(self):
         self.name = 'Dynamically loading code'
 
     # recursive function to find the loadclass function name by traversing down the AST
-    def recursive_classloader_function(self, t, filename, res):
-        if type(t) is m.MethodDeclaration:
-            if str(t.name) == self.CLASS_LOADER:
-                PluginUtil.reportInfo(fileName, self.DexClassLoaderIssueDetails(fileName), res)
-                return
-            
-        elif type(t) is list:
-            for x in t:
-                self.recursive_classloader_function(x, filename, res)
-        elif hasattr(t, '_fields'):
-            for f in t._fields:
-                self.recursive_classloader_function(getattr(t, f), filename, res)
+    def recursive_classloader_function(self, fields, file, res):
+        if type(fields) is m.MethodDeclaration:
+            if str(fields.name) == self.CLASS_LOADER:
+                PluginUtil.reportInfo(file_name, self.class_loader_issue(file_name), res)
+            elif self.CLASS_LOADER in str(fields):
+                PluginUtil.reportInfo(file_name, self.class_loader_issue(file_name), res)
+        elif type(fields) is list:
+            for tree_object_fields in fields:
+                self.recursive_classloader_function(tree_object_fields, file, res)
+        elif hasattr(fields, '_fields'):
+            for values in fields._fields:
+                self.recursive_classloader_function(getattr(fields, values), file, res)
         return
 
     # recursive function to find the register receiver function name by traversing down the AST
-    def recursive_register_receiver_function(self, t, filename, res):
-
-        if type(t) is m.MethodDeclaration:
-            if str(t.name) == self.DYNAMIC_BROADCAST_RECEIVER:
-                list_BR.append(fileName)
-
-        elif type(t) is list:
-            for x in t:
-                self.recursive_register_receiver_function(x, filename, res)
-        elif hasattr(t, '_fields'):
-            for f in t._fields:
-                self.recursive_register_receiver_function(getattr(t, f), filename, res)
+    def recursive_register_receiver_function(self, fields, file, res):
+        if type(fields) is m.MethodDeclaration:
+            if str(fields.name) == self.DYNAMIC_BROADCAST_RECEIVER:
+                receivers_list.append(file_name)
+            elif self.DYNAMIC_BROADCAST_RECEIVER in str(fields):
+                if file_name not in receivers_list:
+                    receivers_list.append(file_name)
+        elif type(fields) is list:
+            for tree_object_fields in fields:
+                self.recursive_register_receiver_function(tree_object_fields, file, res)
+        elif hasattr(fields, '_fields'):
+            for values in fields._fields:
+                self.recursive_register_receiver_function(getattr(fields, values), file, res)
         return
 
     def target(self, queue):
         files = common.java_files
-        global parser, tree, fileName
+        global parser, tree, file_name
         parser = plyj.Parser()
         tree = ''
         res = []
-        #List of Broadcast Receiver
-        list_BR = []
-
         count = 0
-        for f in files:
+        for file in files:
             count += 1
             pub.sendMessage('progress', bar=self.name, percent=round(count * 100 / len(files)))
-            fileName = str(f)
+            file_name = str(file)
             try:
-                tree = parser.parse_file(f)
+                # Parse the java file to an AST
+                tree = parser.parse_file(file)
             except Exception:
                 continue
 
             try:
                 for import_decl in tree.import_declarations:
+                    # Check if DexClassLoader is called in the import statement; example import dalvik.system.DexClassLoader
                     if self.DEX_CLASS_LOADER in import_decl.name.value:
                         for type_decl in tree.type_declarations:
+                            # Check class declaration within the java source code
                             if type(type_decl) is m.ClassDeclaration:
-                                for t in type_decl.body:
+                                # Traverse through every field declared in the class
+                                for fields in type_decl.body:
                                     try:
-                                        self.recursive_classloader_function(t, f, res)
+                                        self.recursive_classloader_function(fields, file, res)
                                     except Exception as e:
                                         common.logger.error(
                                             "Unable to run class loader plugin " + str(e))
-
-                        if self.CLASS_LOADER in str(tree):
-                            PluginUtil.reportInfo(fileName, self.DexClassLoaderIssueDetails(fileName), res)
-
-                # This will check if app register's a broadcast receiver dynamically
-                if self.DYNAMIC_BROADCAST_RECEIVER in str(tree):
-                    list_BR.append(fileName)
-
             except Exception:
                 continue
 
             try:
                 for type_decl in tree.type_declarations:
+                    # Check class declaration within the java source code
                     if type(type_decl) is m.ClassDeclaration:
-                        for t in type_decl.body:
+                        # Traverse through every field declared in the class
+                        for fields in type_decl.body:
                             try:
-                                self.recursive_register_receiver_function(t, f, res)
+                                self.recursive_register_receiver_function(fields, file, res)
                             except Exception as e:
                                 common.logger.error(
                                     "Unable to run register receiver function plugin " + str(e))
 
-            # This will check if app register's a broadcast receiver dynamically
             except Exception:
                 continue
 
         # Arrange the Broadcast Receivers created Dynamically in column format and store it in the variable -> Broadcast_Receiver
-        Broadcast_Receiver = "\n".join(list_BR)
+        broadcast_receiver = "\n".join(receivers_list)
 
-        if list_BR:
-            PluginUtil.reportWarning(fileName, self.BroadcastReceiverIssueDetails(Broadcast_Receiver), res)
+        if receivers_list:
+            # Report the issue in the file and display it on the terminal
+            PluginUtil.reportWarning(file_name, self.broadcast_receiver_issue(broadcast_receiver), res)
 
         queue.put(res)
 
-    def DexClassLoaderIssueDetails(self, fileName):
+    def class_loader_issue(self, file_name):
         return 'Application dynamically load an external class through DexClassLoader\n%s\n' \
                'Even though this may not be a security issue always, be careful with what you are loading. \n' \
                'https://developer.android.com/reference/dalvik/system/DexClassLoader.html \n' \
-               % fileName
+               % file_name
 
-    def BroadcastReceiverIssueDetails(self, Broadcast_Receiver):
+    def broadcast_receiver_issue(self, Broadcast_Receiver):
         return 'Application dynamically registers a broadcast receiver\n' \
                'Application that register a broadcast receiver dynamically is vulnerable to granting unrestricted access to the broadcast receiver. \n' \
                'The receiver will be called with any broadcast Intent that matches filter.\n' \

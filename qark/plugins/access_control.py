@@ -1,4 +1,6 @@
-import sys, os, re
+import sys
+import os
+import re
 sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)) + '../lib')
 from yapsy.IPlugin import IPlugin
 from plugins import PluginUtil
@@ -17,7 +19,7 @@ class AccessControlCheckPlugin(IPlugin):
 
     def target(self, queue):
         files = common.java_files
-        global parser, tree, fileName
+        global parser, tree, file_name
         parser = plyj.Parser()
         tree = ''
         res = []
@@ -25,7 +27,7 @@ class AccessControlCheckPlugin(IPlugin):
         for f in files:
             count += 1
             pub.sendMessage('progress', bar=self.name, percent=round(count * 100 / len(files)))
-            fileName = str(f)
+            file_name = str(f)
             try:
                 tree = parser.parse_file(f)
             except Exception:
@@ -33,19 +35,20 @@ class AccessControlCheckPlugin(IPlugin):
             try:
                 for import_decl in tree.import_declarations:
                     if 'Service' in import_decl.name.value:
-                        fileBody = str(open(fileName, 'r').read())
-                        if PluginUtil.contains(self.CHECK_PERMISSION, fileBody):
-                            PluginUtil.reportWarning(fileName, self.CheckPermissionIssueDetails(fileName), res)
+                        with open(str(file_name)) as file_body:
+                            data = str(file_body.read())
+                        if PluginUtil.contains(self.CHECK_PERMISSION, data):
+                            PluginUtil.reportWarning(file_name, self.check_permission_issue(file_name), res)
                             break
-                        if PluginUtil.contains(self.ENFORCE_PERMISSION, fileBody):
-                            PluginUtil.reportWarning(fileName, self.EnforcePermissionIssueDetails(fileName), res)
+                        if PluginUtil.contains(self.ENFORCE_PERMISSION, data):
+                            PluginUtil.reportWarning(file_name, self.enforce_permission_issue(file_name), res)
                             break
             except Exception:
                 continue
 
         queue.put(res)
 
-    def CheckPermissionIssueDetails(self, fileName):
+    def check_permission_issue(self, file_name):
         return 'Inappropriate use of Check Permissions \n' \
                'These functions should be used with care as they can grant access ' \
                'to malicious applications, lacking the appropriate permissions, by assuming your applications permissions.' \
@@ -53,14 +56,14 @@ class AccessControlCheckPlugin(IPlugin):
                'permission to get access to otherwise denied resources. This can result in what is known as the confused deputy attack.' \
                'Use - checkCallingPermission instead.\n%s.\n' \
                'Reference: https://developer.android.com/reference/android/content/Context.html#checkCallingOrSelfPermission(java.lang.String)\n' \
-               % fileName
+               % file_name
 
-    def EnforcePermissionIssueDetails(self, fileName):
+    def enforce_permission_issue(self, file_name):
         return 'Inappropriate use of Enforce Permissions \n ' \
                'App is vulnerable to Privilege escalation or Confused Deputy Attack. \n' \
                'Use - enforceCallingPermission instead. This is done to protect against accidentally leaking permissions.\n%s.\n' \
                'Reference: https://developer.android.com/reference/android/content/Context.html#enforceCallingOrSelfPermission(java.lang.String, java.lang.String)\n' \
-               % fileName
+               % file_name
 
     def getName(self):
         return "Access Control Checks"
