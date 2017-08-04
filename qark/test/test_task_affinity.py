@@ -5,28 +5,27 @@ plugin = TaskAffinityPlugin()
 
 def test_regex():
     text ='intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);'
-    assert PluginUtil.contains(plugin.NEW_TASK, text) is True
+    assert PluginUtil.contains(plugin.NEW_TASK, text)
 
 def test_regex1():
     text = 'intent.setFlags(Intent.FLAGACTIVITYNEWTASK);'
-    assert PluginUtil.contains(plugin.NEW_TASK, text) is False
+    assert not PluginUtil.contains(plugin.NEW_TASK, text)
 
 def test_regex2():
     text = 'intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);'
-    assert PluginUtil.contains(plugin.NEW_TASK, text) is False
+    assert not PluginUtil.contains(plugin.NEW_TASK, text)
 
 def test_regex3():
     text = 'intent.setFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);'
-    assert PluginUtil.contains(plugin.MULTIPLE_TASK, text) is True
+    assert PluginUtil.contains(plugin.MULTIPLE_TASK, text)
 
 def test_regex4():
     text = 'intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);'
-    assert PluginUtil.contains(plugin.MULTIPLE_TASK, text) is False
+    assert not PluginUtil.contains(plugin.MULTIPLE_TASK, text)
 
 def test_regex5():
     text = 'intent.setFlags(Intent.FLAGACTIVITYMULTIPLETASK);'
-    assert PluginUtil.contains(plugin.MULTIPLE_TASK, text) is False
-
+    assert not PluginUtil.contains(plugin.MULTIPLE_TASK, text)
 
 
 if __name__ == '__main__':

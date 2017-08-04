@@ -1,4 +1,6 @@
-import sys, os, re
+import sys
+import os
+import re
 
 sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)) + '../lib')
 
@@ -18,49 +20,50 @@ class TaskAffinityPlugin(IPlugin):
 
     def target(self, queue):
         files = common.java_files
-        global parser, tree, fileName
+        global parser, tree, file_name
         parser = plyj.Parser()
         tree = ''
         res = []
         count = 0
-        for f in files:
+        for file in files:
             count += 1
             pub.sendMessage('progress', bar=self.name, percent=round(count * 100 / len(files)))
-            fileName = str(f)
+            file_name = str(file)
             try:
-                tree = parser.parse_file(f)
+                tree = parser.parse_file(file)
             except Exception:
                 continue
 
             try:
                 for import_decl in tree.import_declarations:
+                    # Check if Intent is called in the import statement
                     if 'Intent' in import_decl.name.value:
-                        fileBody = str(open(fileName, 'r').read())
-                        if PluginUtil.contains(self.NEW_TASK, fileBody):
-                            PluginUtil.reportWarning(fileName, self.NewTaskIssueDetails(fileName), res)
+                        with open(file_name, 'r') as f:
+                            file_body = f.read()
+                        if PluginUtil.contains(self.NEW_TASK, file_body):
+                            PluginUtil.reportWarning(file_name, self.new_task_issue(file_name), res)
                             break
-                        if PluginUtil.contains(self.MULTIPLE_TASK_TASK, fileBody):
-                            PluginUtil.reportWarning(fileName, self.MultipleTaskIssueDetails(fileName), res)
+                        if PluginUtil.contains(self.MULTIPLE_TASK_TASK, file_body):
+                            PluginUtil.reportWarning(file_name, self.multiple_task_issue(file_name), res)
                             break
-
             except Exception:
                 continue
 
         queue.put(res)
 
-    def NewTaskIssueDetails(self, fileName):
+    def new_task_issue(self, file_name):
         return 'FLAG_ACTIVITY_NEW_TASK - intent flag is set. \n ' \
                'This results in activity being loaded as a part of a new task. This can' \
                ' be abused in the task hijacking attack. \n%s\n' \
                'Reference: https://www.usenix.org/system/files/conference/usenixsecurity15/sec15-paper-ren-chuangang.pdf\n' \
-               % fileName
+               % file_name
 
-    def MultipleTaskIssueDetails(self, fileName):
+    def multiple_task_issue(self, file_name):
         return 'FLAG_ACTIVITY_MULTIPLE_TASK - intent flag is set. \n ' \
                'This results in activity being loaded as a part of a new task. This can' \
                ' be abused in the task hijacking attack. \n%s\n' \
                'Reference: https://www.usenix.org/system/files/conference/usenixsecurity15/sec15-paper-ren-chuangang.pdf\n' \
-               % fileName
+               % file_name
 
     def getName(self):
         return "Task Hijacking"
