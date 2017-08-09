@@ -22,12 +22,12 @@ $ python qarkMain.py --source 2 -c /Users/foo/qark/sampleApps/goatdroid/goatdroi
 The sampleApps folder contains sample APKs that you can test against QARK
 
 
-##Requirements
+## Requirements
 - python 2.7.6
 - JRE 1.6+ (preferably 1.7+)
 - OSX or RHEL6.6 (Others may work, but not fully tested)
 
-##Documentation
+## Documentation
 
 QARK is an easy to use tool capable of finding common security vulnerabilities in Android applications. Unlike commercial products, it is 100% free to use. QARK features educational information allowing security reviewers to locate precise, in-depth explanations of the vulnerabilities. QARK automates the use of multiple decompilers, leveraging their combined outputs, to produce superior results, when decompiling APKs. Finally, the major advantage QARK has over traditional tools, that just point you to possible vulnerabilities, is that it can produce ADB commands, or even fully functional APKs, that turn hypothetical vulnerabilities into working "POC" exploits.
 
@@ -50,7 +50,7 @@ Included in the types of security vulnerabilities this tool attempts to find are
 - Apps which are debuggable
 - Apps supporting outdated API versions, with known vulnerabilities
 
-##Roadmap
+## Roadmap
 Things that are coming soon:
 - Rewrite of code to support extensibility
 - Bound Service vulnerability detection and exploitation
@@ -60,7 +60,7 @@ Things that are coming soon:
 - File browser capable of using root permissions
 
 
-##Notice
+## Notice
 
 Note: QARK decompiles Android applications back to raw source code. Please do not use this tool if this may be considered illegal in your juristdiction. If you are unsure, seek legal counsel.
 
@@ -69,12 +69,12 @@ likely due to your Python/OpenSSL configuration and the fact that recent changes
 Python installation(s) and re-installing from source may fix your issues.
 
 
-##License
+## License
 Copyright 2015 LinkedIn Corp.  All rights reserved.
 
 Copyright 2015 LinkedIn Corp. Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.  You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software  distributed under the License is distributed on an "AS IS" BASIS,  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 
-##Recent Updates
+## Recent Updates
 Qark has recently been refactored. qark.py has been renamed to qarkMain.py and is now packagable and runnable from other processes via the runAutomated function in qarkMain.py
