@@ -13,7 +13,6 @@ import lib.plyj.model as m
 
 
 class WebViewChecksPlugin(IPlugin):
-
     JAVASCRIPT_ENABLED = r'setJavaScriptEnabled\(true\)'
     LOAD_URL_HTTP = r'loadUrl\([\'\"]http:'
     ALLOW_CONTENT_ACCESS = r'setAllowContentAccess\(true\)'
@@ -30,7 +29,7 @@ class WebViewChecksPlugin(IPlugin):
         global file_name
         tree = ''
         res = []
-        issues_list =[]
+        issues_list = []
         count = 0
         for file in files:
             count += 1
@@ -61,7 +60,6 @@ class WebViewChecksPlugin(IPlugin):
 
                         if PluginUtil.contains(self.LOAD_URL_HTTP, data):
                             PluginUtil.reportWarning(file_name, self.load_http_urls(file_name), res)
-
                         break
 
             except Exception:
@@ -77,19 +75,21 @@ class WebViewChecksPlugin(IPlugin):
                                     if type(fields) is m.MethodDeclaration:
                                         if 'shouldOverrideUrlLoading' in fields.name:
                                             if 'true' not in str(fields.body):
-                                                PluginUtil.reportWarning(file_name, self.url_override_issue(file_name), res)
+                                                PluginUtil.reportWarning(file_name, self.url_override_issue(file_name),
+                                                                         res)
                                                 break
                                             else:
                                                 continue
                                         if 'shouldInterceptRequest' in fields.name:
                                             if 'null' in str(fields.body):
-                                                PluginUtil.reportWarning(file_name, self.intercept_request_issue(file_name), res)
+                                                PluginUtil.reportWarning(file_name,
+                                                                         self.intercept_request_issue(file_name), res)
                                                 break
                                             else:
                                                 continue
                         break
 
-            except Exception as e:
+            except Exception:
                 continue
 
         if issues_list:
@@ -99,36 +99,35 @@ class WebViewChecksPlugin(IPlugin):
         queue.put(res)
 
     def load_http_urls(self, file_name):
-        return 'If WebView is allowing to load clear-text content from the Internet\n ' \
-               'then it would be open to various forms of attack such as MiTM. \n%s\n' \
-                % file_name
+        string = ("Webview is loading http urls\nIf WebView is allowing to load clear-text content"
+                  " from the Internet then it would be open to various forms of attack such as MiTM.\nFilepath: {}\n")
+        return string.format(file_name)
 
     def mixed_content_issue(self, file_name):
-        return 'Usage of setMixedContentMode is found\n' \
-               'In this mode, the WebView will allow a secure origin to load content ' \
-               'from any other origin, even if that origin is insecure. ' \
-               'This is the least secure mode of operation for the WebView, ' \
-               'and where possible apps should not set this mode.\n ' \
-               'https://developer.android.com/reference/android/webkit/WebSettings.html#MIXED_CONTENT_ALWAYS_ALLOW \n%s\n'\
-                % file_name
+        string = ("Usage of setMixedContentMode is found\n"
+                  "In this mode, the WebView will allow a secure origin to load content from"
+                  " any other origin, even if that origin is insecure. This is the least secure"
+                  " mode of operation for the WebView, and where possible apps should not set this mode.\n"
+                  "Reference: https://developer.android.com/reference/android/webkit/WebSettings.html#MIXED_CONTENT_ALWAYS_ALLOW \nFilepath: {}\n")
+        return string.format(file_name)
 
     def secure_content_issue(self, issue_name):
-        return 'File System Access is by default enabled\n' \
-               'setAllowFileAccess() and setAllowContentAccess() are by default true. ' \
-               'This should be set to false to restrict access to local data since it is used to display content from locally stored HTML ' \
-               'or fetch HTML and other content from the server.\n' \
-               'https://developer.android.com/reference/android/webkit/WebSettings.html \n%s\n' \
-                % issue_name
+        string = ("File System Access is by default enabled\n"
+                  "setAllowFileAccess() and setAllowContentAccess() are by default true. This should"
+                  " be set to false to restrict access to local data since it is used to display"
+                  " content from locally stored HTML or fetch HTML and other content from the server.\n"
+                  "Reference: https://developer.android.com/reference/android/webkit/WebSettings.html\nFilepath: {}\n")
+        return string.format(issue_name)
 
     def url_override_issue(self, file_name):
-        return 'Improper implementation of shouldOverrideUrlLoading method\n' \
-               'This incorrect implementation allows any url to load in the webview \n%s\n' \
-                % file_name
+        string = ("Improper implementation of shouldOverrideUrlLoading method\n"
+                  "This incorrect implementation allows any url to load in the webview\nFilepath: {}\n")
+        return string.format(file_name)
 
     def intercept_request_issue(self, file_name):
-        return 'Improper implementation of shouldInterceptRequest method\n' \
-               'Returning null allows any url to load in the webview \n%s\n' \
-                % file_name
+        string = ("Improper implementation of shouldInterceptRequest method\n"
+                  "Returning null allows any url to load in the webview\nFilepath: {}\n")
+        return string.format(file_name)
 
     def getName(self):
         return "Webview Issues"
