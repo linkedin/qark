@@ -34,8 +34,9 @@ class ExternalStorageCheckPlugin(IPlugin):
             file_name = str(file)
             try:
                 tree = parser.parse_file(file)
-            except Exception:
-                continue
+            except Exception as e:
+                common.logger.exception(
+                    "Unable to parse tree for the file " + file_name)
             try:
                 for import_decl in tree.import_declarations:
                     if 'File' in import_decl.name.value:
