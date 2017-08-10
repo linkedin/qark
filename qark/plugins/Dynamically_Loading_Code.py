@@ -99,7 +99,7 @@ class DynamicallyLoadingCodePlugin(IPlugin):
                                         common.logger.error(
                                             "Unable to run class loader plugin " + str(e))
             except Exception:
-                continue
+                pass
 
             try:
                 for type_decl in tree.type_declarations:
@@ -114,7 +114,7 @@ class DynamicallyLoadingCodePlugin(IPlugin):
                                     "Unable to run register receiver function plugin " + str(e))
 
             except Exception:
-                continue
+                pass
 
         # Arrange the Broadcast Receivers created Dynamically in column format and store it in the variable -> Broadcast_Receiver
         br_list = "\n".join(receivers_list)
