@@ -38,17 +38,17 @@ class AccessControlCheckPlugin(IPlugin):
                         with open(file_name, 'r') as f:
                             data = f.read()
                         if PluginUtil.contains(self.CHECK_PERMISSION, data):
-                            PluginUtil.reportWarning(file_name, self.check_permission_issue(file_name), res)
+                            PluginUtil.reportWarning(file_name, self.check_permission(file_name), res)
                             break
                         if PluginUtil.contains(self.ENFORCE_PERMISSION, data):
-                            PluginUtil.reportWarning(file_name, self.enforce_permission_issue(file_name), res)
+                            PluginUtil.reportWarning(file_name, self.enforce_permission(file_name), res)
                             break
             except Exception:
                 continue
 
         queue.put(res)
 
-    def check_permission_issue(self, file_name):
+    def check_permission(self, file_name):
         return 'Inappropriate use of Check Permissions \n' \
                'These functions should be used with care as they can grant access ' \
                'to malicious applications, lacking the appropriate permissions, by assuming your applications permissions.' \
@@ -58,7 +58,7 @@ class AccessControlCheckPlugin(IPlugin):
                'Reference: https://developer.android.com/reference/android/content/Context.html#checkCallingOrSelfPermission(java.lang.String)\n' \
                % file_name
 
-    def enforce_permission_issue(self, file_name):
+    def enforce_permission(self, file_name):
         return 'Inappropriate use of Enforce Permissions \n ' \
                'App is vulnerable to Privilege escalation or Confused Deputy Attack. \n' \
                'Use - enforceCallingPermission instead. This is done to protect against accidentally leaking permissions.\n%s.\n' \
