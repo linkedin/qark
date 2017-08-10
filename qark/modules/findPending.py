@@ -34,9 +34,7 @@ method_list.append('getBroadcast')
 
 
 def start(queue, height):
-    """
-	Start finding pending intents
-	"""
+    """ Start finding pending intents """
     results = []
     global tree
     global current_file
@@ -75,9 +73,10 @@ def start(queue, height):
 
         except Exception:
             common.logger.debug("No type declarations: " + str(j))
-            report.write("parsingerror-issues-list", str(current_file), "strong")
+            report.write("parsing error-issues-list", str(current_file), "strong")
     queue.put(results)
     return
+
 
 def empty_intent(t, filename, results):
     if type(t) is m.MethodDeclaration:
@@ -103,10 +102,9 @@ def empty_intent(t, filename, results):
                                 results.append(issue)
     return
 
+
 def recurse(f, t, results):
-    """
-	Recurse
-	"""
+    """ Recurse """
     # Looking for pending intents
     global method_list
     current = getattr(t, f)
@@ -189,9 +187,7 @@ def recurse(f, t, results):
 
 
 def parse_args(arg, results):
-    """
-	Checking to see whether the setClass method is called on the arguments of a pending intent, if it is a new instance of an Intent
-	"""
+    """ Checking to see whether the setClass method is called on the arguments of a pending intent, if it is a new instance of an Intent"""
     if type(arg) is m.MethodInvocation:
         if type(arg.target) is m.InstanceCreation:
             # If the intent only has one argument, it must be implicit
@@ -249,10 +245,7 @@ def parse_args(arg, results):
 
 def find_class(classname, results):
     found = False
-    """
-	Find the class name
-	"""
-
+    """ Find the class name """
     if hasattr(tree, 'type_declarations'):
         for type_decl in tree.type_declarations:
             if type(type_decl) is m.ClassDeclaration:
@@ -324,9 +317,7 @@ def recurse_class(classname, treeObject, results):
 
 
 def find_intent(intent, results):
-    """
-	Find Intent 
-	"""
+    """ Find Intent """
     # TODO - This section is ugly and needs to be refactored
     # Looking for the intent used in the pending intent
     global tree
@@ -388,7 +379,7 @@ def find_intent(intent, results):
                                                                                     getattr(x, y).name) == "setPackage":
                                                                                 if str(getattr(x,
                                                                                                y).target.value) == str(
-                                                                                        intent):
+                                                                                    intent):
                                                                                     explicit = True
                                                                         else:
                                                                             common.logger.debug(
@@ -436,9 +427,7 @@ def find_intent(intent, results):
 
 
 def intent_digger(t, intent):
-    """
-	Traverse the intent declaration hierarchy
-	"""
+    """ Traverse the intent declaration hierarchy """
     results = [False, False]
     if hasattr(t, "_fields"):
         for f in t._fields:
