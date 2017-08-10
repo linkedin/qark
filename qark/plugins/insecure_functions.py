@@ -19,7 +19,7 @@ class InsecureFunctionsPlugin(IPlugin):
     def recursive_insecure_call_function(self, fields, file, res):
         if type(fields) is m.MethodDeclaration:
             if str(fields.name) == self.CALL_FUNCTION:
-                PluginUtil.reportInfo(file_name, self.insecure_function_issue(file_name), res)
+                PluginUtil.reportInfo(file_name, self.insecure_function(file_name), res)
         elif type(fields) is list:
             for fieldname in fields:
                 self.recursive_insecure_call_function(fieldname, file, res)
@@ -53,14 +53,14 @@ class InsecureFunctionsPlugin(IPlugin):
                                 self.recursive_insecure_call_function(fields, file, res)
 
                             except Exception as e:
-                                common.logger.error(
+                                common.logger.exception(
                                     "Unable to run insecure function plugin " + str(e))
 
             except Exception:
                 continue
         queue.put(res)
 
-    def insecure_function_issue(self, file_name):
+    def insecure_function(self, file_name):
         return 'The Content provider API provides a method call\n' \
                'The framework does no permission checking on this entry into the content provider besides the basic ability ' \
                'for the application to get access to the provider at all. \n' \
