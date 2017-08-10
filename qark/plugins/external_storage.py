@@ -1,16 +1,20 @@
-import sys
-import os
-import re
-sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)) + '../lib')
 from yapsy.IPlugin import IPlugin
 from plugins import PluginUtil
 from modules import common
 from lib.pubsub import pub
+import sys
+import os
 import lib.plyj.parser as plyj
+
+sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)) + '../lib')
+
+string = ("Reading files stored on {} makes it vulnerable to data injection attacks\n"
+          "Note that this code does no error checking and there is no security enforced with these files. \n"
+          "For example, any application holding WRITE_EXTERNAL_STORAGE can write to these files.\nFilepath: {}\n"
+          "Reference: https://developer.android.com/reference/android/content/Context.html#{}\n")
 
 
 class ExternalStorageCheckPlugin(IPlugin):
-
     CHECK_EXTERNAL_STORAGE = r'getExternalFilesDir'
     CHECK_EXTERNAL_MEDIA = r'getExternalMediaDirs'
     CHECK_PUBLIC_DIR = r'getExternalStoragePublicDirectory'
@@ -19,8 +23,8 @@ class ExternalStorageCheckPlugin(IPlugin):
         self.name = 'External Storage Issues'
 
     def target(self, queue):
+        global file_name
         files = common.java_files
-        global parser, tree, file_name
         parser = plyj.Parser()
         tree = ''
         res = []
@@ -28,20 +32,20 @@ class ExternalStorageCheckPlugin(IPlugin):
         external_media = []
         external_pub_dir = []
         count = 0
-        for file in files:
+        for f in files:
             count += 1
             pub.sendMessage('progress', bar=self.name, percent=round(count * 100 / len(files)))
-            file_name = str(file)
+            file_name = str(f)
             try:
-                tree = parser.parse_file(file)
+                tree = parser.parse_file(f)
             except Exception as e:
                 common.logger.exception(
-                    "Unable to parse tree for the file " + file_name)
+                    "Unable to parse the file and generate as AST. Error: " + str(e))
             try:
                 for import_decl in tree.import_declarations:
                     if 'File' in import_decl.name.value:
-                        with open(file_name, 'r') as f:
-                            file_body = f.read()
+                        with open(file_name, 'r') as fr:
+                            file_body = fr.read()
                         if PluginUtil.contains(self.CHECK_EXTERNAL_STORAGE, file_body):
                             external_storage.append(file_name)
                             break
@@ -55,7 +59,7 @@ class ExternalStorageCheckPlugin(IPlugin):
                             break
 
             except Exception:
-                continue
+                pass
 
         # Store the content obtained above in a column format
         storage = "\n".join(external_storage)
@@ -63,36 +67,27 @@ class ExternalStorageCheckPlugin(IPlugin):
         pub_dir = "\n".join(external_pub_dir)
 
         if external_storage:
-            PluginUtil.reportWarning(file_name, self.external_storage_issue(storage), res)
+            PluginUtil.reportWarning(file_name, self.external_storage(storage), res)
 
         if external_media:
-            PluginUtil.reportWarning(file_name, self.media_directory_issue(media), res)
+            PluginUtil.reportWarning(file_name, self.media_directory(media), res)
 
         if external_pub_dir:
-            PluginUtil.reportWarning(file_name, self.public_directory_issue(pub_dir), res)
+            PluginUtil.reportWarning(file_name, self.public_directory(pub_dir), res)
 
         queue.put(res)
 
-    def external_storage_issue(self, storage):
-        return 'Reading files stored on External Storage makes it vulnerable to data injection attacks\n' \
-               'Note that this code does no error checking and there is no security enforced with these files. \n' \
-               'For example, any application holding WRITE_EXTERNAL_STORAGE can write to these files.\n%s.\n' \
-               'Reference: https://developer.android.com/reference/android/content/Context.html#getExternalFilesDir(java.lang.String)\n' \
-               % storage
+    @staticmethod
+    def media_directory(media):
+        return string.format("External Media Directory", media, "getExternalMediaDir(java.lang.String)")
 
-    def media_directory_issue(self, media):
-        return 'Reading files stored on External Media Directory makes it vulnerable to data injection attacks\n ' \
-               'Note that this code does no error checking and there is no security enforced with these files. \n' \
-               'For example, any application holding WRITE_EXTERNAL_STORAGE can write to these files.\n%s.\n' \
-               'Reference: https://developer.android.com/reference/android/content/Context.html#getExternalMediaDir(java.lang.String)\n' \
-               % media
+    @staticmethod
+    def public_directory(pub_dir):
+        return string.format("External Storage Public Directory", pub_dir, "getExternalStoragePublicDirectory(java.lang.String)")
 
-    def public_directory_issue(self, pub_dir):
-        return 'Reading files stored on External Storage Public Directory makes it vulnerable to data injection attacks\n ' \
-               'Note that this code does no error checking and there is no security enforced with these files. \n' \
-               'For example, any application holding WRITE_EXTERNAL_STORAGE can write to these files. \n%s.\n' \
-               'Reference: https://developer.android.com/reference/android/os/Environment.html#getExternalStoragePublicDirectory(java.lang.String)\n' \
-               % pub_dir
+    @staticmethod
+    def external_storage(storage):
+        return string.format("External Storage", storage, "getExternalFilesDir(java.lang.String)")
 
     def getName(self):
         return "External Storage Issues"
