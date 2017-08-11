@@ -14,6 +14,18 @@ string = ("Reading files stored on {} makes it vulnerable to data injection atta
           "Reference: https://developer.android.com/reference/android/content/Context.html#{}\n")
 
 
+def check_media_directory(media):
+    return string.format("External Media Directory", media, "getExternalMediaDir(java.lang.String)")
+
+
+def check_public_directory(pub_dir):
+    return string.format("External Storage Public Directory", pub_dir, "getExternalStoragePublicDirectory(java.lang.String)")
+
+
+def check_external_storage(storage):
+    return string.format("External Storage", storage, "getExternalFilesDir(java.lang.String)")
+
+
 class ExternalStorageCheckPlugin(IPlugin):
     CHECK_EXTERNAL_STORAGE = r'getExternalFilesDir'
     CHECK_EXTERNAL_MEDIA = r'getExternalMediaDirs'
@@ -67,27 +79,15 @@ class ExternalStorageCheckPlugin(IPlugin):
         pub_dir = "\n".join(external_pub_dir)
 
         if external_storage:
-            PluginUtil.reportWarning(file_name, self.external_storage(storage), res)
+            PluginUtil.reportWarning(file_name, check_external_storage(storage), res)
 
         if external_media:
-            PluginUtil.reportWarning(file_name, self.media_directory(media), res)
+            PluginUtil.reportWarning(file_name, check_media_directory(media), res)
 
         if external_pub_dir:
-            PluginUtil.reportWarning(file_name, self.public_directory(pub_dir), res)
+            PluginUtil.reportWarning(file_name, check_public_directory(pub_dir), res)
 
         queue.put(res)
-
-    @staticmethod
-    def media_directory(media):
-        return string.format("External Media Directory", media, "getExternalMediaDir(java.lang.String)")
-
-    @staticmethod
-    def public_directory(pub_dir):
-        return string.format("External Storage Public Directory", pub_dir, "getExternalStoragePublicDirectory(java.lang.String)")
-
-    @staticmethod
-    def external_storage(storage):
-        return string.format("External Storage", storage, "getExternalFilesDir(java.lang.String)")
 
     def getName(self):
         return "External Storage Issues"
