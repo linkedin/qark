@@ -10,17 +10,17 @@ import lib.plyj.model as m
 
 sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)) + '../lib')
 
-string = ("{} logs are detected\nThis may allow potential leakage of information from Android applications.\n"
+STRING = ("{} logs are detected\nThis may allow potential leakage of information from Android applications.\n"
           "{} logs should never be compiled into an application except during development.\nhttps://developer."
           "android.com/reference/android/util/Log.html\n\nFilepath:\n{}\n{} {} logs were found in the application\n")
 
 
 def debug_log_issues(filepath, x):
-    return string.format("Debug", "Debug", filepath, x, "debug")
+    return STRING.format("Debug", "Debug", filepath, x, "debug")
 
 
 def verbose_log_issues(filepath, y):
-    return string.format("Verbose", "Verbose", filepath, y, "verbose")
+    return STRING.format("Verbose", "Verbose", filepath, y, "verbose")
 
 
 class LoggingIssuesPlugin(IPlugin):
@@ -47,6 +47,7 @@ class LoggingIssuesPlugin(IPlugin):
             except Exception as e:
                 common.logger.exception(
                     "Unable to parse the file and generate as AST. Error: " + str(e))
+                continue
 
             # Traverse down the tree to find out verbose or debug logs
             try:
@@ -64,8 +65,10 @@ class LoggingIssuesPlugin(IPlugin):
                                     debug_logs.append(str(fields.name))
                                     if filepath not in discovered_debug_logs:
                                         discovered_debug_logs.append(filepath)
-            except Exception:
-                pass
+            except Exception as e:
+                common.logger.exception(
+                    "Unable to traverse the tree. Error: " + str(e))
+                continue
 
         # Join all the filename and path containing debug and verbose logging
         debug_logs_path = " \n".join(discovered_debug_logs)
