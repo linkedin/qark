@@ -32,10 +32,10 @@ class LoggingIssuesPlugin(IPlugin):
 
     def target(self, queue):
         files = common.java_files
-        global filepath
+        global filepath, tree
         parser = plyj.Parser()
         total_debug_logs, total_verbose_logs, debug_logs, verbose_logs, verbose_logs_list, res, \
-        debug_logs_list, discovered_debug_logs, discovered_verbose_logs = ([] for _ in xrange(9))
+            debug_logs_list, discovered_debug_logs, discovered_verbose_logs = ([] for _ in xrange(9))
         tree = ''
         count = 0
         for f in files:
@@ -66,8 +66,7 @@ class LoggingIssuesPlugin(IPlugin):
                                     if filepath not in discovered_debug_logs:
                                         discovered_debug_logs.append(filepath)
             except Exception as e:
-                common.logger.exception(
-                    "Unable to traverse the tree. Error: " + str(e))
+                common.logger.info("Plyj parser failed while parsing the file: " + filepath + "\nError" + str(e))
                 continue
 
         # Join all the filename and path containing debug and verbose logging
