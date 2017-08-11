@@ -7,8 +7,8 @@ import os
 import re
 import lib.plyj.parser as plyj
 import lib.plyj.model as m
-sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)) + '../lib')
 
+sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)) + '../lib')
 
 string = ("{} logs are detected\nThis may allow potential leakage of information from Android applications.\n"
           "{} logs should never be compiled into an application except during development.\nhttps://developer."
@@ -34,15 +34,8 @@ class LoggingIssuesPlugin(IPlugin):
         files = common.java_files
         global filepath
         parser = plyj.Parser()
-        total_debug_logs = []
-        total_verbose_logs = []
-        debug_logs = []
-        verbose_logs = []
-        verbose_logs_list = []
-        debug_logs_list = []
-        discovered_debug_logs = []
-        discovered_verbose_logs = []
-        res = []
+        total_debug_logs, total_verbose_logs, debug_logs, verbose_logs, verbose_logs_list, res, \
+        debug_logs_list, discovered_debug_logs, discovered_verbose_logs = ([] for _ in xrange(9))
         tree = ''
         count = 0
         for f in files:
@@ -61,10 +54,12 @@ class LoggingIssuesPlugin(IPlugin):
                     if type(type_decl) is m.ClassDeclaration:
                         for fields in type_decl.body:
                             if type(fields) is m.MethodDeclaration:
+                                # Check if the app is send verbose logging message
                                 if str(fields.name) == 'v':
                                     verbose_logs.append(str(fields.name))
                                     if filepath not in discovered_verbose_logs:
                                         discovered_verbose_logs.append(filepath)
+                                # Check if the app is send debug logging message
                                 elif str(fields.name) == 'd':
                                     debug_logs.append(str(fields.name))
                                     if filepath not in discovered_debug_logs:
@@ -79,11 +74,11 @@ class LoggingIssuesPlugin(IPlugin):
 
         # Display the file paths of all discovered logs
         if discovered_debug_logs:
-            x = str(len(debug_logs))
+            x = len(debug_logs)
             PluginUtil.reportInfo(filepath, debug_log_issues(debug_logs_path, x), res)
 
         if discovered_verbose_logs:
-            y = str(len(verbose_logs))
+            y = len(verbose_logs)
             PluginUtil.reportInfo(filepath, verbose_log_issues(verbose_logs_path, y), res)
 
         # Sometimes Log functions may be called from a constructor and hence maybe skipped by tree
@@ -109,11 +104,11 @@ class LoggingIssuesPlugin(IPlugin):
         verbose_path = " \n".join(verbose_logs_list)
 
         if total_debug_logs:
-            x = str(len(total_debug_logs))
+            x = len(total_debug_logs)
             PluginUtil.reportInfo(filepath, debug_log_issues(debug_path, x), res)
 
         if total_verbose_logs:
-            y = str(len(total_verbose_logs))
+            y = len(total_verbose_logs)
             PluginUtil.reportInfo(filepath, verbose_log_issues(verbose_path, y), res)
 
     @staticmethod
