@@ -6,24 +6,23 @@ import lib.plyj.parser as plyj
 import lib.plyj.model as m
 import sys
 import os
-import re
 
 sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)) + '../lib')
 
-string = ("Be careful with use of {} permission function\nApp maybe vulnerable to Privilege escalation or "
+STRING = ("Be careful with use of {} permission function\nApp maybe vulnerable to Privilege escalation or "
           "Confused Deputy Attack. This function can grant access to malicious application, lacking the "
           "appropriate permission, by assuming your applications permissions. This means a malicious application, "
           "without appropriate permissions, can bypass its permission check by using your application"
-          "permission to get access to otherwise denied resources. Use - {}CallingPermission instead.\n{}\n"
+          "permission to get access to otherwise denied resources. Use - {}CallingPermission instead.\nFilepath: {}\n"
           "Reference: https://developer.android.com/reference/android/content/Context.html#{}\n")
 
 
-def check_permission(file_name):
-    return string.format("Check", "check", file_name, "checkCallingOrSelfPermission(java.lang.String)")
+def check_permission(filepath):
+    return STRING.format("Check", "check", filepath, "checkCallingOrSelfPermission(java.lang.String)")
 
 
-def enforce_permission(file_name):
-    return string.format("Enforce", "enforce", file_name, "enforceCallingOrSelfPermission(java.lang.String, java.lang.String)" )
+def enforce_permission(filepath):
+    return STRING.format("Enforce", "enforce", filepath, "enforceCallingOrSelfPermission(java.lang.String, java.lang.String)")
 
 
 class AccessControlCheckPlugin(IPlugin):
@@ -35,7 +34,7 @@ class AccessControlCheckPlugin(IPlugin):
 
     def target(self, queue):
         files = common.java_files
-        global file_name
+        global filepath, tree
         parser = plyj.Parser()
         tree = ''
         res = []
@@ -43,25 +42,27 @@ class AccessControlCheckPlugin(IPlugin):
         for f in files:
             count += 1
             pub.sendMessage('progress', bar=self.name, percent=round(count * 100 / len(files)))
-            file_name = str(f)
+            filepath = str(f)
             try:
                 tree = parser.parse_file(f)
             except Exception as e:
-                common.logger.exception(
-                    "Unable to parse the file and generate as AST. Error: " + str(e))
+                common.logger.exception("Unable to parse the file and generate as AST. Error: " + str(e))
+                continue
+
             try:
                 for import_decl in tree.import_declarations:
                     if 'Service' in import_decl.name.value:
-                        with open(file_name, 'r') as r:
+                        with open(filepath, 'r') as r:
                             data = r.read()
                         if PluginUtil.contains(self.CHECK_PERMISSION, data):
-                            PluginUtil.reportInfo(file_name, check_permission(file_name), res)
+                            PluginUtil.reportInfo(filepath, check_permission(filepath), res)
                             break
                         if PluginUtil.contains(self.ENFORCE_PERMISSION, data):
-                            PluginUtil.reportInfo(file_name, enforce_permission(file_name), res)
+                            PluginUtil.reportInfo(filepath, enforce_permission(filepath), res)
                             break
-            except Exception:
-                pass
+            except Exception as e:
+                common.logger.info("Plyj parser failed while parsing the file: " + filepath + "\nError" + str(e))
+                continue
 
         queue.put(res)
 
