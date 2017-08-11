@@ -116,10 +116,12 @@ class LoggingIssuesPlugin(IPlugin):
             y = str(len(total_verbose_logs))
             PluginUtil.reportInfo(filepath, verbose_log_issues(verbose_path, y), res)
 
-    def getName(self):
+    @staticmethod
+    def getName():
         return "Detect exposed logs"
 
-    def getCategory(self):
+    @staticmethod
+    def getCategory():
         # Currently unused, but will be used later for clubbing issues from a specific plugin (when multiple plugins run at the same time)
         return "PLUGIN ISSUES"
 
