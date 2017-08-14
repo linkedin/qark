@@ -24,5 +24,3 @@ go to the test directory and run pytest
 ```
 cd test && export PYTHONPATH=../:$PYTHONPATH && py.test
 ```
-
-
