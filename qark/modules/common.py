@@ -189,7 +189,7 @@ def set_environment_variables():
 	os.environ["ANDROID_HOME"] = getConfig('AndroidSDKPath')
 
 def initialize_logger():
-	logger.setLevel(logging.DEBUG)
+	logger.setLevel(logging.INFO)
 
 	if not os.path.exists(rootDir + '/logs'):
 		os.makedirs(rootDir + '/logs')
