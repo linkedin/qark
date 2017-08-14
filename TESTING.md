@@ -17,7 +17,7 @@ pip install mock pytest yapsy
 
 go to the test directory and run pytest
 ```
-cd test && py.test
+cd test && export PYTHONPATH=../:$PYTHONPATH && py.test
 ```
 
 
