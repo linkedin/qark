@@ -1,4 +1,4 @@
-from plugins import PluginUtil
+from .qark.plugins import PluginUtil
 from plugins.Dynamically_Loading_Code import DynamicallyLoadingCodePlugin
 
 plugin = DynamicallyLoadingCodePlugin()
