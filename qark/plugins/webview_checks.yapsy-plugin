@@ -1,0 +1,12 @@
+[Core]
+Name = Check WebView related issues
+Module = webview_checks
+
+
+Author = Sarvesh Kapre
+Version = 0.1
+Website = https://github.com/linkedin/qark/
+Description = Extended webview module by finding the following issues
+              Search for use of  "setMixedContentMode" which will allow a secure origin to load content from any other origin, even if that origin is insecure
+              Checks for inapproriate implementation of "shouldOverrideUrlLoading" and "shouldInterceptRequest" method
+              Check if WebView is allowing to load clear-text content from the Internet through loadurl() method
