@@ -1,0 +1,15 @@
+[Core]
+Name = Check Access Control issues
+Module = access_control
+
+
+Author = Sarvesh Kapre
+Version = 0.1
+Website = https://github.com/linkedin/qark/
+Description = Check for calls to the following functions
+                checkCallingOrSelfPermission
+                checkCallingOrSelfUriPermission
+                checkPermission
+                enforceCallingOrSelfPermission
+                enforceCallingOrSelfUriPermission
+                enforcePermission.
