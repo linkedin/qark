@@ -66,7 +66,7 @@ class LoggingIssuesPlugin(IPlugin):
                                     if filepath not in discovered_debug_logs:
                                         discovered_debug_logs.append(filepath)
             except Exception as e:
-                common.logger.info("Plyj parser failed while parsing the file: " + filepath + "\nError" + str(e))
+                common.logger.debug("Plyj parser failed while parsing the file: " + filepath + "\nError" + str(e))
                 continue
 
         # Join all the filename and path containing debug and verbose logging
