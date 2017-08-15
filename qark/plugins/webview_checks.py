@@ -96,7 +96,7 @@ class WebViewChecksPlugin(IPlugin):
                         break
 
             except Exception as e:
-                common.logger.info("Plyj parser failed while parsing the file: " + filepath + "\nError" + str(e))
+                common.logger.debug("Plyj parser failed while parsing the file: " + filepath + "\nError" + str(e))
                 continue
 
             try:
@@ -122,7 +122,7 @@ class WebViewChecksPlugin(IPlugin):
                         break
 
             except Exception as e:
-                common.logger.info("Plyj parser failed while parsing the file: " + filepath + "\nError" + str(e))
+                common.logger.debug("Plyj parser failed while parsing the file: " + filepath + "\nError" + str(e))
                 continue
 
         if issues_list:

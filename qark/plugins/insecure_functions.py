@@ -66,7 +66,7 @@ class InsecureFunctionsPlugin(IPlugin):
                                 common.logger.exception("Unable to run insecure function plugin " + str(e))
 
             except Exception as e:
-                common.logger.info("Plyj parser failed while parsing the file: " + filepath + "\nError" + str(e))
+                common.logger.debug("Plyj parser failed while parsing the file: " + filepath + "\nError" + str(e))
                 continue
         queue.put(res)
 

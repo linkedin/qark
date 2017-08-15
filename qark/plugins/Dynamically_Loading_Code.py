@@ -97,7 +97,7 @@ class DynamicallyLoadingCodePlugin(IPlugin):
                                     except Exception as e:
                                         common.logger.error("Unable to run class loader plugin " + str(e))
             except Exception as e:
-                common.logger.info("Plyj parser failed while parsing the file: " + filepath + "\nError" + str(e))
+                common.logger.debug("Plyj parser failed while parsing the file: " + filepath + "\nError" + str(e))
                 continue
 
             try:
@@ -111,7 +111,7 @@ class DynamicallyLoadingCodePlugin(IPlugin):
                             except Exception as e:
                                 common.logger.error("Unable to run register receiver function plugin " + str(e))
             except Exception as e:
-                common.logger.info("Plyj parser failed while parsing the file: " + filepath + "\nError" + str(e))
+                common.logger.debug("Plyj parser failed while parsing the file: " + filepath + "\nError" + str(e))
                 continue
 
         # Arrange the Broadcast Receivers created Dynamically in column format and store it in the variable -> Broadcast_Receiver
