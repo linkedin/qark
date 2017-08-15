@@ -12,7 +12,7 @@ Activate the virtualenv
 
 Install mock and pytest in the virtualenv
 ```
-pip install mock pytest yapsy
+pip install mock pytest
 ```
 
 go to the test directory and run pytest
