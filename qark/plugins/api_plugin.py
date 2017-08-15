@@ -1,59 +1,67 @@
+from yapsy.IPlugin import IPlugin
+from plugins import PluginUtil
+from modules import common
+from lib.pubsub import pub
 import sys
 import os
-
+import re
+import lib.plyj.parser as plyj
+import lib.plyj.model as m
 sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)) + '../lib')
 
-from yapsy.IPlugin import IPlugin
-from modules import common, report
-from modules.common import ReportIssue, Severity, terminalPrint, logger
-from modules.createExploit import ExploitType
-from lib.progressbar import *
-from lib.pubsub import pub
-import logging
+STRING = "API Key Found\n{}"
 
 
-class PluginTwo(IPlugin):
+def hardcoded_api_key(api_key_variable):
+    return STRING.format(api_key_variable)
+
+
+class HardcodedAPIIssuesPlugin(IPlugin):
+        HARDCODED_API_KEY = r'API_KEY|api_key|API|api|key'
+      # Regex to check for API Keys containing atleast one uppercase, lowercase chracters and number
+        API_KEY_REGEX = r'^.+(?=.{20,})(?=.+\d)(?=.+[a-z])(?=.+[A-Z]).+$'
+      # Regex which is used to ignore few special characters in api keys to prevent false positives
+        SPECIAL_CHAR_REGEX = r'^.+(?=.+[!$%^~]).+$'
+
+    def __init__(self):
+        self.name = 'Detect exposed logs'
+
     def target(self, queue):
-        results = []
-        #TODO: add documentation for available API calls. Sample shown below.
-        # Here, we want to scan all decompiled files to see if any file contains the text "API_KEY"
-        possibleFiles = common.text_scan(common.java_files, r'API_KEY')
+        files = common.java_files
+        global file_path
+        api_key_list = []
+        res = []
         count = 0
-        for f in possibleFiles:
+        for f in files:
             count += 1
-            # The following call generates the progress bar in the terminal output
-            pub.sendMessage('progress', bar=self.getName(), percent=round(count*100/len(possibleFiles)))
+            pub.sendMessage('progress', bar=self.name, percent=round(count * 100 / len(files)))
+            file_path = str(f)
+            with open(f, 'r') as fi:
+                file_content = fi.read()
 
-            # Mostly for logging. This goes in the log file generated under /logs
-            common.logger.debug("Text found, " + str(f))
+            for line in file_content.splitlines():
+                if re.match(self.API_KEY_REGEX, line):
+                 # Check if special character is present in the line. If "Yes, then ignore.
+                    if re.match(self.SPECIAL_CHAR_REGEX, line):
+                        pass
+                else:
+                    if line not in api_key_list:
+                        api_key_list.append(line)
 
-            # This will put individual results of the plugin scan in the HTML report.
-            issue = ReportIssue()
-            issue.setCategory(ExploitType.PLUGIN)
-            issue.setDetails("The string 'API_KEY' appears in the file: %s\n%s" % (f[1], str(f[0])))
-            issue.setFile(str(f[1]))
-            issue.setSeverity(Severity.VULNERABILITY)
-            results.append(issue)
+        api_key_variable = "\n".join(api_key_list)
 
-            # This puts individual results of the plugin scan in the terminal output.
-            issue = terminalPrint()
-            issue.setLevel(Severity.VULNERABILITY)
-            issue.setData("The string 'API_KEY' appears in the file: %s\n%s" % (f[1], str(f[0])))
-            results.append(issue)
+        if api_key_list:
+            PluginUtil.reportInfo(file_path, hardcoded_api_key(api_key_variable), res)
 
-        # This is required to send the complete list of results (including the ones to be printed on terminal as well as
-        # issues to be printed in tht HTML report) back to the main thread.
-        queue.put(results)
-            
 
-    def getName(self):
-        # The name to be displayed against the progressbar
+    @staticmethod
+    def getName():
         return "Hardcoded API Keys"
 
-    def getCategory(self):
+    @staticmethod
+    def getCategory():
         # Currently unused, but will be used later for clubbing issues from a specific plugin (when multiple plugins run at the same time)
         return "PLUGIN ISSUES"
 
     def getTarget(self):
         return self.target
-
