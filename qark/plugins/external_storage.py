@@ -69,7 +69,7 @@ class ExternalStorageCheckPlugin(IPlugin):
                             break
 
             except Exception as e:
-                common.logger.info("Plyj parser failed while parsing the file: " + filepath + "\nError" + str(e))
+                common.logger.debug("Plyj parser failed while parsing the file: " + filepath + "\nError" + str(e))
                 continue
 
         # Store the content obtained above in a column format
