@@ -9,55 +9,55 @@ from lib.pubsub import pub
 import re
 import qarkMain
 
-ordered_broadcast_issue = ("Data Injection due to exported Broadcast Receiver.\n"
+ORDERED_BROADCAST_ISSUE = ("Data Injection due to exported Broadcast Receiver.\n"
                            "Default priority of exported receiver is 0. Since, the higher priority receivers respond first"
                            " and forward it to lower priority receivers, a malicious receiver with high priority can intercept the "
                            "message change it and forward it to lower priority receivers.\n{}\n")
 
-google_safe_browsing_check = ("To provide users with a safer browsing experience, you can configure your apps"
+GOOGLE_SAFEBROWSING_CHECK = ("To provide users with a safer browsing experience, you can configure your apps"
                               "WebView objects to verify URLs using Google Safe Browsing.\nWhen this security measure is enabled,"
                               " your app shows users a warning when they attempt to navigate to a potentially unsafe website.\n{}\n")
 
-task_launch_mode_issue = ("Use of android:launchMode=singleTask is found\n"
+TASK_LAUNCH_MODE_ISSUE = ("Use of android:launchMode=singleTask is found\n"
                           "This results in AMS either resuming the earlier activity or loads it in a task with same affinity or"
                           " the activity is started as a new task. This may result in Task Poisoning.\n"
                           "https://www.usenix.org/system/files/conference/usenixsecurity15/sec15-paper-ren-chuangang.pdf\n{}\n")
 
-task_reparenting_issue = ("Use of android:allowTaskReparenting='true' is found\n"
+TASK_REPARENTING_ISSUE = ("Use of android:allowTaskReparenting='true' is found\n"
                           "This allows an existing activity to be reparented to a new native task"
                           " i.e task having the same affinity as the activity.\n"
                           "This may lead to UI spoofing attack on this application.\n"
                           "https://www.usenix.org/system/files/conference/usenixsecurity15/sec15-paper-ren-chuangang.pdf\n{}\n")
 
-path_usage_issue = ("Be careful with the use of android:path in the <path-permission> tag\n"
+PATH_USAGE_ISSUE = ("Be careful with the use of android:path in the <path-permission> tag\n"
                     "android:path means that the permission applies to the exact path declared"
                     " in android:path. This expression does not protect the sub-directories\n{}\n")
 
-hardcoded_api_key_issue = "API Key Found\n{}"
+HARDCODED_API_KEY_ISSUE = "API Key Found\n{}"
 
 
 def ordered_broadcast(list_orderedBR):
-    return ordered_broadcast_issue.format(list_orderedBR)
+    return ORDERED_BROADCAST_ISSUE.format(list_orderedBR)
 
 
 def google_safe_browsing(fileName):
-    return google_safe_browsing_check.format(fileName)
+    return GOOGLE_SAFEBROWSING_CHECK.format(fileName)
 
 
 def task_launch_mode(line):
-    return task_launch_mode_issue.format(line)
+    return TASK_LAUNCH_MODE_ISSUE.format(line)
 
 
 def task_reparenting(line):
-    return task_reparenting_issue.format(line)
+    return TASK_REPARENTING_ISSUE.format(line)
 
 
 def path_usage(line):
-    return path_usage_issue.format(line)
+    return PATH_USAGE_ISSUE.format(line)
 
 
 def hardcoded_api_key(api_key_variable):
-    return hardcoded_api_key_issue.format(api_key_variable)
+    return HARDCODED_API_KEY_ISSUE.format(api_key_variable)
 
 
 class ManifestFilePlugin(IPlugin):
