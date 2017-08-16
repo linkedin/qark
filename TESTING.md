@@ -15,6 +15,11 @@ Install mock and pytest in the virtualenv
 pip install mock pytest
 ```
 
+Install all QARK requirements in the virtualenv
+```
+pip install -r requirements.txt
+```
+
 go to the test directory and run pytest
 ```
 cd test && export PYTHONPATH=../:$PYTHONPATH && py.test

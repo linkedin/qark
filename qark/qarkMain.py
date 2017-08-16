@@ -220,7 +220,7 @@ def hasmode(filename, mode):
 
 def setmode(filename, mode):
     st = os.stat(filename)
-    os.chmod(filneame, st.st_mode | mode)
+    os.chmod(filename, st.st_mode | mode)
 
 def list_all_apk():
     result = []
@@ -644,7 +644,9 @@ def main():
                 break
             else:
                 common.logger.error("%s is not a valid directory. Please try again" % common.sourceDirectory)
-                exit()
+                if not common.interactive_mode:
+                    exit()
+
         report.write("apkpath", common.sourceDirectory)
         totalfiles = 0
         for root, dirnames, filenames in os.walk(common.sourceDirectory):
