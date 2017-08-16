@@ -9,16 +9,17 @@ sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)) + '../lib')
 
 STRING = "API Key Found\n{}"
 
+
 def hardcoded_api_key(api_key_variable):
     return STRING.format(api_key_variable)
 
 
 class HardcodedAPIIssuesPlugin(IPlugin):
-    HARDCODED_API_KEY = r'API_KEY|api_key|API|api|key'
     # Regex to check for API Keys containing atleast one uppercase, lowercase chracters and number
-    API_KEY_REGEX = r'^.+(?=.{20,})(?=.+\d)(?=.+[a-z])(?=.+[A-Z]).+$'
-    # Regex which is used to ignore few special characters in api keys to prevent false positives
-    SPECIAL_CHAR_REGEX = r'^.+(?=.+[!$%^~]).+$'
+    API_KEY_REGEX = r'^.+(?=.{20,})(?=.+\d)(?=.+[a-z])(?=.+[A-Z])(?=.+[-_]).+$'
+    # Regex which is used to ignore few special characters in api keys
+    # Except - " ' ; to prevent false positives
+    SPECIAL_CHAR_REGEX = r'^.+(?=.+[!$%^&*()_+|~=`{}\[\]:<>?,.\/]).+$'
 
     def __init__(self):
         self.name = 'Hardcoded API Keys'
@@ -33,17 +34,19 @@ class HardcodedAPIIssuesPlugin(IPlugin):
             count += 1
             pub.sendMessage('progress', bar=self.name, percent=round(count * 100 / len(files)))
             file_path = str(f)
-            with open(f, 'r') as fi:
+            with open(file_path, 'r') as fi:
                 file_content = fi.read()
-
-            # for line in file_content.splitlines():
-            if re.match(self.API_KEY_REGEX, file_content):
-             # Check if special character is present in the line. If "Yes, then ignore.
-                if re.match(self.SPECIAL_CHAR_REGEX, file_content):
-                    pass
-            else:
-                if file_path not in api_key_list:
-                    api_key_list.append(file_path)
+            # Split the file content in each individual line
+            for line in file_content.splitlines():
+                # Further split each line into words
+                for word in line.split():
+                    # Regex to check API value in work
+                    if re.match(self.API_KEY_REGEX, word):
+                        # Check if special character is present in the line. If "Yes, then ignore.
+                        if not re.match(self.SPECIAL_CHAR_REGEX, word):
+                            if file_path not in api_key_list and line not in api_key_list:
+                                api_key_list.append("Line: " + line)
+                                api_key_list.append("Filepath: " + file_path + "\n")
 
         api_key_variable = "\n".join(api_key_list)
 
