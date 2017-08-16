@@ -73,7 +73,7 @@ def start(queue, height):
 
         except Exception:
             common.logger.debug("No type declarations: " + str(j))
-            report.write("parsing error-issues-list", str(current_file), "strong")
+            report.write("parsingerror-issues-list", str(current_file), "strong")
     queue.put(results)
     return
 
@@ -112,7 +112,7 @@ def recurse(f, t, results):
         for e in method_list:
             if str(type(current)) == str(e):
                 # TODO - Remove this (never seems to be hit)
-                report.write("parsing error-issues-list", str(current_file), "strong")
+                report.write("parsingerror-issues-list", str(current_file), "strong")
                 common.logger.debug("Please report the following error, if you see this")
                 common.logger.debug("INCOMPLETE CODE BRANCH REACHED findPending.py #0 (results may be incomplete)")
     elif type(current) is list:

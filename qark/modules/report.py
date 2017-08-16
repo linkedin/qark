@@ -247,7 +247,7 @@ def write(identity, data, tag=None):
         fh.close()
     except Exception as e:
         common.reportInitSuccess=False
-        common.logger.debug("Report writing error: " + str(e))
+        common.logger.error("Report writing error: " + str(e))
 
 def write_counters():
     try:
