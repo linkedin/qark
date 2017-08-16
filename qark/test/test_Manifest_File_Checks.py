@@ -116,6 +116,16 @@ def test_regex24():
     assert not PluginUtil.contains(plugin.SPECIAL_CHAR_REGEX, text)
 
 
+def test_regex25():
+    text = '<meta-data android:name="android.webkit.WebView.EnableSafeBrowsing" android:value="true" />'
+    assert PluginUtil.contains("EnableSafeBrowsing", text)
+
+
+def test_regex26():
+    text = '<meta-data android:name="android.webkit.WebView.EnableSafeBrowsing" android:value="true" />'
+    assert PluginUtil.contains("true", text)
+
+
 if __name__ == '__main__':
     test_regex()
     test_regex1()
@@ -140,3 +150,5 @@ if __name__ == '__main__':
     test_regex22()
     test_regex23()
     test_regex24()
+    test_regex25()
+    test_regex26()

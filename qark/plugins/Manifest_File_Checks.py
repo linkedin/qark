@@ -1,57 +1,63 @@
+import sys
+import os
+
+sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)) + '../lib')
 from yapsy.IPlugin import IPlugin
 from plugins import PluginUtil
 from modules import common
 from lib.pubsub import pub
-import sys
-import os
 import re
 import qarkMain
 
-sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)) + '../lib')
+ordered_broadcast_issue = ("Data Injection due to exported Broadcast Receiver.\n"
+                           "Default priority of exported receiver is 0. Since, the higher priority receivers respond first"
+                           " and forward it to lower priority receivers, a malicious receiver with high priority can intercept the "
+                           "message change it and forward it to lower priority receivers.\n{}\n")
+
+google_safe_browsing_check = ("To provide users with a safer browsing experience, you can configure your apps"
+                              "WebView objects to verify URLs using Google Safe Browsing.\nWhen this security measure is enabled,"
+                              " your app shows users a warning when they attempt to navigate to a potentially unsafe website.\n{}\n")
+
+task_launch_mode_issue = ("Use of android:launchMode=singleTask is found\n"
+                          "This results in AMS either resuming the earlier activity or loads it in a task with same affinity or"
+                          " the activity is started as a new task. This may result in Task Poisoning.\n"
+                          "https://www.usenix.org/system/files/conference/usenixsecurity15/sec15-paper-ren-chuangang.pdf\n{}\n")
+
+task_reparenting_issue = ("Use of android:allowTaskReparenting='true' is found\n"
+                          "This allows an existing activity to be reparented to a new native task"
+                          " i.e task having the same affinity as the activity.\n"
+                          "This may lead to UI spoofing attack on this application.\n"
+                          "https://www.usenix.org/system/files/conference/usenixsecurity15/sec15-paper-ren-chuangang.pdf\n{}\n")
+
+path_usage_issue = ("Be careful with the use of android:path in the <path-permission> tag\n"
+                    "android:path means that the permission applies to the exact path declared"
+                    " in android:path. This expression does not protect the sub-directories\n{}\n")
+
+hardcoded_api_key_issue = "API Key Found\n{}"
 
 
 def ordered_broadcast(list_orderedBR):
-    STRING = ("Data Injection due to exported Broadcast Receiver.\n"
-              "Default priority of exported receiver is 0. Since, the higher priority receivers respond first"
-              " and forward it to lower priority receivers, a malicious receiver with high priority can intercept the "
-              "message change it and forward it to lower priority receivers.\n{}\n")
-    return STRING.format(list_orderedBR)
+    return ordered_broadcast_issue.format(list_orderedBR)
 
 
 def google_safe_browsing(fileName):
-    STRING = ("To provide users with a safer browsing experience, you can configure your apps"
-              "WebView objects to verify URLs using Google Safe Browsing.\nWhen this security measure is enabled,"
-              " your app shows users a warning when they attempt to navigate to a potentially unsafe website.\n{}\n")
-    return STRING.format(fileName)
+    return google_safe_browsing_check.format(fileName)
 
 
 def task_launch_mode(line):
-    STRING = ("Use of android:launchMode=singleTask is found\n"
-              "This results in AMS either resuming the earlier activity or loads it in a task with same affinity or"
-              " the activity is started as a new task. This may result in Task Poisoning.\n"
-              "https://www.usenix.org/system/files/conference/usenixsecurity15/sec15-paper-ren-chuangang.pdf\n{}\n")
-    return STRING.format(line)
+    return task_launch_mode_issue.format(line)
 
 
 def task_reparenting(line):
-    STRING = ("Use of android:allowTaskReparenting='true' is found\n"
-              "This allows an existing activity to be reparented to a new native task"
-              " i.e task having the same affinity as the activity.\n"
-              "This may lead to UI spoofing attack on this application.\n"
-              "https://www.usenix.org/system/files/conference/usenixsecurity15/sec15-paper-ren-chuangang.pdf\n{}\n")
-    return STRING.format(line)
+    return task_reparenting_issue.format(line)
 
 
 def path_usage(line):
-    STRING = ("Be careful with the use of android:path in the <path-permission> tag\n"
-              "android:path means that the permission applies to the exact path declared"
-              " in android:path. This expression does not protect the sub-directories\n{}\n")
-    return STRING.format(line)
+    return path_usage_issue.format(line)
 
 
 def hardcoded_api_key(api_key_variable):
-    STRING = "API Key Found\n{}"
-    return STRING.format(api_key_variable)
+    return hardcoded_api_key_issue.format(api_key_variable)
 
 
 class ManifestFilePlugin(IPlugin):
@@ -63,9 +69,9 @@ class ManifestFilePlugin(IPlugin):
     PRIORITY_REGEX = r'priority'
     HARDCODED_API_KEY = r'API_KEY|api_key|API|api|key'
     # Regex to check for API Keys containing atleast one uppercase, lowercase chracters and number
-    API_KEY_REGEX = r'^.+(?=.{20,})(?=.+\d)(?=.+[a-z])(?=.+[A-Z]).+$'
+    API_KEY_REGEX = r'(?=.{20,})(?=.+\d)(?=.+[a-z])(?=.+[A-Z])'
     # Regex which is used to ignore few special characters in api keys to prevent false positives
-    SPECIAL_CHAR_REGEX = r'^.+(?=.+[!$%^~]).+$'
+    SPECIAL_CHAR_REGEX = r'(?=.+[!$%^~])'
 
     def __init__(self):
         self.name = 'Manifest File Checks'
@@ -75,16 +81,18 @@ class ManifestFilePlugin(IPlugin):
 
     def target(self, queue):
         raw_file = str(common.manifest)
+        # Split the raw file content into each individual line
+        split_line = raw_file.splitlines()
         count = 0
+        # Create a list for each object
         ordered_broadcast, path_variable_list, launch_mode_list, api_key_list, res = ([] for _ in xrange(5))
         global file_name
         # full path to app manifest
         file_name = qarkMain.find_manifest_in_source()
-
         receivers = self.UserCreatedReceivers()
         for receiver in receivers:
-            if "exported" and "true" in str(receiver):
-                if not any(re.findall(self.PRIORITY_REGEX, str(receiver))):
+            if "exported" in str(receiver) and "true" in str(receiver):
+                if not re.search(self.PRIORITY_REGEX, str(receiver)):
                     ordered_broadcast.append(str(receiver))
 
         # Arrange exported broadcast receiver without priority set in column format
@@ -92,30 +100,28 @@ class ManifestFilePlugin(IPlugin):
         if ordered_broadcast:
             PluginUtil.reportWarning(file_name, ordered_broadcast(list_orderedBR), res)
 
-        for line in raw_file.splitlines():
+        for line in split_line:
             count += 1
             # update progress bar
-            pub.sendMessage('progress', bar=self.name, percent=round(count * 100 / len(raw_file.splitlines())))
+            pub.sendMessage('progress', bar=self.name, percent=round(count * 100 / len(split_line)))
 
-            if any(re.findall(self.PATH_USAGE, line)):
+            if re.search(self.PATH_USAGE, line):
                 path_variable_list.append(line)
 
-            if any(re.findall(self.LAUNCH_MODE, line)):
+            if re.search(self.LAUNCH_MODE, line):
                 launch_mode_list.append(line)
 
-            if any(re.findall(self.TASK_REPARENTING, line)):
+            if re.search(self.TASK_REPARENTING, line):
                 PluginUtil.reportInfo(file_name, task_reparenting(file_name), res)
 
             if re.match(self.API_KEY_REGEX, line):
                 # Check if special character is present in the line. If "Yes, then ignore.
-                if re.match(self.SPECIAL_CHAR_REGEX, line):
-                    pass
-                else:
+                if not re.match(self.SPECIAL_CHAR_REGEX, line):
                     if line not in api_key_list:
                         api_key_list.append(line)
 
             # Additional check for hardcoded api keys which matches the syntax most commonly used with google API_KEY
-            if any(re.findall(self.HARDCODED_API_KEY, line)):
+            if re.search(self.HARDCODED_API_KEY, line):
                 if line not in api_key_list:
                     api_key_list.append(line)
 
@@ -134,8 +140,8 @@ class ManifestFilePlugin(IPlugin):
             PluginUtil.reportInfo(file_name, hardcoded_api_key(api_key_variable), res)
 
         # Check for google safe browsing API
-        if "WebView" in raw_file.splitlines():
-            if "EnableSafeBrowsing" and "true" not in raw_file.splitlines():
+        if "WebView" in split_line:
+            if "EnableSafeBrowsing" not in split_line and "true" not in split_line:
                 PluginUtil.reportInfo(file_name, google_safe_browsing(file_name), res)
 
         # send all results back to main thread
