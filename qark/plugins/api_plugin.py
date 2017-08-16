@@ -7,11 +7,11 @@ from modules import common
 from lib.pubsub import pub
 import re
 
-hardcoded_api_key_issue = "API Key Found\n{}"
+HARDCODED_API_KEY_ISSUE = "API Key Found\n{}"
 
 
 def hardcoded_api_key(api_key_variable):
-    return hardcoded_api_key_issue.format(api_key_variable)
+    return HARDCODED_API_KEY_ISSUE.format(api_key_variable)
 
 
 class HardcodedAPIIssuesPlugin(IPlugin):
@@ -43,11 +43,10 @@ class HardcodedAPIIssuesPlugin(IPlugin):
                     # Regex to check API value in work
                     if re.match(self.API_KEY_REGEX, word):
                         # Check if special character is present in the line. If "Yes, then ignore.
-                        if not re.match(self.SPECIAL_CHAR_REGEX, word):
-                            # Avoid redundant display of line and filepath on the output screen
-                            if file_path not in api_key_list and line not in api_key_list:
-                                api_key_list.append("Line: " + line)
-                                api_key_list.append("Filepath: " + file_path + "\n")
+                        # Avoid redundant display of line and filepath on the output screen
+                        if not re.match(self.SPECIAL_CHAR_REGEX, word) and line not in api_key_list:
+                            api_key_list.append("Line: " + line)
+                            api_key_list.append("Filepath: " + file_path + "\n")
 
         api_key_variable = "\n".join(api_key_list)
 
