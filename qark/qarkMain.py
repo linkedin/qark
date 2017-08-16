@@ -646,6 +646,7 @@ def main():
                 common.logger.error("%s is not a valid directory. Please try again" % common.sourceDirectory)
                 if not common.interactive_mode:
                     exit()
+
         report.write("apkpath", common.sourceDirectory)
         totalfiles = 0
         for root, dirnames, filenames in os.walk(common.sourceDirectory):
