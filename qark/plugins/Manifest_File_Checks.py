@@ -116,13 +116,11 @@ class ManifestFilePlugin(IPlugin):
 
             if re.match(self.API_KEY_REGEX, line):
                 # Check if special character is present in the line. If "Yes, then ignore.
-                if not re.match(self.SPECIAL_CHAR_REGEX, line):
-                    if line not in api_key_list:
-                        api_key_list.append(line)
+                if not re.match(self.SPECIAL_CHAR_REGEX, line) and line not in api_key_list:
+                    api_key_list.append(line)
 
             # Additional check for hardcoded api keys which matches the syntax most commonly used with google API_KEY
-            if re.search(self.HARDCODED_API_KEY, line):
-                if line not in api_key_list:
+            if re.search(self.HARDCODED_API_KEY, line) and line not in api_key_list:
                     api_key_list.append(line)
 
         # Arrange identified path variable and launch mode usage in column format
