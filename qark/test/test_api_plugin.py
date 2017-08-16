@@ -29,15 +29,9 @@ def test_regex5():
     assert PluginUtil.contains(plugin.SPECIAL_CHAR_REGEX, text)
 
 
-def test_regex6():
-    text = 'public static final String API_TOKEN = "Nti4kWY-qRHTYq3dsbeip0P1tbGCzs2BAY163ManCAb"'
-    assert not PluginUtil.contains(plugin.SPECIAL_CHAR_REGEX, text)
-
-
 if __name__ == '__main__':
     test_regex1()
     test_regex2()
     test_regex3()
     test_regex4()
     test_regex5()
-    test_regex6()
