@@ -20,9 +20,33 @@ Install all QARK requirements in the virtualenv
 pip install -r requirements.txt
 ```
 
-go to the test directory and run pytest
+Go to the test directory and run pytest
 ```
 cd test && export PYTHONPATH=../:$PYTHONPATH && py.test
 ```
 
+Install pytest-cov to produce test coverage reports. It supports centralized testing approach
+```
+pip install pytest-cov
+```
 
+Run pytest-cov. This command will run test on all the files and folders of the project
+```
+py.test --cov
+```
+
+To check test coverage for specific folder (modules and plugins in Qark's case)
+```
+py.test --cov= <absolute path to specific folder>
+```
+
+Example syntax to check test coverage for modules and plugins
+```
+py.test --cov=/../../../qark/qark/modules/
+py.test --cov=/../../../qark/qark/plugins/
+```
+
+Saving report in HTML format. Helps in providing a detailed feedback of code with and without unit tests
+```
+py.test --cov=<absolute path to specific folder> --cov-report html
+```
