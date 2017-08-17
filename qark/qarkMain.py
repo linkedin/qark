@@ -499,7 +499,7 @@ def main():
         if int(common.args.debuglevel) in range(10,60):
             common.logger.setLevel(int(common.args.debuglevel))
         else:
-            parser.error("Please provide a valid Debug level (10,20,30,40,50,60)")
+            common.logger.error("Please provide a valid Debug level (10,20,30,40,50,60)")
 
     exploit_choice = 1
 
@@ -928,11 +928,15 @@ def main():
                 statement_list+=common.text_scan([p[1]],insert_rex)
         if len(cp_dec_list)>0:
             common.logger.info("The Content Providers above should be manually inspected for injection vulnerabilities.")
+
+    # content_provider_uri_permissions is not defined so don't bother the user with errors
+    '''
     try:
         #TODO - This is a pain in the ass and incomplete
         content_provider_uri_permissions()
     except Exception as e:
         common.logger.error("Unable to parse Content Provider permissions. Error: " + str(e))
+    '''
 
 
     for item in list(common.parsingerrors):
