@@ -61,7 +61,7 @@ class AccessControlCheckPlugin(IPlugin):
                             PluginUtil.reportInfo(filepath, enforce_permission(filepath), res)
                             break
             except Exception as e:
-                common.logger.info("Plyj parser failed while parsing the file: " + filepath + "\nError" + str(e))
+                common.logger.debug("Plyj parser failed while parsing the file: " + filepath + "\nError" + str(e))
                 continue
 
         queue.put(res)
