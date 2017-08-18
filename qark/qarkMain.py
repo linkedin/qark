@@ -64,6 +64,8 @@ from lib.pubsub import pub
 from lib.progressbar import ProgressBar, Percentage, Bar
 from lib.yapsy.PluginManager import PluginManager
 #from yapsy.PluginManager import PluginManager
+import csv
+import json
 
 common.qark_package_name=''
 pbar_file_permission_done = False
@@ -106,6 +108,32 @@ def apktool(pathToAPK):
         manifest = f.read()
     pub.sendMessage('manifest', mf=manifest)
     return
+
+'''
+JSON TO XML Function
+'''
+
+def json2xml(json_obj, line_padding=""):
+    result_list = list()
+
+    json_obj_type = type(json_obj)
+
+    if json_obj_type is list:
+        for sub_elem in json_obj:
+            result_list.append(json2xml(sub_elem, line_padding))
+
+        return "\n".join(result_list)
+
+    if json_obj_type is dict:
+        for tag_name in json_obj:
+            sub_obj = json_obj[tag_name]
+            result_list.append("%s<%s>" % (line_padding, tag_name))
+            result_list.append(json2xml(sub_obj, "\t" + line_padding))
+            result_list.append("%s</%s>" % (line_padding, tag_name))
+
+        return "\n".join(result_list)
+
+    return "%s%s" % (line_padding, json_obj)
 
 
 def progress_bar_update(bar, percent):
@@ -1101,7 +1129,81 @@ def main():
                     common.logger.error("Problems installing exploit APK: " + str(e))
             else:
                 common.logger.info("The apk can be found in the "+common.getConfig("rootDir")+"/build/qark directory")
-    elif exploit_choice==2:
+    elif exploit_choice == 2:
+
+        """
+        JSON, XML and CSV File formating
+        Overwrite the CSV file with the header and write the entire data again
+        """
+
+        with open('./report/Report.csv', 'r') as f:
+            r = csv.reader(f)
+            data = [line for line in r]
+        with open('./report/Report.csv', 'w') as f:
+            w = csv.writer(f)
+            w.writerow(["severity", "details", "extra", "type"])
+            w.writerows(data)
+
+        """
+        Convert CSV to JSON
+        Constants to make everything easier
+        """
+
+        CSV_PATH = './report/Report.csv'
+        JSON_PATH = './report/Report.json'
+        XML_PATH = './report/Report.xml'
+
+        # Reads the file the same way that you did
+        csv_file = csv.DictReader(open(CSV_PATH, 'r'))
+
+        # Created a list and adds the rows to the list
+        json_list = []
+        for row in csv_file:
+            json_list.append(row)
+
+        # Writes the json output to the file
+        json_object = json.dumps(json_list)
+        file(JSON_PATH, 'w').write(json_object)
+
+        '''
+        Delete the CSV report as it contains redundant data
+        '''
+        os.remove('./report/Report.csv')
+
+        ''' 
+        Remove redundant data from JSON file
+        '''
+
+        with open('./report/Report.json') as fp:
+            ds = json.load(fp)  # this file contains the json
+
+            mem = {}
+
+            for record in ds:
+                name = record["details"]
+                if name not in mem:
+                    mem[name] = record
+
+            unique_json_object = mem.values()
+
+        ''' 
+        Pretty print JSON Output
+        '''
+
+        parsed = json.loads(json.dumps(unique_json_object))
+        final_json_object = json.dumps(parsed, indent=4, sort_keys=True)
+        file(JSON_PATH, 'w').write(final_json_object)
+
+        '''
+        Creating report in XML format
+        '''
+        XML_report = json.loads(final_json_object)
+        XML_object = json2xml(XML_report)
+        file(XML_PATH, 'w').write(XML_object)
+
+        print "A JSON report of the findings is located in : " + common.reportDir
+        print "An XML report of the findings is located in : " + common.reportDir
+
         if common.reportInitSuccess:
             print "An html report of the findings is located in : " + common.reportDir
         else:
@@ -1110,10 +1212,13 @@ def main():
     if common.reportInitSuccess:
         print "An html report of the findings is located in : " + common.reportDir
     else:
-        common.logger.error("Problem with reporting; No html report generated. Please see the readme file for possible solutions.")
+        common.logger.error(
+            "Problem with reporting; No html report generated. Please see the readme file for possible solutions.")
 
     print "Goodbye!"
     raise SystemExit
 
 if __name__ == "__main__":
-	nonAutomatedParseArgs()
+    # Create a CSV file to store results
+    csv.writer(open('./report/Report.csv', 'w+'))
+    nonAutomatedParseArgs()
