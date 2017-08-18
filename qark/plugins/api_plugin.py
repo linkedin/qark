@@ -41,10 +41,10 @@ class HardcodedAPIIssuesPlugin(IPlugin):
                 # Further split each line into words
                 for word in line.split():
                     # Regex to check API value in work
-                    if re.match(self.API_KEY_REGEX, word):
+                    if re.search(self.API_KEY_REGEX, word):
                         # Check if special character is present in the line. If "Yes, then ignore.
                         # Avoid redundant display of line and filepath on the output screen
-                        if not re.match(self.SPECIAL_CHAR_REGEX, word) and line not in api_key_list:
+                        if not re.search(self.SPECIAL_CHAR_REGEX, word) and line not in api_key_list:
                             api_key_list.append("Line: " + line)
                             api_key_list.append("Filepath: " + file_path + "\n")
 
