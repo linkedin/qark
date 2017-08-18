@@ -220,7 +220,7 @@ def hasmode(filename, mode):
 
 def setmode(filename, mode):
     st = os.stat(filename)
-    os.chmod(filneame, st.st_mode | mode)
+    os.chmod(filename, st.st_mode | mode)
 
 def list_all_apk():
     result = []
@@ -480,7 +480,13 @@ def main():
         if common.args.source==2:
             if common.args.autodetect is None:
                 if common.args.manifest is None or common.args.codepath is None:
-                    common.logger.error("When selecting --source=2, Please either pass --autodetectcodepath=1 or both --manifest and --codepath")
+                    common.logger.error("When selecting --source=2, Please either pass --autodetectcodepath=1 and --manifest, or both --manifest and --codepath")
+            else:
+                if common.args.manifest is None:
+                    common.logger.error("--manifest flag missing. Please provide path to manifest")
+                    exit()
+                else:
+                    common.args.codepath = common.args.manifest  # auto-detect uses the manifest file path
             if common.args.exploit is None:
                 common.logger.error("--exploit flag missing. Possible values 0/1")
                 exit()
@@ -624,7 +630,7 @@ def main():
                 common.sourceDirectory=os.path.abspath(raw_input(common.config.get('qarkhelper','SOURCE_PROMPT')).rstrip())
             else:
                 common.sourceDirectory=common.args.codepath
-            re.sub(r'AndroidManifest.xml','',common.sourceDirectory)
+            common.sourceDirectory = re.sub(r'AndroidManifest.xml','',common.sourceDirectory)
             common.sourceDirectory = os.path.abspath(str(common.sourceDirectory).strip())
             common.sourceDirectory = re.sub("\\\\\s",' ',common.sourceDirectory)
             if os.path.isdir(common.sourceDirectory):
@@ -637,7 +643,10 @@ def main():
                     process_manifest(manifest)
                 break
             else:
-                common.logger.error("Not a directory. Please try again")
+                common.logger.error("%s is not a valid directory. Please try again" % common.sourceDirectory)
+                if not common.interactive_mode:
+                    exit()
+
         report.write("apkpath", common.sourceDirectory)
         totalfiles = 0
         for root, dirnames, filenames in os.walk(common.sourceDirectory):
