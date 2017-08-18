@@ -1168,7 +1168,7 @@ def main():
         '''
         Delete the CSV report as it contains redundant data
         '''
-        os.remove('./report/Report.csv')
+        os.remove('./Report.csv')
 
         ''' 
         Remove redundant data from JSON file
