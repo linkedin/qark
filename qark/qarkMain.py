@@ -1136,10 +1136,10 @@ def main():
         Overwrite the CSV file with the header and write the entire data again
         """
 
-        with open('./report/Report.csv', 'r') as f:
+        with open('./Report.csv', 'r') as f:
             r = csv.reader(f)
             data = [line for line in r]
-        with open('./report/Report.csv', 'w') as f:
+        with open('./Report.csv', 'w') as f:
             w = csv.writer(f)
             w.writerow(["severity", "details", "extra", "type"])
             w.writerows(data)
@@ -1149,9 +1149,9 @@ def main():
         Constants to make everything easier
         """
 
-        CSV_PATH = './report/Report.csv'
-        JSON_PATH = './report/Report.json'
-        XML_PATH = './report/Report.xml'
+        CSV_PATH = './Report.csv'
+        JSON_PATH = './Report.json'
+        XML_PATH = './Report.xml'
 
         # Reads the file the same way that you did
         csv_file = csv.DictReader(open(CSV_PATH, 'r'))
@@ -1174,7 +1174,7 @@ def main():
         Remove redundant data from JSON file
         '''
 
-        with open('./report/Report.json') as fp:
+        with open('./Report.json') as fp:
             ds = json.load(fp)  # this file contains the json
 
             mem = {}
@@ -1220,5 +1220,5 @@ def main():
 
 if __name__ == "__main__":
     # Create a CSV file to store results
-    csv.writer(open('./report/Report.csv', 'w+'))
+    csv.writer(open('./Report.csv', 'w+'))
     nonAutomatedParseArgs()

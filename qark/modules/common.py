@@ -211,7 +211,7 @@ class terminalPrint():
 
         if self.level == 0:
 
-            tr = csv.writer(open('./report/Report.csv', 'a+'))
+            tr = csv.writer(open('./Report.csv', 'a+'))
 
             if self.extra:
                 tr.writerow(["INFO", str(self.data), str(self.extra), "Manifest File Check"])
@@ -229,7 +229,7 @@ class terminalPrint():
                 tr.writerow(["INFO", str(self.data), str(self.extra), "PLUGIN ISSUES"])
 
         elif self.level == 1:
-            tr = csv.writer(open('./report/Report.csv', 'a+'))
+            tr = csv.writer(open('./Report.csv', 'a+'))
 
             if self.extra:
                 tr.writerow(["WARNING", str(self.data), str(self.extra), "Manifest File Check"])
@@ -247,7 +247,7 @@ class terminalPrint():
                 tr.writerow(["WARNING", str(self.data), str(self.extra), "PLUGIN ISSUES"])
 
         elif self.level == 2:
-            tr = csv.writer(open('./report/Report.csv', 'a+'))
+            tr = csv.writer(open('./Report.csv', 'a+'))
 
             if self.extra:
                 tr.writerow(["ERROR", str(self.data), str(self.extra), "Manifest File Check"])
@@ -265,7 +265,7 @@ class terminalPrint():
                 tr.writerow(["ERROR", str(self.data), str(self.extra), "PLUGIN ISSUES"])
 
         elif self.level == 3:
-            tr = csv.writer(open('./report/Report.csv', 'a+'))
+            tr = csv.writer(open('./Report.csv', 'a+'))
 
             if self.extra:
                 tr.writerow(["VULNERABILITY", str(self.data), str(self.extra), "Manifest File Check"])
