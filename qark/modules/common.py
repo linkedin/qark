@@ -27,7 +27,7 @@ from lib import colorama
 from lib.blessed import *
 from modules.createExploit import ExploitType
 import csv
-
+import unittest
 VULNERABILITY_LEVEL = 60
 logging.addLevelName(VULNERABILITY_LEVEL, "POTENTIAL VULNERABILITY")
 
@@ -210,6 +210,7 @@ class terminalPrint():
         """
 
         if self.level == 0:
+
             tr = csv.writer(open('./report/Report.csv', 'a+'))
 
             if self.extra:
