@@ -845,27 +845,27 @@ def main():
 
         if valid_manifest_file(common.args.manifest):
             try:
-            #Start looking for stuff potentially vulnerable to malicious apps
-                if len(prov_exp_list)>0:
+            # Start looking for stuff potentially vulnerable to malicious apps
+                if prov_exp_list:
                     findMethods.map_from_manifest(prov_exp_list,'provider')
-                if len(prov_exp_perm_list)>0:
+                if prov_exp_perm_list:
                     findMethods.map_from_manifest(prov_exp_perm_list,'provider')
-                if len(act_exp_list)>0:
+                if act_exp_list:
                     findMethods.map_from_manifest(act_exp_list,'activity')
-                if len(act_exp_perm_list)>0:
+                if act_exp_perm_list:
                     findMethods.map_from_manifest(act_exp_perm_list,'activity')
                     #BUG Need to customize this
-                if len(actalias_exp_list)>0:
+                if actalias_exp_list:
                     findMethods.map_from_manifest(actalias_exp_list,'activity-alias')
-                if len(act_exp_perm_list)>0:
+                if act_exp_perm_list:
                     findMethods.map_from_manifest(actalias_exp_perm_list,'activity-alias')
-                if len(serv_exp_list)>0:
+                if serv_exp_list:
                     findMethods.map_from_manifest(serv_exp_list,'service')
-                if len(serv_exp_perm_list)>0:
+                if serv_exp_perm_list:
                     findMethods.map_from_manifest(serv_exp_perm_list,'service')
-                if len(rec_exp_list)>0:
+                if rec_exp_list:
                     findMethods.map_from_manifest(rec_exp_list,'receiver')
-                if len(rec_exp_perm_list)>0:
+                if rec_exp_perm_list:
                     findMethods.map_from_manifest(rec_exp_perm_list,'receiver')
             except Exception as e:
                 common.logger.error("Unable to use findMethods to map from manifest: " + str(e))
@@ -968,8 +968,8 @@ def main():
                     show_exports(serv_exp_list,'service')
                     show_exports(rec_exp_list,'receiver')
 
-                    print "\nTo view any sticky broadcasts on the device:"
-                    print "adb shell dumpsys activity| grep sticky\n"
+                    print """\nTo view any sticky broadcasts on the device:
+                    adb shell dumpsys activity| grep sticky\n"""
 
                     common.logger.info("Support for other component types and dynamically adding extras is in the works, please check for updates")
 
