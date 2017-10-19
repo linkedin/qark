@@ -13,9 +13,6 @@ sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)) + '/lib')
 import stat
 import fnmatch
 import subprocess
-import urllib2
-import ast
-import string
 from subprocess import Popen, PIPE, STDOUT
 from collections import defaultdict
 from xml.dom import minidom
@@ -27,8 +24,6 @@ from threading import Thread, Lock
 from Queue import Queue
 # sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)) + '/lib')
 
-from modules.IssueType import IssueSeverity
-from modules.IssueType import IssueType
 from modules import common
 from modules import findExtras
 from modules import webviews
@@ -40,22 +35,18 @@ from modules import sdkManager
 from modules import createSploit
 from modules import createExploit
 from modules import writeExploit
-from modules import intentTracer
 from modules import findMethods
 from modules import findPending
 from modules import findBroadcasts
 from modules import findTapJacking
 from modules import filePermissions
 from modules import exportedPreferenceActivity
-from modules import useCheckPermission
 from modules import cryptoFlaws
 from modules import certValidation
 from modules import GeneralIssues
 from modules import contentProvider
 from modules.contentProvider import *
 from modules import filters
-from modules.report import Severity, ReportIssue
-from modules.createExploit import ExploitType
 from modules.common import terminalPrint, Severity, ReportIssue
 from modules import adb
 from lib import argparse
@@ -63,7 +54,8 @@ from lib.pyfiglet import Figlet
 from lib.pubsub import pub
 from lib.progressbar import ProgressBar, Percentage, Bar
 from lib.yapsy.PluginManager import PluginManager
-#from yapsy.PluginManager import PluginManager
+import csv
+import json
 
 common.qark_package_name=''
 pbar_file_permission_done = False
@@ -106,6 +98,29 @@ def apktool(pathToAPK):
         manifest = f.read()
     pub.sendMessage('manifest', mf=manifest)
     return
+
+
+def json2xml(json_obj, line_padding=""):
+    result_list = list()
+
+    json_obj_type = type(json_obj)
+
+    if json_obj_type is list:
+        for sub_elem in json_obj:
+            result_list.append(json2xml(sub_elem, line_padding))
+
+        return "\n".join(result_list)
+
+    elif json_obj_type is dict:
+        for tag_name in json_obj:
+            sub_obj = json_obj[tag_name]
+            result_list.append("{}<{}>".format(line_padding, tag_name))
+            result_list.append(json2xml(sub_obj, "\t" + line_padding))
+            result_list.append("{}</{}>".format(line_padding, tag_name))
+
+        return "\n".join(result_list)
+
+    return "{}{}".format(line_padding, json_obj)
 
 
 def progress_bar_update(bar, percent):
@@ -171,28 +186,6 @@ def show_exports(compList,compType):
     return
 
 
-
-def read_files(filename,rex):
-    things_to_inspect=[]
-    with open(filename) as f:
-        content=f.readlines()
-        for y in content:
-            if re.search(rex,y):
-                if re.match(r'^\s*(\/\/|\/\*)',y): #exclude single-line or beginning comments
-                    pass
-                elif re.match(r'^\s*\*',y): #exclude lines that are comment bodies
-                    pass
-                elif re.match(r'.*\*\/$',y): #exclude lines that are closing comments
-                    pass
-                elif re.match(r'^\s*Log\..\(',y): #exclude Logging functions
-                    pass
-                elif re.match(r'(.*)(public|private)\s(String|List)',y): #exclude declarations
-                    pass
-                else:
-                    things_to_inspect.append(y)
-    return things_to_inspect
-
-
 def process_manifest(manifest):
     try:
         common.manifest = os.path.abspath(str(manifest).strip())
@@ -251,19 +244,15 @@ def list_all_apk():
         index+=1
     return result
 
+
 def uninstall(package):
     print "trying to uninstall " + package
-    result = []
     adb = common.getConfig('AndroidSDKPath') + "platform-tools/adb"
-    st = os.stat(adb)
     if not hasmode(adb, stat.S_IEXEC): setmode(adb, stat.S_IEXEC)
     while True:
         p1 = Popen([adb, 'devices'], stdout=PIPE, stdin=PIPE, stderr=STDOUT)
-        a = 0
-        for line in p1.stdout:
-            a = a+1
-            # If atleast one device is connected
-        if a >2 :
+        a = len(p1.stdout.readlines())
+        if a > 2:
             break
         else:
             common.logger.warning("Waiting for a device to be connected...")
@@ -272,7 +261,7 @@ def uninstall(package):
     for line in uninstall.stdout:
         if "Failure" in line:
             package = re.sub('-\d$', '', package)
-            uninstall_try_again = Popen([adb, 'shell', 'pm', 'uninstall', package], stdout=PIPE, stdin=PIPE, stderr=STDOUT)
+            Popen([adb, 'shell', 'pm', 'uninstall', package], stdout=PIPE, stdin=PIPE, stderr=STDOUT)
     return
 
 def pull_apk(pathOnDevice):
@@ -373,7 +362,7 @@ def writeReportSection(results, category):
 
 
 def nonAutomatedParseArgs():
-    ignore = os.system('clear')
+    os.system('clear')
     f = Figlet(font='colossal')
     print f.renderText('Q A R K')
 
@@ -421,7 +410,7 @@ def nonAutomatedParseArgs():
     main()
 
 def runAutomated(pathToApk,pathToReport):
-    ignore = os.system('clear')
+    os.system('clear')
     f = Figlet(font='colossal')
     print f.renderText('Q A R K')
 
@@ -650,8 +639,7 @@ def main():
         report.write("apkpath", common.sourceDirectory)
         totalfiles = 0
         for root, dirnames, filenames in os.walk(common.sourceDirectory):
-            for filename in fnmatch.filter(filenames, '*'):
-                totalfiles = totalfiles + 1
+            totalfiles += len(fnmatch.filter(filenames, '*'))
         report.write("totalfiles",totalfiles)
 
     else:
@@ -714,7 +702,7 @@ def main():
     #Begin static code Analysis
     #Easy Wins first
     if common.source_or_apk == 1 and common.interactive_mode:
-            stop_point = raw_input("Press ENTER key to begin decompilation")
+            raw_input("Press ENTER key to begin decompilation")
 
     #Converting dex files to jar
     if common.source_or_apk!=1:
@@ -747,13 +735,13 @@ def main():
     common.xml_files=common.find_xml(common.sourceDirectory)
 
     if common.interactive_mode:
-        stop_point = raw_input("Press ENTER key to begin Static Code Analysis")
+        raw_input("Press ENTER key to begin Static Code Analysis")
 
-    #Regex to look for collection of deviceID
-    #Regex to determine if WebViews are imported
-    wv_imp_rex=r'android.webkit.WebView'
+    # Regex to look for collection of deviceID
+    # Regex to determine if WebViews are imported
+    # wv_imp_rex=r'android.webkit.WebView'
     cp_imp_rex=r'android.content.ContentProvider'
-    #Run through all files, look for regex, print warning/info text and lines of code, with file names/paths
+    # Run through all files, look for regex, print warning/info text and lines of code, with file names/paths
 
     cert_queue = Queue()
     pending_intents_queue = Queue()
@@ -1103,19 +1091,81 @@ def main():
                     common.logger.error("Problems installing exploit APK: " + str(e))
             else:
                 common.logger.info("The apk can be found in the "+common.getConfig("rootDir")+"/build/qark directory")
-    elif exploit_choice==2:
+    elif exploit_choice == 2:
+        # JSON, XML and CSV file formatting
+        # Overwrite the CSV file with the header and write the entire data again
+        with open('./Report.csv', 'r') as f:
+            r = csv.reader(f)
+            data = [line for line in r]
+        with open('./Report.csv', 'w') as f:
+            w = csv.writer(f)
+            w.writerow(["severity", "details", "extra", "type"])
+            w.writerows(data)
+
+        # Convert CSV to JSON
+        # Constants to make everything easier
+
+        CSV_PATH = './Report.csv'
+        JSON_PATH = './Report.json'
+        XML_PATH = './Report.xml'
+
+        # Reads the file the same way that you did
+        csv_file = csv.DictReader(open(CSV_PATH, 'r'))
+
+        # Created a list and adds the rows to the list
+        json_list = []
+        for row in csv_file:
+            json_list.append(row)
+
+        # Writes the json output to the file
+        json_object = json.dumps(json_list)
+        file(JSON_PATH, 'w').write(json_object)
+
+        # Delete the CSV report as it contains redundant data
+        os.remove('./Report.csv')
+
+        # Remove redundant data from JSON file
+        with open('./Report.json') as fp:
+            ds = json.load(fp)  # this file contains the json
+
+            mem = {}
+
+            for record in ds:
+                name = record["details"]
+                if name not in mem:
+                    mem[name] = record
+
+            unique_json_object = mem.values()
+
+        # Pretty print JSON Output
+        parsed = json.loads(json.dumps(unique_json_object))
+        final_json_object = json.dumps(parsed, indent=4, sort_keys=True)
+        file(JSON_PATH, 'w').write(final_json_object)
+
+        # Creating report in XML format
+        XML_report = json.loads(final_json_object)
+        XML_object = json2xml(XML_report)
+        file(XML_PATH, 'w').write(XML_object)
+
+        print "A JSON report of the findings is located in : {}".format(common.reportDir)
+        print "An XML report of the findings is located in : {}".format(common.reportDir)
+
         if common.reportInitSuccess:
-            print "An html report of the findings is located in : " + common.reportDir
+            print "An html report of the findings is located in : {}".format(common.reportDir)
         else:
-            common.logger.error("Problem with reporting; No html report generated. Please see the readme file for possible solutions.")
+            common.logger.error(
+                "Problem with reporting; No html report generated. Please see the readme file for possible solutions.")
         common.exitClean()
     if common.reportInitSuccess:
         print "An html report of the findings is located in : " + common.reportDir
     else:
-        common.logger.error("Problem with reporting; No html report generated. Please see the readme file for possible solutions.")
+        common.logger.error(
+            "Problem with reporting; No html report generated. Please see the readme file for possible solutions.")
 
     print "Goodbye!"
     raise SystemExit
 
 if __name__ == "__main__":
-	nonAutomatedParseArgs()
+    # Create a CSV file to store results
+    csv.writer(open('./Report.csv', 'w+'))
+    nonAutomatedParseArgs()
