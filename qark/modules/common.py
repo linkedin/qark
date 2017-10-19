@@ -28,6 +28,8 @@ from lib.blessed import *
 from modules.createExploit import ExploitType
 import csv
 import unittest
+
+
 VULNERABILITY_LEVEL = 60
 logging.addLevelName(VULNERABILITY_LEVEL, "POTENTIAL VULNERABILITY")
 
@@ -201,16 +203,13 @@ class terminalPrint():
         self.level = level
 
     def getLevel(self):
-
         """
         level = 0 represents Information Issue
         self.extra retrieves information only from the Manifest.xml file. Hence it will be null for issues found from modules and plugins
         self.data contains details/description for each issue
         To get the type of Issue, looking at the specific issue keywords from the description is the only option at the moment
         """
-
         if self.level == 0:
-
             tr = csv.writer(open('./Report.csv', 'a+'))
 
             if self.extra:
@@ -310,7 +309,6 @@ def exitClean():
 class Writer(object):
     """Create an object with a write method that writes to a
     specific place on the screen, defined at instantiation.
-
     This is the glue between blessings and progressbar.
     """
 
@@ -485,7 +483,6 @@ def grep(path, regex):
 def find_java(path):
     """
     Given an absolute path, find  and return all java files in a list
-
     """
     logger.info('Finding all java files')
     list_of_files = []
@@ -499,7 +496,6 @@ def find_java(path):
 def find_xml(path):
     """
     Given an absolute path, find  and return all R.java files in a list
-
     """
     list_of_files = []
     for (dirpath, dirnames, filenames) in os.walk(path):
@@ -528,7 +524,6 @@ def findKeys(path):
 def find_xml(path):
     """
     Given an absolute path, find  and return all xml files in a list
-
     """
     logger.info('Finding all xml files')
     list_of_files = []
