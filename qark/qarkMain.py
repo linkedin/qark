@@ -13,9 +13,6 @@ sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)) + '/lib')
 import stat
 import fnmatch
 import subprocess
-import urllib2
-import ast
-import string
 from subprocess import Popen, PIPE, STDOUT
 from collections import defaultdict
 from xml.dom import minidom
@@ -27,8 +24,6 @@ from threading import Thread, Lock
 from Queue import Queue
 # sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)) + '/lib')
 
-from modules.IssueType import IssueSeverity
-from modules.IssueType import IssueType
 from modules import common
 from modules import findExtras
 from modules import webviews
@@ -40,22 +35,18 @@ from modules import sdkManager
 from modules import createSploit
 from modules import createExploit
 from modules import writeExploit
-from modules import intentTracer
 from modules import findMethods
 from modules import findPending
 from modules import findBroadcasts
 from modules import findTapJacking
 from modules import filePermissions
 from modules import exportedPreferenceActivity
-from modules import useCheckPermission
 from modules import cryptoFlaws
 from modules import certValidation
 from modules import GeneralIssues
 from modules import contentProvider
 from modules.contentProvider import *
 from modules import filters
-from modules.report import Severity, ReportIssue
-from modules.createExploit import ExploitType
 from modules.common import terminalPrint, Severity, ReportIssue
 from modules import adb
 from lib import argparse
@@ -63,7 +54,6 @@ from lib.pyfiglet import Figlet
 from lib.pubsub import pub
 from lib.progressbar import ProgressBar, Percentage, Bar
 from lib.yapsy.PluginManager import PluginManager
-#from yapsy.PluginManager import PluginManager
 import csv
 import json
 
@@ -196,28 +186,6 @@ def show_exports(compList,compType):
     return
 
 
-
-def read_files(filename,rex):
-    things_to_inspect=[]
-    with open(filename) as f:
-        content=f.readlines()
-        for y in content:
-            if re.search(rex,y):
-                if re.match(r'^\s*(\/\/|\/\*)',y): #exclude single-line or beginning comments
-                    pass
-                elif re.match(r'^\s*\*',y): #exclude lines that are comment bodies
-                    pass
-                elif re.match(r'.*\*\/$',y): #exclude lines that are closing comments
-                    pass
-                elif re.match(r'^\s*Log\..\(',y): #exclude Logging functions
-                    pass
-                elif re.match(r'(.*)(public|private)\s(String|List)',y): #exclude declarations
-                    pass
-                else:
-                    things_to_inspect.append(y)
-    return things_to_inspect
-
-
 def process_manifest(manifest):
     try:
         common.manifest = os.path.abspath(str(manifest).strip())
@@ -276,19 +244,15 @@ def list_all_apk():
         index+=1
     return result
 
+
 def uninstall(package):
     print "trying to uninstall " + package
-    result = []
     adb = common.getConfig('AndroidSDKPath') + "platform-tools/adb"
-    st = os.stat(adb)
     if not hasmode(adb, stat.S_IEXEC): setmode(adb, stat.S_IEXEC)
     while True:
         p1 = Popen([adb, 'devices'], stdout=PIPE, stdin=PIPE, stderr=STDOUT)
-        a = 0
-        for line in p1.stdout:
-            a = a+1
-            # If atleast one device is connected
-        if a >2 :
+        a = len(p1.stdout.readlines())
+        if a > 2:
             break
         else:
             common.logger.warning("Waiting for a device to be connected...")
@@ -297,7 +261,7 @@ def uninstall(package):
     for line in uninstall.stdout:
         if "Failure" in line:
             package = re.sub('-\d$', '', package)
-            uninstall_try_again = Popen([adb, 'shell', 'pm', 'uninstall', package], stdout=PIPE, stdin=PIPE, stderr=STDOUT)
+            Popen([adb, 'shell', 'pm', 'uninstall', package], stdout=PIPE, stdin=PIPE, stderr=STDOUT)
     return
 
 def pull_apk(pathOnDevice):
@@ -398,7 +362,7 @@ def writeReportSection(results, category):
 
 
 def nonAutomatedParseArgs():
-    ignore = os.system('clear')
+    os.system('clear')
     f = Figlet(font='colossal')
     print f.renderText('Q A R K')
 
@@ -446,7 +410,7 @@ def nonAutomatedParseArgs():
     main()
 
 def runAutomated(pathToApk,pathToReport):
-    ignore = os.system('clear')
+    os.system('clear')
     f = Figlet(font='colossal')
     print f.renderText('Q A R K')
 
@@ -675,8 +639,7 @@ def main():
         report.write("apkpath", common.sourceDirectory)
         totalfiles = 0
         for root, dirnames, filenames in os.walk(common.sourceDirectory):
-            for filename in fnmatch.filter(filenames, '*'):
-                totalfiles = totalfiles + 1
+            totalfiles += len(fnmatch.filter(filenames, '*'))
         report.write("totalfiles",totalfiles)
 
     else:
@@ -739,7 +702,7 @@ def main():
     #Begin static code Analysis
     #Easy Wins first
     if common.source_or_apk == 1 and common.interactive_mode:
-            stop_point = raw_input("Press ENTER key to begin decompilation")
+            raw_input("Press ENTER key to begin decompilation")
 
     #Converting dex files to jar
     if common.source_or_apk!=1:
@@ -772,13 +735,13 @@ def main():
     common.xml_files=common.find_xml(common.sourceDirectory)
 
     if common.interactive_mode:
-        stop_point = raw_input("Press ENTER key to begin Static Code Analysis")
+        raw_input("Press ENTER key to begin Static Code Analysis")
 
-    #Regex to look for collection of deviceID
-    #Regex to determine if WebViews are imported
-    wv_imp_rex=r'android.webkit.WebView'
+    # Regex to look for collection of deviceID
+    # Regex to determine if WebViews are imported
+    # wv_imp_rex=r'android.webkit.WebView'
     cp_imp_rex=r'android.content.ContentProvider'
-    #Run through all files, look for regex, print warning/info text and lines of code, with file names/paths
+    # Run through all files, look for regex, print warning/info text and lines of code, with file names/paths
 
     cert_queue = Queue()
     pending_intents_queue = Queue()
