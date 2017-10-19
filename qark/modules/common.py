@@ -1130,7 +1130,7 @@ def sink_list_check(token, tree):
 
 class Severity():
     """
-    Enum type for exploitatin category
+    Enum type for exploitation category
     """
     INFO, WARNING, ERROR, VULNERABILITY = range(4)
 
