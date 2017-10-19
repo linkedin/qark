@@ -109,9 +109,6 @@ def apktool(pathToAPK):
     pub.sendMessage('manifest', mf=manifest)
     return
 
-'''
-JSON TO XML Function
-'''
 
 def json2xml(json_obj, line_padding=""):
     result_list = list()
@@ -124,16 +121,16 @@ def json2xml(json_obj, line_padding=""):
 
         return "\n".join(result_list)
 
-    if json_obj_type is dict:
+    elif json_obj_type is dict:
         for tag_name in json_obj:
             sub_obj = json_obj[tag_name]
-            result_list.append("%s<%s>" % (line_padding, tag_name))
+            result_list.append("{}<{}>".format(line_padding, tag_name))
             result_list.append(json2xml(sub_obj, "\t" + line_padding))
-            result_list.append("%s</%s>" % (line_padding, tag_name))
+            result_list.append("{}</{}>".format(line_padding, tag_name))
 
         return "\n".join(result_list)
 
-    return "%s%s" % (line_padding, json_obj)
+    return "{}{}".format(line_padding, json_obj)
 
 
 def progress_bar_update(bar, percent):
@@ -1130,12 +1127,8 @@ def main():
             else:
                 common.logger.info("The apk can be found in the "+common.getConfig("rootDir")+"/build/qark directory")
     elif exploit_choice == 2:
-
-        """
-        JSON, XML and CSV File formating
-        Overwrite the CSV file with the header and write the entire data again
-        """
-
+        # JSON, XML and CSV file formatting
+        # Overwrite the CSV file with the header and write the entire data again
         with open('./Report.csv', 'r') as f:
             r = csv.reader(f)
             data = [line for line in r]
@@ -1144,10 +1137,8 @@ def main():
             w.writerow(["severity", "details", "extra", "type"])
             w.writerows(data)
 
-        """
-        Convert CSV to JSON
-        Constants to make everything easier
-        """
+        # Convert CSV to JSON
+        # Constants to make everything easier
 
         CSV_PATH = './Report.csv'
         JSON_PATH = './Report.json'
@@ -1165,15 +1156,10 @@ def main():
         json_object = json.dumps(json_list)
         file(JSON_PATH, 'w').write(json_object)
 
-        '''
-        Delete the CSV report as it contains redundant data
-        '''
+        # Delete the CSV report as it contains redundant data
         os.remove('./Report.csv')
 
-        ''' 
-        Remove redundant data from JSON file
-        '''
-
+        # Remove redundant data from JSON file
         with open('./Report.json') as fp:
             ds = json.load(fp)  # this file contains the json
 
@@ -1186,28 +1172,24 @@ def main():
 
             unique_json_object = mem.values()
 
-        ''' 
-        Pretty print JSON Output
-        '''
-
+        # Pretty print JSON Output
         parsed = json.loads(json.dumps(unique_json_object))
         final_json_object = json.dumps(parsed, indent=4, sort_keys=True)
         file(JSON_PATH, 'w').write(final_json_object)
 
-        '''
-        Creating report in XML format
-        '''
+        # Creating report in XML format
         XML_report = json.loads(final_json_object)
         XML_object = json2xml(XML_report)
         file(XML_PATH, 'w').write(XML_object)
 
-        print "A JSON report of the findings is located in : " + common.reportDir
-        print "An XML report of the findings is located in : " + common.reportDir
+        print "A JSON report of the findings is located in : {}".format(common.reportDir)
+        print "An XML report of the findings is located in : {}".format(common.reportDir)
 
         if common.reportInitSuccess:
-            print "An html report of the findings is located in : " + common.reportDir
+            print "An html report of the findings is located in : {}".format(common.reportDir)
         else:
-            common.logger.error("Problem with reporting; No html report generated. Please see the readme file for possible solutions.")
+            common.logger.error(
+                "Problem with reporting; No html report generated. Please see the readme file for possible solutions.")
         common.exitClean()
     if common.reportInitSuccess:
         print "An html report of the findings is located in : " + common.reportDir
