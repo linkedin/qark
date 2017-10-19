@@ -55,7 +55,7 @@ class TaskAffinityPlugin(IPlugin):
                         if PluginUtil.contains(self.NEW_TASK, file_body):
                             PluginUtil.reportInfo(filepath, new_task(filepath), res)
                             break
-                        if PluginUtil.contains(self.MULTIPLE_TASK_TASK, file_body):
+                        if PluginUtil.contains(self.MULTIPLE_TASK, file_body):
                             PluginUtil.reportInfo(filepath, multiple_task(filepath), res)
                             break
             except Exception as e:

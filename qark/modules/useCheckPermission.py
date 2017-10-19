@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+
 '''Copyright 2015 LinkedIn Corp. Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
  You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
  
@@ -8,9 +9,10 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.'''
 
 from modules import common
 
+
 def use_check_permission():
-	common.logger.info("Sorry, we haven't completed the check for use_check_permission yet. Check for updates soon.")
-	'''
+    common.logger.info("Sorry, we haven't completed the check for use_check_permission yet. Check for updates soon.")
+    '''
 	From Android Lint:
 
 		UseCheckPermission
@@ -28,4 +30,4 @@ def use_check_permission():
 	than Context#checkCallingPermission it should call
 	Context#enforceCallingPermission.
 	'''
-	return
+    return

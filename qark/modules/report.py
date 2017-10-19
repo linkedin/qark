@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+
 '''Copyright 2015 LinkedIn Corp. Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
  You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -22,11 +23,14 @@ logger = logging.getLogger(__name__)
 
 pre_rendered_html = ""
 
+
 class Section():
     """
     Enum type for exploitation category
     """
-    WEBVIEW, X509, PERMISSIONS, SERVICES, BROADCASTS, PENDING_INTENTS, FILE_PERMISSIONS, CRYPTO_BUGS, ACTIVITY, APPCOMPONENTS, ADB, PLUGIN = range(12)
+    WEBVIEW, X509, PERMISSIONS, SERVICES, BROADCASTS, PENDING_INTENTS, FILE_PERMISSIONS, CRYPTO_BUGS, ACTIVITY, APPCOMPONENTS, ADB, PLUGIN = range(
+        12)
+
 
 section = {}
 section[Section.WEBVIEW] = "webview"
@@ -61,13 +65,13 @@ severity[Severity.WARNING] = "Warning"
 severity[Severity.ERROR] = "Error"
 
 
-def writeSection(sec,data_list):
+def writeSection(sec, data_list):
     try:
-        pre_rendered = open(common.reportDir + "/report.html",'r').read()
-        pre_rendered_html2 = BeautifulSoup(pre_rendered,'html5lib')
+        pre_rendered = open(common.reportDir + "/report.html", 'r').read()
+        pre_rendered_html2 = BeautifulSoup(pre_rendered, 'html5lib')
 
         list_of_files = []
-        #Gather unique files
+        # Gather unique files
         for item in data_list:
             if isinstance(item, ReportIssue):
                 if item.getFile() in list_of_files:
@@ -75,7 +79,7 @@ def writeSection(sec,data_list):
                 else:
                     list_of_files.append(item.getFile())
 
-        #Consolidate issues by filename
+        # Consolidate issues by filename
         for file in list_of_files:
             issues = {}
             details = []
@@ -87,21 +91,21 @@ def writeSection(sec,data_list):
                         if item.getDetails() is not None:
                             details.append(item.getDetails())
                             for key, value in item.getExtras().iteritems():
-                                issues[key]=value
+                                issues[key] = value
 
-            #Construct HTML blob
+            # Construct HTML blob
             new_tag_webview_issue = pre_rendered_html2.new_tag("div")
 
-            new_tag_webview_issue['class']=str(section[sec] + "-issue")
+            new_tag_webview_issue['class'] = str(section[sec] + "-issue")
 
             new_div_image_tag = pre_rendered_html2.new_tag("div")
-            new_div_image_tag['class']="blockquote-box clearfix"
+            new_div_image_tag['class'] = "blockquote-box clearfix"
 
             new_div_image_square_tag = pre_rendered_html2.new_tag("div")
-            new_div_image_square_tag['class']="square pull-left"
+            new_div_image_square_tag['class'] = "square pull-left"
 
             new_glyphicon_tag = pre_rendered_html2.new_tag("span")
-            new_glyphicon_tag['class']="glyphicon glyphicon-list-alt white"
+            new_glyphicon_tag['class'] = "glyphicon glyphicon-list-alt white"
 
             new_div_image_square_tag.append(new_glyphicon_tag)
 
@@ -114,8 +118,8 @@ def writeSection(sec,data_list):
             new_code_tag = pre_rendered_html2.new_tag("code")
 
             new_p_class = pre_rendered_html2.new_tag("p")
-            new_p_class['class']="clip-ellipsis"
-            if len(file_name)>85:
+            new_p_class['class'] = "clip-ellipsis"
+            if len(file_name) > 85:
                 trim = 75
             else:
                 trim = 0
@@ -128,7 +132,7 @@ def writeSection(sec,data_list):
             new_div_image_tag.append(br_tag)
 
             new_tag_div = pre_rendered_html2.new_tag("div")
-            new_tag_div['class']="span4 collapse-group"
+            new_tag_div['class'] = "span4 collapse-group"
 
             new_br_tag_1 = pre_rendered_html2.new_tag("br/")
 
@@ -139,29 +143,25 @@ def writeSection(sec,data_list):
             new_div_image_tag.append(new_tag_div)
 
             new_tag_a = pre_rendered_html2.new_tag("a")
-            new_tag_a['class']="collapse-button"
+            new_tag_a['class'] = "collapse-button"
             new_tag_a.string = "View details >>"
-
 
             new_tag_p.append(new_tag_a)
 
             new_tag_p_details = pre_rendered_html2.new_tag("div")
-            new_tag_p_details['class']="collapse"
+            new_tag_p_details['class'] = "collapse"
             new_strong_tag = pre_rendered_html2.new_tag("strong")
             new_strong_tag.string = "File: "
             new_code_tag = pre_rendered_html2.new_tag("code")
             new_code_tag.string = file_name
             new_strong_tag.append(new_code_tag)
 
-
             new_br_tag_1.append(new_strong_tag)
 
-
-
             new_h4_tag = pre_rendered_html2.new_tag("h4")
-            #new_small_tag = pre_rendered_html2.new_tag("small")
+            # new_small_tag = pre_rendered_html2.new_tag("small")
             new_strong_tag = pre_rendered_html2.new_tag("strong")
-            new_strong_tag['class']="details"
+            new_strong_tag['class'] = "details"
             new_ul_tag = pre_rendered_html2.new_tag("ul")
             new_div_tag = pre_rendered_html2.new_tag("div")
             data = ""
@@ -181,10 +181,8 @@ def writeSection(sec,data_list):
                 new_div_tag.append(new_ul_tag)
 
                 new_strong_tag.append(new_div_tag)
-                #new_small_tag.append(new_strong_tag)
+                # new_small_tag.append(new_strong_tag)
                 new_h4_tag.append(new_strong_tag)
-
-
 
             new_div_tag_1 = pre_rendered_html2.new_tag("div")
             new_div_tag_1['class'] = badger[Severity.INFO]
@@ -194,7 +192,6 @@ def writeSection(sec,data_list):
             new_div_tag_1.append(new_h4_tag)
 
             new_tag_p_details.append(new_div_tag_1)
-
 
             new_tag_div.append(new_tag_p_details)
             new_div_image_tag.append(new_tag_div)
@@ -208,6 +205,7 @@ def writeSection(sec,data_list):
         logger.debug(e.message)
         logger.debug(e)
 
+
 def write_manifest(data):
     """
     Writes an issue to the report. Takes in the section to which the data is to be written, the severity of the data and finally the actual vulnerability to be reported
@@ -215,8 +213,8 @@ def write_manifest(data):
     if common.reportInitSuccess:
         try:
             if os.path.exists(common.reportDir + "/report.html"):
-                pre_rendered = open(common.reportDir + "/report.html",'r').read()
-                pre_rendered_html = BeautifulSoup(pre_rendered,'html5lib')
+                pre_rendered = open(common.reportDir + "/report.html", 'r').read()
+                pre_rendered_html = BeautifulSoup(pre_rendered, 'html5lib')
 
                 new_code_div = pre_rendered_html.new_tag("code")
                 new_code_div['class'] = "xml"
@@ -228,11 +226,13 @@ def write_manifest(data):
             fh.close()
         except Exception as e:
             common.logger.debug("Error writing manifest: " + str(e))
+
+
 def write(identity, data, tag=None):
     try:
         if os.path.exists(common.reportDir + "/report.html"):
-            pre_rendered = open(common.reportDir + "/report.html",'r').read()
-            pre_rendered_html = BeautifulSoup(pre_rendered,'html5lib')
+            pre_rendered = open(common.reportDir + "/report.html", 'r').read()
+            pre_rendered_html = BeautifulSoup(pre_rendered, 'html5lib')
 
             if tag is not None:
                 new_span_tag = pre_rendered_html.new_tag(tag)
@@ -246,18 +246,19 @@ def write(identity, data, tag=None):
             fh.write(str(pre_rendered_html.prettify()))
         fh.close()
     except Exception as e:
-        common.reportInitSuccess=False
+        common.reportInitSuccess = False
         common.logger.debug("Report writing error: " + str(e))
+
 
 def write_counters():
     try:
         if os.path.exists(common.reportDir + "/report.html"):
-            pre_rendered = open(common.reportDir + "/report.html",'r').read()
-            pre_rendered_html = BeautifulSoup(pre_rendered,'html5lib')
-            warnings =  len(re.findall(r'badger-warning', str(pre_rendered_html)))
-            information =  len(re.findall(r'badger-success', str(pre_rendered_html)))
-            vulnerabilities =  len(re.findall(r'badger-danger', str(pre_rendered_html)))
-            debug =  len(re.findall(r'debug-level', str(pre_rendered_html)))
+            pre_rendered = open(common.reportDir + "/report.html", 'r').read()
+            pre_rendered_html = BeautifulSoup(pre_rendered, 'html5lib')
+            warnings = len(re.findall(r'badger-warning', str(pre_rendered_html)))
+            information = len(re.findall(r'badger-success', str(pre_rendered_html)))
+            vulnerabilities = len(re.findall(r'badger-danger', str(pre_rendered_html)))
+            debug = len(re.findall(r'debug-level', str(pre_rendered_html)))
 
             new_div_tag = pre_rendered_html.new_tag("div")
             new_div_tag.string = str(vulnerabilities)
@@ -281,12 +282,13 @@ def write_counters():
     except Exception as e:
         common.logger.debug("Error in write_counters: " + str(e))
 
+
 def write_badger(identity, sev, data, extra=None):
     if common.reportInitSuccess:
         try:
             if os.path.exists(common.reportDir + "/report.html"):
-                pre_rendered = open(common.reportDir + "/report.html",'r').read()
-                pre_rendered_html = BeautifulSoup(pre_rendered,'html5lib')
+                pre_rendered = open(common.reportDir + "/report.html", 'r').read()
+                pre_rendered_html = BeautifulSoup(pre_rendered, 'html5lib')
 
                 new_div_tag = pre_rendered_html.new_tag("div")
                 new_div_tag['class'] = badger[sev]
@@ -298,27 +300,27 @@ def write_badger(identity, sev, data, extra=None):
 
                 if extra is not None:
                     if isinstance(extra, dict):
-                        for key,val in extra.items():
-                                for i in extra[key]:
-                                    if isinstance(i, list) :
-                                        if len(i)>0:
-                                            firstelement = True
-                                            new_ul_tag_depth_1 = pre_rendered_html.new_tag("ul")
-                                            new_li_tag = pre_rendered_html.new_tag("li")
-                                            for j in i:
-                                                if firstelement:
-                                                    new_li_tag.string = j
-                                                    firstelement = False
-                                                else:
-                                                    new_li_tag_depth_1 = pre_rendered_html.new_tag("li")
-                                                    new_li_tag_depth_1.string = j
-                                                    new_ul_tag_depth_1.append(new_li_tag_depth_1)
-                                            new_li_tag.append(new_ul_tag_depth_1)
-                                            new_ul_tag.append(new_li_tag)
-                                    else:
+                        for key, val in extra.items():
+                            for i in extra[key]:
+                                if isinstance(i, list):
+                                    if len(i) > 0:
+                                        firstelement = True
+                                        new_ul_tag_depth_1 = pre_rendered_html.new_tag("ul")
                                         new_li_tag = pre_rendered_html.new_tag("li")
-                                        new_li_tag.string = i
+                                        for j in i:
+                                            if firstelement:
+                                                new_li_tag.string = j
+                                                firstelement = False
+                                            else:
+                                                new_li_tag_depth_1 = pre_rendered_html.new_tag("li")
+                                                new_li_tag_depth_1.string = j
+                                                new_ul_tag_depth_1.append(new_li_tag_depth_1)
+                                        new_li_tag.append(new_ul_tag_depth_1)
                                         new_ul_tag.append(new_li_tag)
+                                else:
+                                    new_li_tag = pre_rendered_html.new_tag("li")
+                                    new_li_tag.string = i
+                                    new_ul_tag.append(new_li_tag)
                     elif isinstance(extra, list):
                         for i in extra:
                             new_li_tag = pre_rendered_html.new_tag("li")
@@ -341,11 +343,12 @@ def write_badger(identity, sev, data, extra=None):
         except Exception as e:
             common.logger.debug("Error badger don't care: " + str(e))
 
+
 def write_adb_commands(identity, sev, data, extra=None, infobartext=None):
     try:
         if os.path.exists(common.reportDir + "/report.html"):
-            pre_rendered = open(common.reportDir + "/report.html",'r').read()
-            pre_rendered_html = BeautifulSoup(pre_rendered,'html5lib')
+            pre_rendered = open(common.reportDir + "/report.html", 'r').read()
+            pre_rendered_html = BeautifulSoup(pre_rendered, 'html5lib')
 
             new_div_tag = pre_rendered_html.new_tag("div")
             new_div_tag['class'] = badger[sev]
@@ -360,27 +363,27 @@ def write_adb_commands(identity, sev, data, extra=None, infobartext=None):
 
             if extra is not None:
                 if isinstance(extra, dict):
-                    for key,val in extra.items():
-                            for i in extra[key]:
-                                if isinstance(i, list) :
-                                    if len(i)>0:
-                                        firstelement = True
-                                        new_ul_tag_depth_1 = pre_rendered_html.new_tag("ul")
-                                        new_li_tag = pre_rendered_html.new_tag("li")
-                                        for j in i:
-                                            if firstelement:
-                                                new_li_tag.string = j
-                                                firstelement = False
-                                            else:
-                                                new_li_tag_depth_1 = pre_rendered_html.new_tag("li")
-                                                new_li_tag_depth_1.string = j
-                                                new_ul_tag_depth_1.append(new_li_tag_depth_1)
-                                        new_li_tag.append(new_ul_tag_depth_1)
-                                        new_ul_tag.append(new_li_tag)
-                                else:
+                    for key, val in extra.items():
+                        for i in extra[key]:
+                            if isinstance(i, list):
+                                if len(i) > 0:
+                                    firstelement = True
+                                    new_ul_tag_depth_1 = pre_rendered_html.new_tag("ul")
                                     new_li_tag = pre_rendered_html.new_tag("li")
-                                    new_li_tag.string = i
+                                    for j in i:
+                                        if firstelement:
+                                            new_li_tag.string = j
+                                            firstelement = False
+                                        else:
+                                            new_li_tag_depth_1 = pre_rendered_html.new_tag("li")
+                                            new_li_tag_depth_1.string = j
+                                            new_ul_tag_depth_1.append(new_li_tag_depth_1)
+                                    new_li_tag.append(new_ul_tag_depth_1)
                                     new_ul_tag.append(new_li_tag)
+                            else:
+                                new_li_tag = pre_rendered_html.new_tag("li")
+                                new_li_tag.string = i
+                                new_ul_tag.append(new_li_tag)
                 elif isinstance(extra, list):
                     for i in extra:
                         new_li_tag = pre_rendered_html.new_tag("li")
@@ -403,16 +406,17 @@ def write_adb_commands(identity, sev, data, extra=None, infobartext=None):
     except Exception as e:
         common.logger.debug("Error writing ADB commands to report: " + str(e))
 
+
 def reset():
     """
     Flushes the contents of the report
     """
     try:
         common.reportDir = common.getConfig("rootDir") + "/report"
-        if common.args.reportdir is not None :
+        if common.args.reportdir is not None:
             common.reportDir = common.args.reportdir + "/report"
-	#	report_dir = common.args.reportdir
-	# common.writeKey("reportDir",report_dir);
+        # report_dir = common.args.reportdir
+        # common.writeKey("reportDir",report_dir);
 
         if os.path.exists(common.reportDir):
             shutil.rmtree(common.reportDir)
