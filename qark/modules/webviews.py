@@ -106,28 +106,28 @@ def default_wv_config(wv, srcfile, sdk_ver, results):
 
     issue = terminalPrint()
     issue.setLevel(Severity.WARNING)
-    issue.setData(common.config.get('qarkhelper', 'FILE_SYS_WARN1') + common.config.get('qarkhelper',
-                                                                                        'FILE_SYS_WARN2') + " To validate this vulnerability, load the following url in this WebView: http://www.secbro.com/poc/html/FILE_SYS_WARN.html." + "Note: A local copy of this html file can also be found at <install_dir>/quark/poc/html/FILE_SYS_WARN.html")
+    issue.setData(common.config.get('qarkhelper', 'FILE_SYS_WARN1') + common.config.get('qarkhelper', 'FILE_SYS_WARN2') + " To validate this vulnerability, load the following local file in this WebView: file://<install_dir>/qark/poc/html/FILE_SYS_WARN.html")
+
     results.append(issue)
 
     issue = terminalPrint()
     issue.setLevel(Severity.WARNING)
-    issue.setData(common.config.get('qarkhelper',
-                                    'WV_CPA_WARNING') + " To validate this vulnerability, load the following url in this WebView: http://www.secbro.com/poc/html/WV_CPA_WARNING.html" + "Note: A local copy of this html file can also be found at <install_dir>/quark/poc/html/WV_CPA_WARNING.html")
+    issue.setData(common.config.get('qarkhelper', 'WV_CPA_WARNING') + " To validate this vulnerability, load the following local file in this WebView: file://<install_dir>/quark/poc/html/WV_CPA_WARNING.html")
+
     results.append(issue)
     if sdk_ver < 16:
         # minSdk <= 15 default is true; minSdk > 16 default is false
         issue = terminalPrint()
         issue.setLevel(Severity.WARNING)
-        issue.setData(common.config.get('qarkhelper',
-                                        'UNIV_FILE_WARNING') + " To validate this vulnerability, load the following url in this WebView: http://www.secbro.com/poc/html/UNIV_FILE_WARNING.html" + "Note: A local copy of this html file can also be found at <install_dir>/quark/poc/html/UNIV_FILE_WARNING.html")
+        issue.setData(common.config.get('qarkhelper', 'UNIV_FILE_WARNING') + " To validate this vulnerability, load the following local file in this WebView: file://<install_dir>/quark/poc/html/UNIV_FILE_WARNING.html")
+
         results.append(issue)
         # BUG - Need to double-check this, it doesn't appear to follow the same logic as the non-default checks
         if sdk_ver < 16:
             issue = terminalPrint()
             issue.setLevel(Severity.WARNING)
-            issue.setData(common.config.get('qarkhelper',
-                                            'FURL_FILE_WARNING') + " To validate this vulnerability, load the following url in this WebView: http://www.secbro.com/poc/html/FURL_FILE_WARNING.html" + "Note: A local copy of this html file can also be found at <install_dir>/quark/poc/html/FURL_FILE_WARNING.html")
+            issue.setData(common.config.get('qarkhelper', 'FURL_FILE_WARNING') + " To validate this vulnerability, load the following local file url in this WebView: file://<install_dir>/quark/poc/html/FURL_FILE_WARNING.html")
+
             results.append(issue)
         else:
             issue = terminalPrint()
@@ -212,10 +212,8 @@ def show_wv_vulns(s_list, i, results):
 
             issue = terminalPrint()
             issue.setLevel(Severity.WARNING)
-            issue.setData(
-                common.config.get('qarkhelper', 'TERMINAL_JS_WARNING') + " " + str(i[0]) + " " + common.config.get(
-                    'qarkhelper',
-                    'TERMINAL_JS_WARNING1') + " To validate this vulnerability, load the following url in this WebView: http://www.secbro.com/poc/html/JS_WARNING.html" + "Note: A local copy of this html file can also be found at <install_dir>/quark/poc/html/JS_WARNING.html\n")
+            issue.setData(common.config.get('qarkhelper', 'TERMINAL_JS_WARNING') +" "+str(i[0]) +" "+common.config.get('qarkhelper', 'TERMINAL_JS_WARNING1') + " To validate this vulnerability, load the following local file in this WebView: file://<install_dir>/quark/poc/html/JS_WARNING.html\n")
+
             results.append(issue)
         else:
             issue = terminalPrint()
@@ -236,10 +234,8 @@ def show_wv_vulns(s_list, i, results):
 
             issue = terminalPrint()
             issue.setLevel(Severity.WARNING)
-            issue.setData(
-                common.config.get('qarkhelper', 'TERMINAL_BURL_WARNING1') + " " + str(i[0]) + " " + common.config.get(
-                    'qarkhelper',
-                    'TERMINAL_BURL_WARNING2') + "To validate this vulnerability, load the following url in this WebView: http://www.secbro.com/poc/html/BURL_WARNING.html " + "Note: A local copy of this html file can also be found at <install_dir>/quark/poc/html/BURL_WARNING.html\n")
+            issue.setData(common.config.get('qarkhelper', 'TERMINAL_BURL_WARNING1') + " "+str(i[0]) +" "+common.config.get('qarkhelper', 'TERMINAL_BURL_WARNING2') + "To validate this vulnerability, load the following local file in this WebView: file://<install_dir>/quark/poc/html/BURL_WARNING.html\n")
+
             results.append(issue)
         else:
             issue = ReportIssue()
@@ -282,10 +278,8 @@ def show_wv_vulns(s_list, i, results):
 
             issue = terminalPrint()
             issue.setLevel(Severity.WARNING)
-            issue.setData(
-                common.config.get('qarkhelper', 'TERMINAL_FILE_SYS_WARN1') + str(i[0]) + " " + common.config.get(
-                    'qarkhelper',
-                    'TERMINAL_FILE_SYS_WARN2') + " To validate this vulnerability, load the following url in this WebView: http://www.secbro.com/poc/html/FILE_SYS_WARN.html " + "Note: A local copy of this html file can also be found at <install_dir>/quark/poc/html/FILE_SYS_WARN.html\n")
+            issue.setData(common.config.get('qarkhelper', 'TERMINAL_FILE_SYS_WARN1') + str(i[0]) +" "+ common.config.get('qarkhelper', 'TERMINAL_FILE_SYS_WARN2') + " To validate this vulnerability, load the following local file in this WebView: file://<install_dir>/quark/poc/html/FILE_SYS_WARN.html\n")
+
             results.append(issue)
         # Regex to determine if WebViews have Content Provider access (default = true)
         # Checks whether WebView can access Content Providers
@@ -316,8 +310,8 @@ def show_wv_vulns(s_list, i, results):
 
             issue = terminalPrint()
             issue.setLevel(Severity.WARNING)
-            issue.setData(common.config.get('qarkhelper', 'TERMINAL_WV_CPA_WARNING') + str(i[
-                                                                                               0]) + "To validate this vulnerability, load the following url in this WebView: http://www.secbro.com/poc/html/WV_CPA_WARNING.html " + "Note: A local copy of this html file can also be found at <install_dir>/quark/poc/html/WV_CPA_WARNING.html\n")
+            issue.setData(common.config.get('qarkhelper', 'TERMINAL_WV_CPA_WARNING') + str(i[0]) + "To validate this vulnerability, load the following local file in this WebView: file://<install_dir>/quark/poc/html/WV_CPA_WARNING.html\n")
+
             results.append(issue)
             # check for JS access from file URL can access content from any origin
             # minSdk <= 15 default is true; minSdk > 16 default is false
@@ -335,8 +329,8 @@ def show_wv_vulns(s_list, i, results):
 
                 issue = terminalPrint()
                 issue.setLevel(Severity.WARNING)
-                issue.setData(common.config.get('qarkhelper', 'TERMINAL_UNIV_FILE_WARNING') + str(i[
-                                                                                                      0]) + " To validate this vulnerability, load the following url in this WebView: http://www.secbro.com/poc/html/UNIV_FILE_WARNING.html " + "Note: A local copy of this html file can also be found at <install_dir>/quark/poc/html/UNIV_FILE_WARNING.html\n")
+                issue.setData(common.config.get('qarkhelper', 'TERMINAL_UNIV_FILE_WARNING') +str(i[0]) + " To validate this vulnerability, load the following local file in this WebView: file://<install_dir>/quark/poc/html/UNIV_FILE_WARNING.html\n")
+
                 results.append(issue)
                 skip_next = True
             else:
@@ -387,8 +381,8 @@ def show_wv_vulns(s_list, i, results):
                     issue = terminalPrint()
                     issue.setLevel(Severity.WARNING)
                     issue.setExtras(IS_FILE_ACCESS_ENABLED, True)
-                    issue.setData(common.config.get('qarkhelper', 'TERMINAL_UNIV_FILE_WARNING') + str(i[
-                                                                                                          0]) + "To validate this vulnerability, load the following url in this WebView: http://www.secbro.com/poc/html/UNIV_FILE_WARNING2.html " + "Note: A local copy of this html file can also be found at <install_dir>/quark/poc/html/UNIV_FILE_WARNING2.html\n")
+                    issue.setData(common.config.get('qarkhelper', 'TERMINAL_UNIV_FILE_WARNING') + str(i[0]) + "To validate this vulnerability, load the following local file in this WebView: file://<install_dir>/quark/poc/html/UNIV_FILE_WARNING2.html\n")
+
                     results.append(issue)
 
         else:
@@ -404,8 +398,8 @@ def show_wv_vulns(s_list, i, results):
 
                 issue = terminalPrint()
                 issue.setLevel(Severity.WARNING)
-                issue.setData(common.config.get('qarkhelper', 'TERMINAL_UNIV_FILE_WARNING') + '1 ' + str(i[
-                                                                                                             0]) + " To validate this vulnerability, load the following url in this WebView: http://www.secbro.com/poc/html/UNIV_FILE_WARNING.html " + "Note: A local copy of this html file can also be found at <install_dir>/quark/poc/html/UNIV_FILE_WARNING.html\n")
+                issue.setData(common.config.get('qarkhelper', 'TERMINAL_UNIV_FILE_WARNING') + '1 '+str(i[0]) + " To validate this vulnerability, load the following local file url in this WebView: file://<install_dir>/quark/poc/html/UNIV_FILE_WARNING.html\n")
+
                 results.append(issue)
                 skip_next = True
 
@@ -427,43 +421,43 @@ def show_wv_vulns(s_list, i, results):
                 if skip_next:
                     pass
                 else:
-                    # minSdk <= 15 default is true; minSdk > 16 default is false
-                    wv_allow_file_access_furls = re.escape(sl + '.setAllowFileAccessFromFileURLs(true)')
-                    if wv_config(i[1], wv_allow_file_access_furls):
-                        issue = ReportIssue()
-                        issue.setCategory(ExploitType.WEBVIEW)
-                        issue.setDetails(common.config.get('qarkhelper', 'FURL_FILE_WARNING'))
-                        issue.setFile(str(i[1]))
-                        issue.setSeverity(Severity.WARNING)
-                        issue.setExtras(IS_UNIVERSAL_FILE_ACCESS_ENABLED, True)
-                        results.append(issue)
+                    #minSdk <= 15 default is true; minSdk > 16 default is false
+                        wv_allow_file_access_furls=re.escape(sl+'.setAllowFileAccessFromFileURLs(true)')
+                        if wv_config(i[1],wv_allow_file_access_furls):
+                            issue = ReportIssue()
+                            issue.setCategory(ExploitType.WEBVIEW)
+                            issue.setDetails(common.config.get('qarkhelper', 'FURL_FILE_WARNING'))
+                            issue.setFile(str(i[1]))
+                            issue.setSeverity(Severity.WARNING)
+                            issue.setExtras(IS_UNIVERSAL_FILE_ACCESS_ENABLED, True)
+                            results.append(issue)
 
-                        issue = terminalPrint()
-                        issue.setLevel(Severity.WARNING)
-                        issue.setData(common.config.get('qarkhelper', 'TERMINAL_FURL_FILE_WARNING') + str(i[
-                                                                                                              0]) + "To validate this vulnerability, load the following url in this WebView: http://www.secbro.com/poc/html/FURL_FILE_WARNING.html " + "Note: A local copy of this html file can also be found at <install_dir>/quark/poc/html/FURL_FILE_WARNING.html\n")
-                        results.append(issue)
-                    else:
-                        issue = ReportIssue()
-                        issue.setCategory(ExploitType.WEBVIEW)
-                        issue.setDetails(common.config.get('qarkhelper', 'FURL_FILE_OK'))
-                        issue.setFile(str(i[1]))
-                        issue.setSeverity(Severity.INFO)
-                        issue.setExtras(IS_UNIVERSAL_FILE_ACCESS_ENABLED, False)
-                        results.append(issue)
+                            issue = terminalPrint()
+                            issue.setLevel(Severity.WARNING)
+                            issue.setData(common.config.get('qarkhelper', 'TERMINAL_FURL_FILE_WARNING') + str(i[0]) + "To validate this vulnerability, load the following local file in this WebView: file://<install_dir>/quark/poc/html/FURL_FILE_WARNING.html\n")
+                            results.append(issue)
+                        else:
+                            issue = ReportIssue()
+                            issue.setCategory(ExploitType.WEBVIEW)
+                            issue.setDetails(common.config.get('qarkhelper', 'FURL_FILE_OK'))
+                            issue.setFile(str(i[1]))
+                            issue.setSeverity(Severity.INFO)
+                            issue.setExtras(IS_UNIVERSAL_FILE_ACCESS_ENABLED, False)
+                            results.append(issue)
 
-                        issue = terminalPrint()
-                        issue.setLevel(Severity.INFO)
-                        issue.setData(common.config.get('qarkhelper', 'FURL_FILE_OK') + str(i[0]))
-                        results.append(issue)
+                            issue = terminalPrint()
+                            issue.setLevel(Severity.INFO)
+                            issue.setData(common.config.get('qarkhelper', 'FURL_FILE_OK') + str(i[0]))
+                            results.append(issue)
 
-                        # Checking whether plugins are enabled for WebViews
-                        # setPluginsEnabled deprecated in API 9, removed in API 18
-                        # setPluginState added in API 8, deprecated in API 18
-        wv_plugsinenabled = re.escape(sl + '.setPluginsEnabled(true)')
-        wv_pluginstate = re.escape(sl + '.setPluginState(WebSettings.PluginState.ON*')
+    #Checking whether plugins are enabled for WebViews
+    #setPluginsEnabled deprecated in API 9, removed in API 18
+    #setPluginState added in API 8, deprecated in API 18
+        wv_plugsinenabled=re.escape(sl+'.setPluginsEnabled(true)')
+        wv_pluginstate=re.escape(sl+'.setPluginState(WebSettings.PluginState.ON*')
 
-        if wv_config(i[1], wv_plugsinenabled):
+        if wv_config(i[1],wv_plugsinenabled):
+
             if int(common.minSdkVersion) < 18:
                 issue = ReportIssue()
                 issue.setCategory(ExploitType.WEBVIEW)
@@ -532,8 +526,8 @@ def show_wv_vulns(s_list, i, results):
 
                 issue = terminalPrint()
                 issue.setLevel(Severity.WARNING)
-                issue.setData(common.config.get('qarkhelper', 'TERMINAL_BAD_JS_INT') + " " + str(i[
-                                                                                                     0]) + " To validate this vulnerability, load the following url in this WebView: http://www.secbro.com/poc/html/BAD_JS_INT.html " + "Note: A local copy of this html file can also be found at <install_dir>/quark/poc/html/BAD_JS_INT.html" + "\n")
+                issue.setData(common.config.get('qarkhelper', 'TERMINAL_BAD_JS_INT') + " "+str(i[0]) + " To validate this vulnerability, load the following local file in this WebView: file://<install_dir>/quark/poc/html/BAD_JS_INT.html\n")
+
                 results.append(issue)
             else:
                 issue = ReportIssue()
@@ -607,15 +601,16 @@ def find_webviews():
     wv_list = find_ext('WebView')
     # 2. Look for classes that extend classes that extend WebView
     while len(common.tree(wv_list)) > 1:
-        wv_list += common.tree(wv_list)
+        wv_list+=common.tree(wv_list)
 
-    wv_list.append(['WebView', ''])
-    # 3. Cleanup?
-    # 4. Look for all declaration of WebViews using normal and extended class names
-    # BUG sometimes multiple declarations are coming back for z[0], need to figure out what is going on there
-    # Currently there may be false negatives
-    # BUG - Need to review this for optional/multiple spaces
-    wv_decs = []
+    wv_list.append(['WebView',''])
+    #3. Cleanup?
+    #4. Look for all declaration of WebViews using normal and extended class names
+    #BUG sometimes multiple declarations are coming back for z[0], need to figure out what is going on there
+    #Currently there may be false negatives
+    #BUG - Need to review this for optional/multiple spaces
+    wv_decs=[]
+
     wv_decs.append([])
     for x in wv_list:
         if len(x) > 0:

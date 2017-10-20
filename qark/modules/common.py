@@ -26,6 +26,9 @@ from modules.IssueType import IssueType, IssueSeverity
 from lib import colorama
 from lib.blessed import *
 from modules.createExploit import ExploitType
+import csv
+import unittest
+
 
 VULNERABILITY_LEVEL = 60
 logging.addLevelName(VULNERABILITY_LEVEL, "POTENTIAL VULNERABILITY")
@@ -200,6 +203,84 @@ class terminalPrint():
         self.level = level
 
     def getLevel(self):
+        """
+        level = 0 represents Information Issue
+        self.extra retrieves information only from the Manifest.xml file. Hence it will be null for issues found from modules and plugins
+        self.data contains details/description for each issue
+        To get the type of Issue, looking at the specific issue keywords from the description is the only option at the moment
+        """
+        if self.level == 0:
+            tr = csv.writer(open('./Report.csv', 'a+'))
+
+            if self.extra:
+                tr.writerow(["INFO", str(self.data), str(self.extra), "Manifest File Check"])
+            elif "WEBVIEWS" in str(self.data):
+                tr.writerow(["INFO", str(self.data), str(self.extra), "WEB-VIEW ISSUES"])
+            elif "x.509" in str(self.data) or "certificate" in str(self.data) or "Man-In-The-Middle" in str(self.data):
+                tr.writerow(["INFO", str(self.data), str(self.extra), "CERTIFICATE VALIDATION ISSUES"])
+            elif "SecureRandom" in str(self.data) or "ECB" in str(self.data) or "key" in str(self.data):
+                tr.writerow(["INFO", str(self.data), str(self.extra), "CRYPTO ISSUES"])
+            elif "broadcast" in str(self.data):
+                tr.writerow(["INFO", str(self.data), str(self.extra), "BROADCAST ISSUES"])
+            elif "PendingIntent" in str(self.data):
+                tr.writerow(["INFO", str(self.data), str(self.extra), "PENDING INTENT ISSUES"])
+            else:
+                tr.writerow(["INFO", str(self.data), str(self.extra), "PLUGIN ISSUES"])
+
+        elif self.level == 1:
+            tr = csv.writer(open('./Report.csv', 'a+'))
+
+            if self.extra:
+                tr.writerow(["WARNING", str(self.data), str(self.extra), "Manifest File Check"])
+            elif "WEBVIEWS" in str(self.data):
+                tr.writerow(["WARNING", str(self.data), str(self.extra), "WEB-VIEW ISSUES"])
+            elif "x.509" in str(self.data) or "certificate" in str(self.data) or "Man-In-The-Middle" in str(self.data):
+                tr.writerow(["WARNING", str(self.data), str(self.extra), "CERTIFICATE VALIDATION ISSUES"])
+            elif "SecureRandom" in str(self.data) or "ECB" in str(self.data) or "key" in str(self.data):
+                tr.writerow(["WARNING", str(self.data), str(self.extra), "CRYPTO ISSUES"])
+            elif "broadcast" in str(self.data):
+                tr.writerow(["WARNING", str(self.data), str(self.extra), "BROADCAST ISSUES"])
+            elif "PendingIntent" in str(self.data):
+                tr.writerow(["WARNING", str(self.data), str(self.extra), "PENDING INTENT ISSUES"])
+            else:
+                tr.writerow(["WARNING", str(self.data), str(self.extra), "PLUGIN ISSUES"])
+
+        elif self.level == 2:
+            tr = csv.writer(open('./Report.csv', 'a+'))
+
+            if self.extra:
+                tr.writerow(["ERROR", str(self.data), str(self.extra), "Manifest File Check"])
+            elif "WEBVIEWS" in str(self.data):
+                tr.writerow(["ERROR", str(self.data), str(self.extra), "WEB-VIEW ISSUES"])
+            elif "x.509" in str(self.data) or "certificate" in str(self.data) or "Man-In-The-Middle" in str(self.data):
+                tr.writerow(["ERROR", str(self.data), str(self.extra), "CERTIFICATE VALIDATION ISSUES"])
+            elif "SecureRandom" in str(self.data) or "ECB" in str(self.data) or "key" in str(self.data):
+                tr.writerow(["ERROR", str(self.data), str(self.extra), "CRYPTO ISSUES"])
+            elif "broadcast" in str(self.data):
+                tr.writerow(["ERROR", str(self.data), str(self.extra), "BROADCAST ISSUES"])
+            elif "PendingIntent" in str(self.data):
+                tr.writerow(["ERROR", str(self.data), str(self.extra), "PENDING INTENT ISSUES"])
+            else:
+                tr.writerow(["ERROR", str(self.data), str(self.extra), "PLUGIN ISSUES"])
+
+        elif self.level == 3:
+            tr = csv.writer(open('./Report.csv', 'a+'))
+
+            if self.extra:
+                tr.writerow(["VULNERABILITY", str(self.data), str(self.extra), "Manifest File Check"])
+            elif "WEBVIEWS" in str(self.data):
+                tr.writerow(["VULNERABILITY", str(self.data), str(self.extra), "WEB-VIEW ISSUES"])
+            elif "x.509" in str(self.data) or "certificate" in str(self.data) or "Man-In-The-Middle" in str(self.data):
+                tr.writerow(["VULNERABILITY", str(self.data), str(self.extra), "CERTIFICATE VALIDATION ISSUES"])
+            elif "SecureRandom" in str(self.data) or "ECB" in str(self.data) or "key" in str(self.data):
+                tr.writerow(["VULNERABILITY", str(self.data), str(self.extra), "CRYPTO ISSUES"])
+            elif "broadcast" in str(self.data):
+                tr.writerow(["VULNERABILITY", str(self.data), str(self.extra), "BROADCAST ISSUES"])
+            elif "PendingIntent" in str(self.data):
+                tr.writerow(["VULNERABILITY", str(self.data), str(self.extra), "PENDING INTENT ISSUES"])
+            else:
+                tr.writerow(["VULNERABILITY", str(self.data), str(self.extra), "PLUGIN ISSUES"])
+
         return self.level
 
     def setData(self, data):
@@ -227,16 +308,15 @@ def exitClean():
 
 class Writer(object):
     """Create an object with a write method that writes to a
-	specific place on the screen, defined at instantiation.
-
-	This is the glue between blessings and progressbar.
-	"""
+    specific place on the screen, defined at instantiation.
+    This is the glue between blessings and progressbar.
+    """
 
     def __init__(self, location):
         """
-		Input: location - tuple of ints (x, y), the position
-						of the bar in the terminal
-		"""
+        Input: location - tuple of ints (x, y), the position
+                        of the bar in the terminal
+        """
         self.location = location
 
     def write(self, string):
@@ -346,8 +426,8 @@ def fcount(path):
 
 def getConfig(key):
     """
-	Function to retrieve a key
-	"""
+    Function to retrieve a key
+    """
     value = ""
     for line in fileinput.input([rootDir + "/settings.properties"]):
         if key in line:
@@ -368,9 +448,9 @@ def getConfig(key):
 
 def writeKey(key, value):
     """
-	Function to write a key to settings.properties\n
-	If a value exists, this will overwrite the key
-	"""
+    Function to write a key to settings.properties\n
+    If a value exists, this will overwrite the key
+    """
     flag = 0
     for line in fileinput.input([rootDir + "/settings.properties"], inplace=True):
         if key in line:
@@ -389,8 +469,8 @@ def writeKey(key, value):
 # Will return file names matching regex
 def grep(path, regex):
     """
-	Standard wrapper around grep. Searches the contents of a file given a regular expression and returns a list of results
-	"""
+    Standard wrapper around grep. Searches the contents of a file given a regular expression and returns a list of results
+    """
     regObj = re.compile(regex)
     res = []
     for root, dirs, fnames in os.walk(path):
@@ -402,9 +482,8 @@ def grep(path, regex):
 
 def find_java(path):
     """
-	Given an absolute path, find  and return all java files in a list
-
-	"""
+    Given an absolute path, find  and return all java files in a list
+    """
     logger.info('Finding all java files')
     list_of_files = []
     for (dirpath, dirnames, filenames) in os.walk(path):
@@ -416,9 +495,8 @@ def find_java(path):
 
 def find_xml(path):
     """
-	Given an absolute path, find  and return all R.java files in a list
-
-	"""
+    Given an absolute path, find  and return all R.java files in a list
+    """
     list_of_files = []
     for (dirpath, dirnames, filenames) in os.walk(path):
         for filename in filenames:
@@ -429,9 +507,9 @@ def find_xml(path):
 
 def findKeys(path):
     """
-	Given an absolute path, find  and return all key files in a list
+    Given an absolute path, find  and return all key files in a list
 
-	"""
+    """
     logger.info('Looking for private key files in project')
     list_of_files = []
     for (dirpath, dirnames, filenames) in os.walk(path):
@@ -445,9 +523,8 @@ def findKeys(path):
 
 def find_xml(path):
     """
-	Given an absolute path, find  and return all xml files in a list
-
-	"""
+    Given an absolute path, find  and return all xml files in a list
+    """
     logger.info('Finding all xml files')
     list_of_files = []
     for (dirpath, dirnames, filenames) in os.walk(path):
@@ -459,8 +536,8 @@ def find_xml(path):
 
 def read_files(filename, rex):
     """
-	Read a file line by line, run a regular expression against the content and return list of things that require inspection
-	"""
+    Read a file line by line, run a regular expression against the content and return list of things that require inspection
+    """
     things_to_inspect = []
     try:
         with open(filename) as f:
@@ -486,8 +563,8 @@ def read_files(filename, rex):
 
 def print_res_list(list_n, msg_n):
     """
-	Deprecated code
-	"""
+    Deprecated code
+    """
     if len(list_n) > 1:
         print msg_n
         for x in list_n:
@@ -498,8 +575,8 @@ def print_res_list(list_n, msg_n):
 # look for text
 def text_scan(file_list, rex_n):
     """
-	Given a list of files, search content of each file by the regular expression and return a list of matches
-	"""
+    Given a list of files, search content of each file by the regular expression and return a list of matches
+    """
     result_list = []
     # result_list.append([])
     for file in file_list:
@@ -511,8 +588,8 @@ def text_scan(file_list, rex_n):
 
 def text_scan_single(file_name, rex_n):
     """
-	Given a single files, search content of each file by the regular expression and return a list of matches
-	"""
+    Given a single files, search content of each file by the regular expression and return a list of matches
+    """
     result_list = []
     result_list.append([])
     result = read_files(file_name, rex_n)
@@ -523,8 +600,8 @@ def text_scan_single(file_name, rex_n):
 
 def compare(length, req_length, msg, bye):
     """
-	Deprecated code
-	"""
+    Deprecated code
+    """
     if length != req_length:
         print msg
         if bye == 'true':
@@ -534,8 +611,8 @@ def compare(length, req_length, msg, bye):
 
 def dedup(L):
     """
-	Given a list, deduplicate it
-	"""
+    Given a list, deduplicate it
+    """
     if L:
         L.sort()
         last = L[-1]
@@ -550,8 +627,8 @@ def dedup(L):
 # find clases that extend something
 def find_ext(class_name):
     """
-	Function to find if a class extends any other type and return the results in a list
-	"""
+    Function to find if a class extends any other type and return the results in a list
+    """
     extension_list = []
     extension_list.append([])
     ext_string = r'class.*extends\s+' + re.escape(class_name) + r'\s*(<.*>)?(implements.*)?\s*{'
@@ -568,8 +645,8 @@ def find_ext(class_name):
 
 def tree(l):
     """
-	Given a list of files, find the complete list of hierarchy of extensions and return the result as a list
-	"""
+    Given a list of files, find the complete list of hierarchy of extensions and return the result as a list
+    """
     tmp_list = []
     for c in l:
         if len(c) > 0:
@@ -588,8 +665,8 @@ def normalizeActivityNames(activityList, package_name):
 
 def check_export(tag, output):
     """
-	Check if the application has marked the tag as EXPORTED
-	"""
+    Check if the application has marked the tag as EXPORTED
+    """
 
     global protected_broadcasts
 
@@ -777,8 +854,8 @@ def check_export(tag, output):
 
 def sink_list_check(token, tree):
     """
-	Check against the master list of sinks
-	"""
+    Check against the master list of sinks
+    """
     # BUG The commented out sinks need some massaging to parse right; They are mostly breaking context
     sink_list = []
     sink_list.append([])
@@ -1048,8 +1125,8 @@ def sink_list_check(token, tree):
 
 class Severity():
     """
-	Enum type for exploitatin category
-	"""
+    Enum type for exploitation category
+    """
     INFO, WARNING, ERROR, VULNERABILITY = range(4)
 
 
