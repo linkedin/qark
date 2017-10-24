@@ -50,7 +50,6 @@ from modules import filters
 from modules.common import terminalPrint, Severity, ReportIssue
 from modules import adb
 from lib import argparse
-from lib.pyfiglet import Figlet
 from lib.pubsub import pub
 from lib.progressbar import ProgressBar, Percentage, Bar
 from lib.yapsy.PluginManager import PluginManager
@@ -366,8 +365,16 @@ def writeReportSection(results, category):
 
 def nonAutomatedParseArgs():
     os.system('clear')
-    f = Figlet(font='colossal')
-    print f.renderText('Q A R K')
+    print """ .d88888b.           d8888   8888888b.    888    d8P  
+d88P" "Y88b         d88888   888   Y88b   888   d8P   
+888     888        d88P888   888    888   888  d8P    
+888     888       d88P 888   888   d88P   888d88K     
+888     888      d88P  888   8888888P"    8888888b    
+888 Y8b 888     d88P   888   888 T88b     888  Y88b   
+Y88b.Y8b88P    d8888888888   888  T88b    888   Y88b  
+ "Y888888"    d88P     888   888   T88b   888    Y88b 
+        Y8b                                            """
+
 
 
     common.logger = logging.getLogger()
@@ -414,8 +421,15 @@ def nonAutomatedParseArgs():
 
 def runAutomated(pathToApk,pathToReport):
     os.system('clear')
-    f = Figlet(font='colossal')
-    print f.renderText('Q A R K')
+    print """ .d88888b.           d8888   8888888b.    888    d8P  
+d88P" "Y88b         d88888   888   Y88b   888   d8P   
+888     888        d88P888   888    888   888  d8P    
+888     888       d88P 888   888   d88P   888d88K     
+888     888      d88P  888   8888888P"    8888888b    
+888 Y8b 888     d88P   888   888 T88b     888  Y88b   
+Y88b.Y8b88P    d8888888888   888  T88b    888   Y88b  
+ "Y888888"    d88P     888   888   T88b   888    Y88b 
+        Y8b                                            """
 
 
     common.logger = logging.getLogger()
