@@ -50,3 +50,4 @@ Saving the report in HTML format. This helps in providing a detailed feedback of
 ```
 py.test --cov=<absolute path to specific folder> --cov-report html
 ```
+
