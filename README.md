@@ -96,7 +96,7 @@ Copyright 2015 LinkedIn Corp. Licensed under the Apache License, Version 2.0 (th
 Unless required by applicable law or agreed to in writing, software  distributed under the License is distributed on an "AS IS" BASIS,  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 
 ## Recent Updates
-*Version 2.0*
+**Version 2.0**
 QARK has previously been self-contained with a lot of Python dependencies living in the `lib/` folder. With the release of `2.0` we remove this and go towards the standard approach of using virtual environments. The usage section has been updated to reflect these changes.
 
 
