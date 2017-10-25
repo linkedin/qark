@@ -29,7 +29,7 @@ from modules import findExtras
 from modules import webviews
 from modules import report
 from modules import unpackAPK
-from lib.axmlparserpy import axmlprinter
+from axmlparserpy import axmlprinter
 from modules.DetermineMinSDK import determine_min_sdk
 from modules import sdkManager
 from modules import createSploit
@@ -51,8 +51,8 @@ from modules.common import terminalPrint, Severity, ReportIssue
 from modules import adb
 from lib import argparse
 from lib.pubsub import pub
-from lib.progressbar import ProgressBar, Percentage, Bar
-from lib.yapsy.PluginManager import PluginManager
+from progressbar import ProgressBar, Percentage, Bar
+from yapsy.PluginManager import PluginManager
 import csv
 import json
 

@@ -22,7 +22,7 @@ from collections import defaultdict
 from multiprocessing import Process
 from threading import Thread, Lock
 
-from lib.progressbar import *
+from progressbar import *
 from lib import blessings
 from modules.common import logger
 from modules import report

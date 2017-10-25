@@ -15,7 +15,7 @@ from modules import common
 from modules import report
 import lib.plyj.parser as plyj
 import lib.plyj.model as m
-from lib.progressbar import *
+from progressbar import *
 from modules.report import ReportIssue
 from modules.common import Severity, ReportIssue
 from modules.createExploit import ExploitType
@@ -269,7 +269,7 @@ def recursive_ssl_session(t, filename, results):
 
 def recursive_find_verify(q, filename, results):
     '''
-    Find all .verify methods 
+    Find all .verify methods
     '''
     global sslSessions
     global tree

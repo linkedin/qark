@@ -7,7 +7,7 @@ from yapsy.IPlugin import IPlugin
 from modules import common, report
 from modules.common import ReportIssue, Severity, terminalPrint, logger
 from modules.createExploit import ExploitType
-from lib.progressbar import *
+from progressbar import *
 from lib.pubsub import pub
 import logging
 
@@ -44,7 +44,7 @@ class PluginTwo(IPlugin):
         # This is required to send the complete list of results (including the ones to be printed on terminal as well as
         # issues to be printed in tht HTML report) back to the main thread.
         queue.put(results)
-            
+
 
     def getName(self):
         # The name to be displayed against the progressbar
