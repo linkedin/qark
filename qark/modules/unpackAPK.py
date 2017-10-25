@@ -27,7 +27,7 @@ import blessings
 from modules.common import logger
 from modules import report
 from modules import common
-from lib.pubsub import pub
+from pubsub import pub
 
 lock = Lock()
 progresswriter1 = common.Writer((0, common.term.height - 10))

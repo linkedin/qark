@@ -10,3 +10,4 @@ coloredlogs >= 1.0.1
 ply >= 3.9
 yapsy >= 1.11.223
 mock
+PyPubSub == 3.3.0

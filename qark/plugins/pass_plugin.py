@@ -8,7 +8,7 @@ from modules import common, report
 from modules.common import ReportIssue, Severity, terminalPrint, logger
 from modules.createExploit import ExploitType
 from progressbar import *
-from lib.pubsub import pub
+from pubsub import pub
 import logging
 
 

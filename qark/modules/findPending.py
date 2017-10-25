@@ -12,7 +12,7 @@ import logging
 import lib.plyj.parser as plyj
 import lib.plyj.model as m
 from progressbar import *
-from lib.pubsub import pub
+from pubsub import pub
 from modules.report import ReportIssue
 from modules.common import Severity, ReportIssue
 from modules.createExploit import ExploitType

@@ -50,7 +50,7 @@ from modules import filters
 from modules.common import terminalPrint, Severity, ReportIssue
 from modules import adb
 from lib import argparse
-from lib.pubsub import pub
+from pubsub import pub
 from progressbar import ProgressBar, Percentage, Bar
 from yapsy.PluginManager import PluginManager
 import csv

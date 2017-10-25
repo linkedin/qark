@@ -17,7 +17,7 @@ from modules import report
 from modules.report import ReportIssue
 from modules.common import Severity, ReportIssue
 from modules.createExploit import ExploitType
-from lib.pubsub import pub
+from pubsub import pub
 from modules.common import terminalPrint
 
 common.logger = logging.getLogger()

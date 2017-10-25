@@ -16,7 +16,7 @@ from modules.report import ReportIssue
 from modules.common import Severity, ReportIssue
 from modules.createExploit import ExploitType
 from progressbar import *
-from lib.pubsub import pub
+from pubsub import pub
 from modules.common import terminalPrint
 
 
