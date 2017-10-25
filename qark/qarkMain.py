@@ -6,6 +6,7 @@ Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.'''
 
+import argparse
 import os
 import re
 import sys
@@ -49,7 +50,6 @@ from modules.contentProvider import *
 from modules import filters
 from modules.common import terminalPrint, Severity, ReportIssue
 from modules import adb
-from lib import argparse
 from pubsub import pub
 from progressbar import ProgressBar, Percentage, Bar
 from yapsy.PluginManager import PluginManager
