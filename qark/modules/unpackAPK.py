@@ -23,7 +23,7 @@ from multiprocessing import Process
 from threading import Thread, Lock
 
 from progressbar import *
-from lib import blessings
+import blessings
 from modules.common import logger
 from modules import report
 from modules import common
