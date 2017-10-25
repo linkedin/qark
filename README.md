@@ -9,7 +9,7 @@
 
 Install virtualenv:
 ```
-pip install virtualenv
+$ pip install virtualenv
 ```
 
 Create virtual environment (you can make sure it is `python2.7` with the `-p` flag):
