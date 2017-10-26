@@ -19,6 +19,7 @@ from xml.dom import minidom
 import traceback
 import logging
 import time
+import shlex
 import shutil
 from threading import Thread, Lock
 from Queue import Queue
@@ -465,6 +466,10 @@ Y88b.Y8b88P    d8888888888   888  T88b    888   Y88b
 
     if pathToLog:
         logging.basicConfig(filename=pathToLog, level=logging.DEBUG)
+
+    common.rootDir = os.path.dirname(os.path.realpath(__file__))
+    common.writeKey("rootDir", common.rootDir)
+    common.initialize_logger()
     common.logger = logging.getLogger()
     if not pathToApk and not pathToReport and not command_line_arguments:
         common.logger.error("Please specify pathToApk and pathToReport, or command_line_arguments")
@@ -472,7 +477,6 @@ Y88b.Y8b88P    d8888888888   888  T88b    888   Y88b
         common.logger.info("Running only with command_line_arguments, disregarding pathToApk and pathToReport")
 
     common.runningAutomated = True
-    common.rootDir = os.path.dirname(os.path.realpath(__file__))
     common.buildLocation = buildDir
 
     #Initialize system
@@ -481,7 +485,6 @@ Y88b.Y8b88P    d8888888888   888  T88b    888   Y88b
         f = open(os.path.dirname(os.path.realpath(__file__)) + "/settings.properties",'w')
         f.close()
 
-    common.writeKey("rootDir", common.rootDir)
     if command_line_arguments:
         parser = setup_argparse()
         try:
