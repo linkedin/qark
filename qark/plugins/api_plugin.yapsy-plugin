@@ -1,0 +1,9 @@
+[Core]
+Name = API Key checker
+Module = api_plugin
+
+[Documentation]
+Author = Tushar Dalvi
+Version = 1.0
+Website = https://github.com/linkedin/qark/
+Description = Demonstrates another simple check
