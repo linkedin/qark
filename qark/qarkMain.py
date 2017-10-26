@@ -1227,8 +1227,9 @@ def main():
         common.logger.error(
             "Problem with reporting; No html report generated. Please see the readme file for possible solutions.")
 
-    print "Goodbye!"
-    raise SystemExit
+    if not common.runningAutomated:
+        print "Goodbye!"
+        raise SystemExit
 
 if __name__ == "__main__":
     # Create a CSV file to store results
