@@ -452,7 +452,8 @@ def run_automated_defaults(pathToReport, pathToApk):
     common.interactive_mode = False
 
 
-def runAutomated(pathToApk,pathToReport, command_line_arguments=''):
+def runAutomated(pathToApk='',pathToReport='', command_line_arguments=''):
+    """Call with `command_line_arguments` or specify `pathToApk` and `pathToReport`."""
     os.system('clear')
     print """ .d88888b.           d8888   8888888b.    888    d8P  
 d88P" "Y88b         d88888   888   Y88b   888   d8P   
@@ -466,6 +467,10 @@ Y88b.Y8b88P    d8888888888   888  T88b    888   Y88b
 
 
     common.logger = logging.getLogger()
+    if not pathToApk and not pathToReport and not command_line_arguments:
+        common.logger.error("Please specify pathToApk and pathToReport, or command_line_arguments")
+    elif command_line_arguments and (pathToApk or pathToReport):
+        common.logger.info("Running only with command_line_arguments, disregarding pathToApk and pathToReport")
     common.rootDir = os.path.dirname(os.path.realpath(__file__))
 
     #Initialize system
@@ -487,7 +492,8 @@ Y88b.Y8b88P    d8888888888   888  T88b    888   Y88b
             run_automated_defaults(pathToApk, pathToReport)
         else:
             common.interactive_mode = False
-
+    else:
+        run_automated_defaults(pathToApk, pathToReport)
     main()
 
 
