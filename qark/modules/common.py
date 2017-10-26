@@ -64,6 +64,7 @@ rootDir = ""
 reportDir = ""
 interactive_mode = True
 source_or_apk = 1
+buildLocation = ""
 exploitLocation = ""
 apkPathChoice = 0
 apkList = []

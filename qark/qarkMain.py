@@ -19,7 +19,6 @@ from xml.dom import minidom
 import traceback
 import logging
 import time
-import shlex
 import shutil
 from threading import Thread, Lock
 from Queue import Queue
@@ -363,7 +362,6 @@ def writeReportSection(results, category):
             if item.getLevel() == Severity.VULNERABILITY:
                 common.logger.log(common.VULNERABILITY_LEVEL,item.getData())
 
-
 def setup_argparse():
     parser = argparse.ArgumentParser(description='QARK - Andr{o}id Source Code Analyzer and Exploitation Tool')
     required = parser.add_argument_group('Required')
@@ -403,6 +401,24 @@ def setup_argparse():
     return parser
 
 
+def run_automated_defaults(pathToReport, pathToApk):
+    common.args = argparse.Namespace()
+    common.args.exploit = 0
+    common.args.install = 0
+    common.args.source = 1
+    common.args.reportDir = pathToReport
+    common.args.reportdir = pathToReport
+    common.args.apkpath = pathToApk
+    common.args.debuglevel = None
+    common.args.acceptterms = None
+    common.args.autodetect = None
+    common.args.basesdk = None
+    common.args.codepath = None
+    common.args.manifest = None
+    common.args.version = False
+    common.interactive_mode = False
+
+
 def nonAutomatedParseArgs():
     os.system('clear')
     print """ .d88888b.           d8888   8888888b.    888    d8P  
@@ -435,25 +451,7 @@ Y88b.Y8b88P    d8888888888   888  T88b    888   Y88b
     main()
 
 
-def run_automated_defaults(pathToReport, pathToApk):
-    common.args = argparse.Namespace()
-    common.args.exploit = 0
-    common.args.install = 0
-    common.args.source = 1
-    common.args.reportDir = pathToReport
-    common.args.apkpath = pathToApk
-    common.args.debuglevel = None
-    common.args.acceptterms = None
-    common.args.autodetect = None
-    common.args.basesdk = None
-    common.args.codepath = None
-    common.args.manifest = None
-    common.args.version = False
-    common.interactive_mode = False
-
-
-def runAutomated(pathToApk='',pathToReport='', command_line_arguments=''):
-    """Call with `command_line_arguments` or specify `pathToApk` and `pathToReport`."""
+def runAutomated(pathToApk='',pathToReport='', command_line_arguments='', pathToLog=None, buildDir=None):
     os.system('clear')
     print """ .d88888b.           d8888   8888888b.    888    d8P  
 d88P" "Y88b         d88888   888   Y88b   888   d8P   
@@ -465,13 +463,17 @@ Y88b.Y8b88P    d8888888888   888  T88b    888   Y88b
  "Y888888"    d88P     888   888   T88b   888    Y88b 
         Y8b                                            """
 
-
+    if pathToLog:
+        logging.basicConfig(filename=pathToLog, level=logging.DEBUG)
     common.logger = logging.getLogger()
     if not pathToApk and not pathToReport and not command_line_arguments:
         common.logger.error("Please specify pathToApk and pathToReport, or command_line_arguments")
     elif command_line_arguments and (pathToApk or pathToReport):
         common.logger.info("Running only with command_line_arguments, disregarding pathToApk and pathToReport")
+
+    common.runningAutomated = True
     common.rootDir = os.path.dirname(os.path.realpath(__file__))
+    common.buildLocation = buildDir
 
     #Initialize system
     #Verify that settings.properties always exists
@@ -479,9 +481,7 @@ Y88b.Y8b88P    d8888888888   888  T88b    888   Y88b
         f = open(os.path.dirname(os.path.realpath(__file__)) + "/settings.properties",'w')
         f.close()
 
-    #
     common.writeKey("rootDir", common.rootDir)
-    common.initialize_logger()
     if command_line_arguments:
         parser = setup_argparse()
         try:

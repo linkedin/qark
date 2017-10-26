@@ -188,13 +188,29 @@ def build_apk(path):
     Builds the APK when path the the source is available
     """
     print "------------ Building Exploit APK ------------"
-    currentDir = common.getConfig("rootDir")
+    currentDir = common.getConfig("rootDir") if common.buildLocation == '' else common.buildLocation
     os.chdir(currentDir + "/build/" + path)
     properties = open('local.properties', 'w+')
     os.chdir(currentDir)
     properties.write('sdk.dir=' + common.getConfig('AndroidSDKPath'))
     properties.close()
     os.chdir(currentDir + "/build/" + path)
+
+    # adb expects settings.properties.
+    # If building from a different directory need to copy it over to the new build directory
+    if common.buildLocation != '':
+        try:
+            settings_properties_path = os.path.abspath(os.path.join(os.path.dirname(__file__),'../settings.properties'))
+            destination = '{}/{}/{}'.format(os.path.abspath(currentDir), 'build/', path)
+            shutil.copy(settings_properties_path, destination)
+            shutil.copy(settings_properties_path, common.buildLocation)
+            common.logger.info('TRIED COPYING %s TO %s', settings_properties_path, destination)
+        except Exception as e:
+            common.logger.exception('COPYING SETTINGS.PROPERTIES FROM QARK DIRECTORY FAILED')
+            settings_properties_path = os.path.abspath(os.path.join(os.path.dirname(__file__),'../settings.properties'))
+            common.logger.debug('TRIED COPYING %s TO %s', settings_properties_path,
+                                os.path.join(currentDir, "/build/", path))
+            common.logger.debug('currentDir: %s', currentDir)
     p1 = Popen(['./gradlew', "assembleDebug"], stdout=PIPE, stdin=PIPE, stderr=STDOUT, bufsize=1)
     for line in iter(p1.stdout.readline, b''):
         print line,
