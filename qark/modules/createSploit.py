@@ -18,7 +18,7 @@ from modules.common import logger
 
 class exploitType:
     """
-    Enum type for exploitatin category
+    Enum type for exploitation category
     """
     MANIFEST, ACTIVITY, INTENT, PERMISSION, SERVICE, RECEIVER, BROADCAST_INTENT = range(7)
 
@@ -34,14 +34,13 @@ def copy_template(src, dest):
     except OSError as e:
         # If the error was caused because the source wasn't a directory
         if e.errno == errno.ENOTDIR:
-            shutil.copy(src, dst)
+            shutil.copy(src, dest)
             status = 'ERROR'
         else:
             print('Directory not copied. Error: %s' % e)
             # TODO - give an option to specify a different dir, if the specified one already exists
             status = 'ERROR'
         return status
-
 
 def modify_template(path, filename, temp_text, repl_text):
     """
@@ -61,10 +60,9 @@ def modify_template(path, filename, temp_text, repl_text):
     os.rename(tmp2, tmp)
     return
 
-
 def modify_template_2(filename, placeholder, replacement):
     """
-    Takes a filename,placeholder value to be replaced and the actual replacement value\n
+    Takes a filename,placeholder value to be replaced and the actual replacement value
     Uncomments the commented out code from exploit template, replaces the placeholder with actual value and adds this content on the next line to facilitate multiple substitutions
     """
     flag = False
