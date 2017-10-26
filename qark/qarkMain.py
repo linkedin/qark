@@ -407,6 +407,7 @@ Y88b.Y8b88P    d8888888888   888  T88b    888   Y88b
     advanced_mutual.add_argument("-c", "--codepath", dest="codepath", help="Enter the full path to the root folder containing java source. Required only when --source==2")
 
     optional.add_argument("-e", "--exploit", dest="exploit", help="1 to generate a targeted exploit APK, 0 to skip")
+    optional.add_argument("--decompile", action="store_true", help="To stop Qark after decompilation")
 #     optional.add_argument("-n", "--no-progress-bar", dest="noprogressbar", help="dont display progress bar for compatibility reasons", default=False, action='store_true')
     optional.add_argument("-i", "--install", dest="install", help="1 to install exploit APK on the device, 0 to skip")
     optional.add_argument("-d", "--debug", dest="debuglevel", help="Debug Level. 10=Debug, 20=INFO, 30=Warning, 40=Error")
@@ -449,6 +450,7 @@ Y88b.Y8b88P    d8888888888   888  T88b    888   Y88b
     common.args.exploit = 0
     common.args.install = 0
     common.args.source = 1
+    # common.args.decompile = 0
     common.args.reportDir = pathToReport
     common.args.apkpath = pathToApk
     common.args.debuglevel = None
@@ -479,6 +481,12 @@ def main():
             if common.args.exploit is None:
                 common.logger.error("--exploit flag missing. Possible values 0/1")
                 exit()
+            # if common.args.decompile is None:
+            #     common.logger.error("--decompile flag missing. Possible values 0/1. 0 to continue with Static Code Analysis and 1 to EXIT after decompilation\n")
+            #     exit()
+            # if int(common.args.decompile) not in (0, 1):
+            #     common.logger.error("Incorrect value in --decompile flag. Possible values 0/1. 0 to continue with Static Code Analysis and 1 to EXIT after decompilation\n")
+            #     exit()
             if int(common.args.exploit) == 1:
                 if common.args.install is None:
                     common.logger.error("--install flag missing. Possible values 0/1")
@@ -754,8 +762,30 @@ def main():
     #find all R.java files
     common.xml_files=common.find_xml(common.sourceDirectory)
 
-    if common.interactive_mode:
-        raw_input("Press ENTER key to begin Static Code Analysis")
+    '''
+        Decompile switch to take user input to stop after decompilation or continue with static code analysis
+    '''
+
+    if common.source_or_apk == 1:
+        try:
+            if common.interactive_mode:
+                print common.term.cyan + common.term.bold + str(common.config.get('qarkhelper', 'DECOMPILE_CHOICE')).decode('string-escape').format(t=common.term)
+                decompile_choice = raw_input(common.config.get('qarkhelper', 'ENTER_YOUR_CHOICE'))
+                if decompile_choice == "1":
+                    common.exitClean()
+                    exit()
+                else:
+                    if decompile_choice != "2":
+                        print common.term.cyan + common.term.bold + "You just had 2 options and still you messed up. Let me select option 2 for you."
+            else:
+                if common.args.decompile == True:
+                    common.exitClean()
+                    exit()
+        except Exception as e:
+            if not common.interactive_mode:
+                common.logger.error(common.config.get('qarkhelper','NOT_A_VALID_OPTION'))
+                exit()
+            common.logger.error(common.config.get('qarkhelper','NOT_A_VALID_OPTION_INTERACTIVE'))
 
     # Regex to look for collection of deviceID
     # Regex to determine if WebViews are imported
