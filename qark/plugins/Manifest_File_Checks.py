@@ -98,7 +98,7 @@ class ManifestFilePlugin(IPlugin):
         # Arrange exported broadcast receiver without priority set in column format
         list_orderedBR = " \n".join(ordered_broadcast)
         if ordered_broadcast:
-            PluginUtil.reportWarning(file_name, ordered_broadcast(list_orderedBR), res)
+            PluginUtil.reportWarning(file_name, list_orderedBR, res)
 
         for line in split_line:
             count += 1

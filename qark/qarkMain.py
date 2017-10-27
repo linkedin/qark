@@ -45,6 +45,7 @@ from modules import cryptoFlaws
 from modules import certValidation
 from modules import GeneralIssues
 from modules import contentProvider
+from modules.createExploit import ExploitType
 from modules.contentProvider import *
 from modules import filters
 from modules.common import terminalPrint, Severity, ReportIssue
@@ -908,15 +909,26 @@ def main():
                     findMethods.map_from_manifest(rec_exp_perm_list,'receiver')
             except Exception as e:
                 common.logger.error("Unable to use findMethods to map from manifest: " + str(e))
+        results = []
+        for issue in list(crypto_flaw_queue.queue):
+            results.append((issue, "CRYPTO ISSUES"))
+        for issue in list(find_broadcast_queue.queue):
+            results.append((issue, "BROADCAST ISSUES"))
+        for issue in list(cert_queue.queue):
+            results.append((issue, "CERTIFICATE VALIDATION ISSUES"))
+        for issue in list(pending_intents_queue.queue):
+            results.append((issue, "PENDING INTENT ISSUES"))
+        for issue in list(file_permission_queue.queue):
+            results.append((issue, "FILE PERMISSION ISSUES"))
+        for issue in list(web_view_queue.queue):
+            results.append((issue, "WEB-VIEW ISSUES"))
 
-
-        results = [ (crypto_flaw_queue.get(), "CRYPTO ISSUES"),
-                    (find_broadcast_queue.get(), "BROADCAST ISSUES"),
-                    (cert_queue.get(), "CERTIFICATE VALIDATION ISSUES"),
-                    (pending_intents_queue.get(), "PENDING INTENT ISSUES"),
-                    (file_permission_queue.get(), "FILE PERMISSION ISSUES"),
-                    (web_view_queue.get(), "WEB-VIEW ISSUES")
-         ]
+        # results = [ (issue, "CRYPTO ISSUES") for issue in list(crypto_flaw_queue.queue),
+        #             (issue, "BROADCAST ISSUES") for issue in list(find_broadcast_queue.queue),
+        #             (issue, "CERTIFICATE VALIDATION ISSUES") for issue in list(cert_queue.queue),
+        #             (issue, "PENDING INTENT ISSUES") for issue in list(pending_intents_queue.queue),
+        #             (issue, "FILE PERMISSION ISSUES") for issue in list(file_permission_queue.queue),
+        #             (issue, "WEB-VIEW ISSUES") for issue in list(web_view_queue.queue) ]
         if not plugin_queue.empty():
             for i in range(plugin_queue.qsize()):
                 results.append((plugin_queue.get(), "PLUGIN ISSUES"))
@@ -944,6 +956,10 @@ def main():
         common.logger.debug("Beginning TapJacking testing")
         findTapJacking.start(common.sourceDirectory)
     else:
+        tapjacking_details = "Since the minSdkVersion is less that 9, it is likely this application is vulnerable to TapJacking. QARK made no attempt to confirm, as the protection would have to be custom code, which is difficult for QARK to examine and understand properly. This vulnerability allows a malicious application to lay on top of this app, while letting the key strokes pass through to the application below. This can cause users to take unwanted actions, within the victim application, similar to Clickjacking on websites. Please select the appropriate options in the exploitation menus to verify manually using QARK's exploit APK. Note: The QARK proof-of-concept is transparent, but in real-world attacks, it would likely not be. This is done solely to aid in testing. For more information: https://media.blackhat.com/ad-12/Niemietz/bh-ad-12-androidmarcus_niemietz-WP.pdf"
+        writeReportSection([ReportIssue(category=ExploitType.MANIFEST, severity=Severity.VULNERABILITY,
+                                       details=tapjacking_details,
+                                       file="manifest.xml"), terminalPrint(data=tapjacking_details)], "PLUGIN ISSUES")
         common.logger.log(common.VULNERABILITY_LEVEL,"Since the minSdkVersion is less that 9, it is likely this application is vulnerable to TapJacking. QARK made no attempt to confirm, as the protection would have to be custom code, which is difficult for QARK to examine and understand properly. This vulnerability allows a malicious application to lay on top of this app, while letting the key strokes pass through to the application below. This can cause users to take unwanted actions, within the victim application, similar to Clickjacking on websites. Please select the appropriate options in the exploitation menus to verify manually using QARK's exploit APK. Note: The QARK proof-of-concept is transparent, but in real-world attacks, it would likely not be. This is done solely to aid in testing. For more information: https://media.blackhat.com/ad-12/Niemietz/bh-ad-12-androidmarcus_niemietz-WP.pdf")
 
 
@@ -1032,7 +1048,7 @@ def main():
                 else:
                     common.logger.error(common.config.get('qarkhelper','NOT_A_VALID_OPTION_INTERACTIVE'))
             else:
-                if int(common.args.exploit) in (0,1):
+                if int(common.args.exploit) in (0, 1):
                     exploit_choice = int(common.args.exploit)
                     break
                 else:
