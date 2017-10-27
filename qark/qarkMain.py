@@ -1048,7 +1048,7 @@ def main():
                 else:
                     common.logger.error(common.config.get('qarkhelper','NOT_A_VALID_OPTION_INTERACTIVE'))
             else:
-                if int(common.args.exploit) in (0, 1):
+                if int(common.args.exploit) in (0,1,2):
                     exploit_choice = int(common.args.exploit)
                     break
                 else:
