@@ -414,7 +414,7 @@ Y88b.Y8b88P    d8888888888   888  T88b    888   Y88b
     optional.add_argument("-i", "--install", dest="install", help="1 to install exploit APK on the device, 0 to skip")
     optional.add_argument("-d", "--debug", dest="debuglevel", help="Debug Level. 10=Debug, 20=INFO, 30=Warning, 40=Error")
     optional.add_argument("-v", "--version", dest="version", help="Print version info", action='store_true')
-    optional.add_argument("-r", "--reportdir", dest="reportdir", help="Specify full path for output report directory. Defaults to /report")
+    optional.add_argument("-r", "--reportdir", dest="reportDir", help="Specify full path for output report directory. Defaults to /report")
     required_group = required.add_mutually_exclusive_group()
     required_group.add_argument("-t", "--acceptterms", dest="acceptterms", help="Automatically accept terms and conditions when downloading Android SDK")
     required_group.add_argument("-b", "--basesdk", dest="basesdk", help="specify the full path to the root directory of the android sdk")
@@ -458,7 +458,6 @@ Y88b.Y8b88P    d8888888888   888  T88b    888   Y88b
     common.args.source = 1
     # common.args.decompile = 0
     common.args.reportDir = pathToReport
-    common.args.reportdir = pathToReport
     common.args.apkpath = pathToApk
     common.args.debuglevel = None
     common.args.acceptterms = None
