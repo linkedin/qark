@@ -19,6 +19,7 @@ from xml.dom import minidom
 import traceback
 import logging
 import time
+import shlex
 import shutil
 from threading import Thread, Lock
 from Queue import Queue
@@ -363,6 +364,62 @@ def writeReportSection(results, category):
             if item.getLevel() == Severity.VULNERABILITY:
                 common.logger.log(common.VULNERABILITY_LEVEL,item.getData())
 
+def setup_argparse():
+    parser = argparse.ArgumentParser(description='QARK - Andr{o}id Source Code Analyzer and Exploitation Tool')
+    required = parser.add_argument_group('Required')
+    mode = parser.add_argument_group('Mode')
+    advanced = parser.add_argument_group('When --source=2')
+    auto = parser.add_argument_group('When --source=1')
+    optional = parser.add_argument_group('Optional')
+    exploitmenu = parser.add_argument_group('Exploit Generation')
+    mode.add_argument("-s", "--source", dest="source", metavar='int', type=int,
+                      help="1 if you have an APK, 2 if you want to specify the source selectively")
+    advanced.add_argument("-m", "--manifest", dest="manifest",
+                          help="Enter the full path to the manifest file. Required only when --source==2")
+    auto.add_argument("-p", "--pathtoapk", dest="apkpath",
+                      help="Enter the full path to the APK file. Required only when --source==1")
+
+    advanced_mutual = advanced.add_mutually_exclusive_group()
+    advanced_mutual.add_argument("-a", "--autodetectcodepath", dest="autodetect",
+                                 help="AutoDetect java source code path based of the path provided for manifest. 1=autodetect, 0=specify manually")
+    advanced_mutual.add_argument("-c", "--codepath", dest="codepath",
+                                 help="Enter the full path to the root folder containing java source. Required only when --source==2")
+
+    optional.add_argument("-e", "--exploit", dest="exploit", help="1 to generate a targeted exploit APK, 0 to skip")
+    optional.add_argument("--decompile", action="store_true", help="To stop Qark after decompilation")
+    #     optional.add_argument("-n", "--no-progress-bar", dest="noprogressbar", help="dont display progress bar for compatibility reasons", default=False, action='store_true')
+    optional.add_argument("-i", "--install", dest="install", help="1 to install exploit APK on the device, 0 to skip")
+    optional.add_argument("-d", "--debug", dest="debuglevel",
+                          help="Debug Level. 10=Debug, 20=INFO, 30=Warning, 40=Error")
+    optional.add_argument("-v", "--version", dest="version", help="Print version info", action='store_true')
+    optional.add_argument("-r", "--reportdir", dest="reportdir",
+                          help="Specify full path for output report directory. Defaults to /report")
+    required_group = required.add_mutually_exclusive_group()
+    required_group.add_argument("-t", "--acceptterms", dest="acceptterms",
+                                help="Automatically accept terms and conditions when downloading Android SDK")
+    required_group.add_argument("-b", "--basesdk", dest="basesdk",
+                                help="specify the full path to the root directory of the android sdk")
+
+    return parser
+
+
+def run_automated_defaults(pathToReport, pathToApk):
+    common.args = argparse.Namespace()
+    common.args.exploit = 0
+    common.args.install = 0
+    common.args.source = 1
+    common.args.reportDir = pathToReport
+    common.args.reportdir = pathToReport
+    common.args.apkpath = pathToApk
+    common.args.debuglevel = None
+    common.args.acceptterms = None
+    common.args.autodetect = None
+    common.args.basesdk = None
+    common.args.codepath = None
+    common.args.manifest = None
+    common.args.version = False
+    common.interactive_mode = False
+
 
 def nonAutomatedParseArgs():
     os.system('clear')
@@ -389,42 +446,16 @@ Y88b.Y8b88P    d8888888888   888  T88b    888   Y88b
         f = open(os.path.dirname(os.path.realpath(__file__)) + "/settings.properties",'w')
         f.close()
 
-    #
     common.writeKey("rootDir", common.rootDir)
 
     common.initialize_logger()
-    #######################################
-    parser = argparse.ArgumentParser(description='QARK - Andr{o}id Source Code Analyzer and Exploitation Tool')
-    required = parser.add_argument_group('Required')
-    mode = parser.add_argument_group('Mode')
-    advanced = parser.add_argument_group('When --source=2')
-    auto = parser.add_argument_group('When --source=1')
-    optional = parser.add_argument_group('Optional')
-    exploitmenu = parser.add_argument_group('Exploit Generation')
-    mode.add_argument("-s", "--source", dest="source", metavar='int', type=int, help="1 if you have an APK, 2 if you want to specify the source selectively")
-    advanced.add_argument("-m", "--manifest", dest="manifest", help="Enter the full path to the manifest file. Required only when --source==2")
-    auto.add_argument("-p", "--pathtoapk", dest="apkpath", help="Enter the full path to the APK file. Required only when --source==1")
-
-    advanced_mutual = advanced.add_mutually_exclusive_group()
-    advanced_mutual.add_argument("-a", "--autodetectcodepath", dest="autodetect", help="AutoDetect java source code path based of the path provided for manifest. 1=autodetect, 0=specify manually")
-    advanced_mutual.add_argument("-c", "--codepath", dest="codepath", help="Enter the full path to the root folder containing java source. Required only when --source==2")
-
-    optional.add_argument("-e", "--exploit", dest="exploit", help="1 to generate a targeted exploit APK, 0 to skip")
-    optional.add_argument("--decompile", action="store_true", help="To stop Qark after decompilation")
-#     optional.add_argument("-n", "--no-progress-bar", dest="noprogressbar", help="dont display progress bar for compatibility reasons", default=False, action='store_true')
-    optional.add_argument("-i", "--install", dest="install", help="1 to install exploit APK on the device, 0 to skip")
-    optional.add_argument("-d", "--debug", dest="debuglevel", help="Debug Level. 10=Debug, 20=INFO, 30=Warning, 40=Error")
-    optional.add_argument("-v", "--version", dest="version", help="Print version info", action='store_true')
-    optional.add_argument("-r", "--reportdir", dest="reportdir", help="Specify full path for output report directory. Defaults to /report")
-    required_group = required.add_mutually_exclusive_group()
-    required_group.add_argument("-t", "--acceptterms", dest="acceptterms", help="Automatically accept terms and conditions when downloading Android SDK")
-    required_group.add_argument("-b", "--basesdk", dest="basesdk", help="specify the full path to the root directory of the android sdk")
+    parser = setup_argparse()
 
     common.args = parser.parse_args()
     main()
 
 
-def runAutomated(pathToApk,pathToReport, pathToLog=None, buildDir=None):
+def runAutomated(pathToApk='',pathToReport='', command_line_arguments='', pathToLog=None, buildDir=None):
     os.system('clear')
     print """ .d88888b.           d8888   8888888b.    888    d8P  
 d88P" "Y88b         d88888   888   Y88b   888   d8P   
@@ -438,9 +469,17 @@ Y88b.Y8b88P    d8888888888   888  T88b    888   Y88b
 
     if pathToLog:
         logging.basicConfig(filename=pathToLog, level=logging.DEBUG)
-    common.logger = logging.getLogger()
-    common.runningAutomated = True
+
     common.rootDir = os.path.dirname(os.path.realpath(__file__))
+    common.writeKey("rootDir", common.rootDir)
+    common.initialize_logger()
+    common.logger = logging.getLogger()
+    if not pathToApk and not pathToReport and not command_line_arguments:
+        common.logger.error("Please specify pathToApk and pathToReport, or command_line_arguments")
+    elif command_line_arguments and (pathToApk or pathToReport):
+        common.logger.info("Running only with command_line_arguments, disregarding pathToApk and pathToReport")
+
+    common.runningAutomated = True
     common.buildLocation = buildDir
 
     #Initialize system
@@ -449,27 +488,20 @@ Y88b.Y8b88P    d8888888888   888  T88b    888   Y88b
         f = open(os.path.dirname(os.path.realpath(__file__)) + "/settings.properties",'w')
         f.close()
 
-    #
-    common.writeKey("rootDir", common.rootDir)
-
-    common.initialize_logger()
-    common.args = argparse.Namespace()
-    common.args.exploit = 0
-    common.args.install = 0
-    common.args.source = 1
-    # common.args.decompile = 0
-    common.args.reportDir = pathToReport
-    common.args.reportdir = pathToReport
-    common.args.apkpath = pathToApk
-    common.args.debuglevel = None
-    common.args.acceptterms = None
-    common.args.autodetect = None
-    common.args.basesdk = None
-    common.args.codepath = None
-    common.args.manifest = None
-    common.args.version = False
-    common.interactive_mode = False
+    if command_line_arguments:
+        parser = setup_argparse()
+        try:
+            common.args = parser.parse_args(shlex.split(command_line_arguments))
+        except:
+            common.logger.exception("Failed to parse command line arguments, arguments: %s", command_line_arguments)
+            common.logger.info("Using defaults instead")
+            run_automated_defaults(pathToApk, pathToReport)
+        else:
+            common.interactive_mode = False
+    else:
+        run_automated_defaults(pathToApk, pathToReport)
     main()
+
 
 def main():
 
