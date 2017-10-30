@@ -1,4 +1,4 @@
-AxmlParserPY >= 0.01
+pyaxmlparser == 0.3.6
 blessed >= 1.9.5
 blessings >= 1.6
 beautifulsoup4 >= 4.4.0

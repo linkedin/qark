@@ -31,7 +31,7 @@ from modules import findExtras
 from modules import webviews
 from modules import report
 from modules import unpackAPK
-from axmlparserpy import axmlprinter
+from pyaxmlparser import axmlprinter
 from modules.DetermineMinSDK import determine_min_sdk
 from modules import sdkManager
 from modules import createSploit
