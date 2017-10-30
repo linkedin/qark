@@ -414,9 +414,8 @@ def reset():
     """
     try:
         common.reportDir = common.getConfig("rootDir") + "/report"
-        if common.args.reportdir is not None:
-            common.reportDir = common.args.reportdir + "/report"
-        # report_dir = common.args.reportdir
+        if common.args.reportDir is not None:
+            common.reportDir = common.args.reportDir + "/report"
         # common.writeKey("reportDir",report_dir);
 
         if os.path.exists(common.reportDir):

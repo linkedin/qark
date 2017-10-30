@@ -392,7 +392,7 @@ def setup_argparse():
     optional.add_argument("-d", "--debug", dest="debuglevel",
                           help="Debug Level. 10=Debug, 20=INFO, 30=Warning, 40=Error")
     optional.add_argument("-v", "--version", dest="version", help="Print version info", action='store_true')
-    optional.add_argument("-r", "--reportdir", dest="reportdir",
+    optional.add_argument("-r", "--reportdir", dest="reportDir",
                           help="Specify full path for output report directory. Defaults to /report")
     required_group = required.add_mutually_exclusive_group()
     required_group.add_argument("-t", "--acceptterms", dest="acceptterms",
