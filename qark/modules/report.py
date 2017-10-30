@@ -7,6 +7,7 @@ Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.'''
 
+from collections import defaultdict
 import os
 import sys
 import re
@@ -81,17 +82,16 @@ def writeSection(sec, data_list):
 
         # Consolidate issues by filename
         for file in list_of_files:
-            issues = {}
+            issues = []
             details = []
             file_name = "No Filename provided"
             for item in data_list:
                 if isinstance(item, ReportIssue):
                     if file == item.getFile():
+                        issues.append(item)
                         file_name = str(item.getFile())
                         if item.getDetails() is not None:
                             details.append(item.getDetails())
-                            for key, value in item.getExtras().iteritems():
-                                issues[key] = value
 
             # Construct HTML blob
             new_tag_webview_issue = pre_rendered_html2.new_tag("div")
@@ -166,7 +166,7 @@ def writeSection(sec, data_list):
             new_div_tag = pre_rendered_html2.new_tag("div")
             data = ""
             count = 0
-            for item in details:
+            for issue, item in zip(issues, details):
 
                 new_br_tag = pre_rendered_html2.new_tag("br/")
 
@@ -184,14 +184,14 @@ def writeSection(sec, data_list):
                 # new_small_tag.append(new_strong_tag)
                 new_h4_tag.append(new_strong_tag)
 
-            new_div_tag_1 = pre_rendered_html2.new_tag("div")
-            new_div_tag_1['class'] = badger[Severity.INFO]
-            new_div_tag_1['data-badger'] = severity[Severity.INFO]
+                new_div_tag_1 = pre_rendered_html2.new_tag("div")
+                new_div_tag_1['class'] = badger[issue.severity]
+                new_div_tag_1['data-badger'] = severity[issue.severity]
 
-            new_div_tag_1.append(new_br_tag_1)
-            new_div_tag_1.append(new_h4_tag)
+                new_div_tag_1.append(new_br_tag_1)
+                new_div_tag_1.append(new_h4_tag)
 
-            new_tag_p_details.append(new_div_tag_1)
+                new_tag_p_details.append(new_div_tag_1)
 
             new_tag_div.append(new_tag_p_details)
             new_div_image_tag.append(new_tag_div)
@@ -202,6 +202,7 @@ def writeSection(sec, data_list):
                 fh.write(str(pre_rendered_html2.prettify()))
             fh.close()
     except Exception as e:
+        common.logger.exception("failed to write report")
         logger.debug(e.message)
         logger.debug(e)
 

@@ -64,6 +64,7 @@ rootDir = ""
 reportDir = ""
 interactive_mode = True
 source_or_apk = 1
+buildLocation = ""
 exploitLocation = ""
 apkPathChoice = 0
 apkList = []
@@ -194,10 +195,13 @@ class terminalPrint():
     data = ""
     extra = {}
 
-    def __init__(self):
-        self.level = logging.INFO
-        self.data = ""
-        self.extra = {}
+    def __init__(self, level=logging.INFO, data="", extra=None):
+        self.level = level
+        self.data = data
+        if not extra:
+            self.extra = {}
+        else:
+            self.extra = extra
 
     def setLevel(self, level):
         self.level = level
@@ -1209,13 +1213,16 @@ class ReportIssue():
     name = ""
     extra = {}
 
-    def __init__(self):
-        self.category = ""
-        self.severity = ""
-        self.details = ""
-        self.file = ""
-        self.name = ""
-        self.extra = {}
+    def __init__(self, category="", severity="", details="", file="", name="", extra=None):
+        self.category = category
+        self.severity = severity
+        self.details = details
+        self.file = file
+        self.name = name
+        if not extra:
+            self.extra = {}
+        else:
+            self.extra = extra
 
     def getCategory(self):
         return self.category

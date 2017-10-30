@@ -11,49 +11,62 @@ from progressbar import *
 from pubsub import pub
 import logging
 
+HARDCODED_API_KEY_ISSUE = "API Key Found\n{}"
 
-class PluginTwo(IPlugin):
+
+def hardcoded_api_key(api_key_variable):
+    return HARDCODED_API_KEY_ISSUE.format(api_key_variable)
+
+
+class HardcodedAPIIssuesPlugin(IPlugin):
+    # Regex to check for API Keys containing atleast one uppercase, lowercase chracters and number
+    API_KEY_REGEX = r'(?=.{20,})(?=.+\d)(?=.+[a-z])(?=.+[A-Z])(?=.+[-_])'
+    # Regex which is used to ignore few special characters in api keys
+    # Except - " ' ; to prevent false positives
+    SPECIAL_CHAR_REGEX = r'(?=.+[!$%^&*()_+|~=`{}\[\]:<>?,.\/])'
+
+    def __init__(self):
+        self.name = 'Hardcoded API Keys'
+
     def target(self, queue):
-        results = []
-        #TODO: add documentation for available API calls. Sample shown below.
-        # Here, we want to scan all decompiled files to see if any file contains the text "API_KEY"
-        possibleFiles = common.text_scan(common.java_files, r'API_KEY')
+        files = common.java_files
+        global file_path
+        api_key_list = []
+        res = []
         count = 0
-        for f in possibleFiles:
+        for f in files:
             count += 1
-            # The following call generates the progress bar in the terminal output
-            pub.sendMessage('progress', bar=self.getName(), percent=round(count*100/len(possibleFiles)))
+            pub.sendMessage('progress', bar=self.name, percent=round(count * 100 / len(files)))
+            file_path = str(f)
+            with open(file_path, 'r') as fi:
+                file_content = fi.read()
+            # Split the file content in each individual line
+            for line in file_content.splitlines():
+                # Further split each line into words
+                for word in line.split():
+                    # Regex to check API value in work
+                    if re.search(self.API_KEY_REGEX, word):
+                        # Check if special character is present in the line. If "Yes, then ignore.
+                        # Avoid redundant display of line and filepath on the output screen
+                        if not re.search(self.SPECIAL_CHAR_REGEX, word) and line not in api_key_list:
+                            api_key_list.append("Line: " + line)
+                            api_key_list.append("Filepath: " + file_path + "\n")
 
-            # Mostly for logging. This goes in the log file generated under /logs
-            common.logger.debug("Text found, " + str(f))
+        api_key_variable = "\n".join(api_key_list)
 
-            # This will put individual results of the plugin scan in the HTML report.
-            issue = ReportIssue()
-            issue.setCategory(ExploitType.PLUGIN)
-            issue.setDetails("The string 'API_KEY' appears in the file: %s\n%s" % (f[1], str(f[0])))
-            issue.setFile(str(f[1]))
-            issue.setSeverity(Severity.VULNERABILITY)
-            results.append(issue)
+        if api_key_list:
+            PluginUtil.reportInfo(file_path, hardcoded_api_key(api_key_variable), res)
 
-            # This puts individual results of the plugin scan in the terminal output.
-            issue = terminalPrint()
-            issue.setLevel(Severity.VULNERABILITY)
-            issue.setData("The string 'API_KEY' appears in the file: %s\n%s" % (f[1], str(f[0])))
-            results.append(issue)
+        queue.put(res)
 
-        # This is required to send the complete list of results (including the ones to be printed on terminal as well as
-        # issues to be printed in tht HTML report) back to the main thread.
-        queue.put(results)
-
-
-    def getName(self):
-        # The name to be displayed against the progressbar
+    @staticmethod
+    def getName():
         return "Hardcoded API Keys"
 
-    def getCategory(self):
+    @staticmethod
+    def getCategory():
         # Currently unused, but will be used later for clubbing issues from a specific plugin (when multiple plugins run at the same time)
         return "PLUGIN ISSUES"
 
     def getTarget(self):
         return self.target
-

@@ -88,7 +88,7 @@ def empty_intent(t, filename, results):
                         if str(y) in str(line):
                             if "new Intent()" in str(line):
                                 issue = ReportIssue()
-                                issue.setCategory(ExploitType.CERTIFICATE)
+                                issue.setCategory(ExploitType.INTENT)
                                 issue.setDetails("Empty Pending instance found in: " + str(
                                     filename) + ". For security reasons, the Intent you supply here should almost always be an explicit intent that is specify an explicit component to be delivered to through Intent.setClass. A malicious application could potentially intercept, redirect and/or modify this Intent. Pending Intents retain the UID of your application and all related permissions, allowing another application to act as yours. Reference: https://developer.android.com/reference/android/app/PendingIntent.html")
                                 issue.setFile(filename)

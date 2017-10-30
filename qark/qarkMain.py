@@ -20,6 +20,7 @@ from xml.dom import minidom
 import traceback
 import logging
 import time
+import shlex
 import shutil
 from threading import Thread, Lock
 from Queue import Queue
@@ -46,6 +47,7 @@ from modules import cryptoFlaws
 from modules import certValidation
 from modules import GeneralIssues
 from modules import contentProvider
+from modules.createExploit import ExploitType
 from modules.contentProvider import *
 from modules import filters
 from modules.common import terminalPrint, Severity, ReportIssue
@@ -83,7 +85,7 @@ def clear(n):
         print("\n"*n)
 
 def valid_manifest_file(manifest_path):
-    return manifest_path and manifest_path.lower() not in ("false", "f")
+    return bool(manifest_path) and manifest_path.lower() not in ("false", "f")
 
 def get_manifestXML(mf):
     common.manifest = mf
@@ -362,6 +364,62 @@ def writeReportSection(results, category):
             if item.getLevel() == Severity.VULNERABILITY:
                 common.logger.log(common.VULNERABILITY_LEVEL,item.getData())
 
+def setup_argparse():
+    parser = argparse.ArgumentParser(description='QARK - Andr{o}id Source Code Analyzer and Exploitation Tool')
+    required = parser.add_argument_group('Required')
+    mode = parser.add_argument_group('Mode')
+    advanced = parser.add_argument_group('When --source=2')
+    auto = parser.add_argument_group('When --source=1')
+    optional = parser.add_argument_group('Optional')
+    exploitmenu = parser.add_argument_group('Exploit Generation')
+    mode.add_argument("-s", "--source", dest="source", metavar='int', type=int,
+                      help="1 if you have an APK, 2 if you want to specify the source selectively")
+    advanced.add_argument("-m", "--manifest", dest="manifest",
+                          help="Enter the full path to the manifest file. Required only when --source==2")
+    auto.add_argument("-p", "--pathtoapk", dest="apkpath",
+                      help="Enter the full path to the APK file. Required only when --source==1")
+
+    advanced_mutual = advanced.add_mutually_exclusive_group()
+    advanced_mutual.add_argument("-a", "--autodetectcodepath", dest="autodetect",
+                                 help="AutoDetect java source code path based of the path provided for manifest. 1=autodetect, 0=specify manually")
+    advanced_mutual.add_argument("-c", "--codepath", dest="codepath",
+                                 help="Enter the full path to the root folder containing java source. Required only when --source==2")
+
+    optional.add_argument("-e", "--exploit", dest="exploit", help="1 to generate a targeted exploit APK, 0 to skip")
+    optional.add_argument("--decompile", action="store_true", help="To stop Qark after decompilation")
+    #     optional.add_argument("-n", "--no-progress-bar", dest="noprogressbar", help="dont display progress bar for compatibility reasons", default=False, action='store_true')
+    optional.add_argument("-i", "--install", dest="install", help="1 to install exploit APK on the device, 0 to skip")
+    optional.add_argument("-d", "--debug", dest="debuglevel",
+                          help="Debug Level. 10=Debug, 20=INFO, 30=Warning, 40=Error")
+    optional.add_argument("-v", "--version", dest="version", help="Print version info", action='store_true')
+    optional.add_argument("-r", "--reportdir", dest="reportdir",
+                          help="Specify full path for output report directory. Defaults to /report")
+    required_group = required.add_mutually_exclusive_group()
+    required_group.add_argument("-t", "--acceptterms", dest="acceptterms",
+                                help="Automatically accept terms and conditions when downloading Android SDK")
+    required_group.add_argument("-b", "--basesdk", dest="basesdk",
+                                help="specify the full path to the root directory of the android sdk")
+
+    return parser
+
+
+def run_automated_defaults(pathToReport, pathToApk):
+    common.args = argparse.Namespace()
+    common.args.exploit = 0
+    common.args.install = 0
+    common.args.source = 1
+    common.args.reportDir = pathToReport
+    common.args.reportdir = pathToReport
+    common.args.apkpath = pathToApk
+    common.args.debuglevel = None
+    common.args.acceptterms = None
+    common.args.autodetect = None
+    common.args.basesdk = None
+    common.args.codepath = None
+    common.args.manifest = None
+    common.args.version = False
+    common.interactive_mode = False
+
 
 def nonAutomatedParseArgs():
     os.system('clear')
@@ -379,6 +437,8 @@ Y88b.Y8b88P    d8888888888   888  T88b    888   Y88b
 
     common.logger = logging.getLogger()
     common.rootDir = os.path.dirname(os.path.realpath(__file__))
+    common.runningAutomated = False
+    common.exploitLocation = ''
 
     #Initialize system
     #Verify that settings.properties always exists
@@ -386,40 +446,16 @@ Y88b.Y8b88P    d8888888888   888  T88b    888   Y88b
         f = open(os.path.dirname(os.path.realpath(__file__)) + "/settings.properties",'w')
         f.close()
 
-    #
     common.writeKey("rootDir", common.rootDir)
 
     common.initialize_logger()
-    #######################################
-    parser = argparse.ArgumentParser(description='QARK - Andr{o}id Source Code Analyzer and Exploitation Tool')
-    required = parser.add_argument_group('Required')
-    mode = parser.add_argument_group('Mode')
-    advanced = parser.add_argument_group('When --source=2')
-    auto = parser.add_argument_group('When --source=1')
-    optional = parser.add_argument_group('Optional')
-    exploitmenu = parser.add_argument_group('Exploit Generation')
-    mode.add_argument("-s", "--source", dest="source", metavar='int', type=int, help="1 if you have an APK, 2 if you want to specify the source selectively")
-    advanced.add_argument("-m", "--manifest", dest="manifest", help="Enter the full path to the manifest file. Required only when --source==2")
-    auto.add_argument("-p", "--pathtoapk", dest="apkpath", help="Enter the full path to the APK file. Required only when --source==1")
-
-    advanced_mutual = advanced.add_mutually_exclusive_group()
-    advanced_mutual.add_argument("-a", "--autodetectcodepath", dest="autodetect", help="AutoDetect java source code path based of the path provided for manifest. 1=autodetect, 0=specify manually")
-    advanced_mutual.add_argument("-c", "--codepath", dest="codepath", help="Enter the full path to the root folder containing java source. Required only when --source==2")
-
-    optional.add_argument("-e", "--exploit", dest="exploit", help="1 to generate a targeted exploit APK, 0 to skip")
-#     optional.add_argument("-n", "--no-progress-bar", dest="noprogressbar", help="dont display progress bar for compatibility reasons", default=False, action='store_true')
-    optional.add_argument("-i", "--install", dest="install", help="1 to install exploit APK on the device, 0 to skip")
-    optional.add_argument("-d", "--debug", dest="debuglevel", help="Debug Level. 10=Debug, 20=INFO, 30=Warning, 40=Error")
-    optional.add_argument("-v", "--version", dest="version", help="Print version info", action='store_true')
-    optional.add_argument("-r", "--reportdir", dest="reportdir", help="Specify full path for output report directory. Defaults to /report")
-    required_group = required.add_mutually_exclusive_group()
-    required_group.add_argument("-t", "--acceptterms", dest="acceptterms", help="Automatically accept terms and conditions when downloading Android SDK")
-    required_group.add_argument("-b", "--basesdk", dest="basesdk", help="specify the full path to the root directory of the android sdk")
+    parser = setup_argparse()
 
     common.args = parser.parse_args()
     main()
 
-def runAutomated(pathToApk,pathToReport):
+
+def runAutomated(pathToApk='',pathToReport='', command_line_arguments='', pathToLog=None, buildDir=None):
     os.system('clear')
     print """ .d88888b.           d8888   8888888b.    888    d8P  
 d88P" "Y88b         d88888   888   Y88b   888   d8P   
@@ -431,9 +467,20 @@ Y88b.Y8b88P    d8888888888   888  T88b    888   Y88b
  "Y888888"    d88P     888   888   T88b   888    Y88b 
         Y8b                                            """
 
+    if pathToLog:
+        logging.basicConfig(filename=pathToLog, level=logging.DEBUG)
 
-    common.logger = logging.getLogger()
     common.rootDir = os.path.dirname(os.path.realpath(__file__))
+    common.writeKey("rootDir", common.rootDir)
+    common.initialize_logger()
+    common.logger = logging.getLogger()
+    if not pathToApk and not pathToReport and not command_line_arguments:
+        common.logger.error("Please specify pathToApk and pathToReport, or command_line_arguments")
+    elif command_line_arguments and (pathToApk or pathToReport):
+        common.logger.info("Running only with command_line_arguments, disregarding pathToApk and pathToReport")
+
+    common.runningAutomated = True
+    common.buildLocation = buildDir
 
     #Initialize system
     #Verify that settings.properties always exists
@@ -441,25 +488,20 @@ Y88b.Y8b88P    d8888888888   888  T88b    888   Y88b
         f = open(os.path.dirname(os.path.realpath(__file__)) + "/settings.properties",'w')
         f.close()
 
-    #
-    common.writeKey("rootDir", common.rootDir)
-
-    common.initialize_logger()
-    common.args = argparse.Namespace()
-    common.args.exploit = 0
-    common.args.install = 0
-    common.args.source = 1
-    common.args.reportDir = pathToReport
-    common.args.apkpath = pathToApk
-    common.args.debuglevel = None
-    common.args.acceptterms = None
-    common.args.autodetect = None
-    common.args.basesdk = None
-    common.args.codepath = None
-    common.args.manifest = None
-    common.args.version = False
-    common.interactive_mode = False
+    if command_line_arguments:
+        parser = setup_argparse()
+        try:
+            common.args = parser.parse_args(shlex.split(command_line_arguments))
+        except:
+            common.logger.exception("Failed to parse command line arguments, arguments: %s", command_line_arguments)
+            common.logger.info("Using defaults instead")
+            run_automated_defaults(pathToApk, pathToReport)
+        else:
+            common.interactive_mode = False
+    else:
+        run_automated_defaults(pathToApk, pathToReport)
     main()
+
 
 def main():
 
@@ -479,6 +521,12 @@ def main():
             if common.args.exploit is None:
                 common.logger.error("--exploit flag missing. Possible values 0/1")
                 exit()
+            # if common.args.decompile is None:
+            #     common.logger.error("--decompile flag missing. Possible values 0/1. 0 to continue with Static Code Analysis and 1 to EXIT after decompilation\n")
+            #     exit()
+            # if int(common.args.decompile) not in (0, 1):
+            #     common.logger.error("Incorrect value in --decompile flag. Possible values 0/1. 0 to continue with Static Code Analysis and 1 to EXIT after decompilation\n")
+            #     exit()
             if int(common.args.exploit) == 1:
                 if common.args.install is None:
                     common.logger.error("--install flag missing. Possible values 0/1")
@@ -754,8 +802,30 @@ def main():
     #find all R.java files
     common.xml_files=common.find_xml(common.sourceDirectory)
 
-    if common.interactive_mode:
-        raw_input("Press ENTER key to begin Static Code Analysis")
+    '''
+        Decompile switch to take user input to stop after decompilation or continue with static code analysis
+    '''
+
+    if common.source_or_apk == 1:
+        try:
+            if common.interactive_mode:
+                print common.term.cyan + common.term.bold + str(common.config.get('qarkhelper', 'DECOMPILE_CHOICE')).decode('string-escape').format(t=common.term)
+                decompile_choice = raw_input(common.config.get('qarkhelper', 'ENTER_YOUR_CHOICE'))
+                if decompile_choice == "1":
+                    common.exitClean()
+                    exit()
+                else:
+                    if decompile_choice != "2":
+                        print common.term.cyan + common.term.bold + "You just had 2 options and still you messed up. Let me select option 2 for you."
+            else:
+                if common.args.decompile == True:
+                    common.exitClean()
+                    exit()
+        except Exception as e:
+            if not common.interactive_mode:
+                common.logger.error(common.config.get('qarkhelper','NOT_A_VALID_OPTION'))
+                exit()
+            common.logger.error(common.config.get('qarkhelper','NOT_A_VALID_OPTION_INTERACTIVE'))
 
     # Regex to look for collection of deviceID
     # Regex to determine if WebViews are imported
@@ -871,15 +941,26 @@ def main():
                     findMethods.map_from_manifest(rec_exp_perm_list,'receiver')
             except Exception as e:
                 common.logger.error("Unable to use findMethods to map from manifest: " + str(e))
+        results = []
+        for issue in list(crypto_flaw_queue.queue):
+            results.append((issue, "CRYPTO ISSUES"))
+        for issue in list(find_broadcast_queue.queue):
+            results.append((issue, "BROADCAST ISSUES"))
+        for issue in list(cert_queue.queue):
+            results.append((issue, "CERTIFICATE VALIDATION ISSUES"))
+        for issue in list(pending_intents_queue.queue):
+            results.append((issue, "PENDING INTENT ISSUES"))
+        for issue in list(file_permission_queue.queue):
+            results.append((issue, "FILE PERMISSION ISSUES"))
+        for issue in list(web_view_queue.queue):
+            results.append((issue, "WEB-VIEW ISSUES"))
 
-
-        results = [ (crypto_flaw_queue.get(), "CRYPTO ISSUES"),
-                    (find_broadcast_queue.get(), "BROADCAST ISSUES"),
-                    (cert_queue.get(), "CERTIFICATE VALIDATION ISSUES"),
-                    (pending_intents_queue.get(), "PENDING INTENT ISSUES"),
-                    (file_permission_queue.get(), "FILE PERMISSION ISSUES"),
-                    (web_view_queue.get(), "WEB-VIEW ISSUES")
-         ]
+        # results = [ (issue, "CRYPTO ISSUES") for issue in list(crypto_flaw_queue.queue),
+        #             (issue, "BROADCAST ISSUES") for issue in list(find_broadcast_queue.queue),
+        #             (issue, "CERTIFICATE VALIDATION ISSUES") for issue in list(cert_queue.queue),
+        #             (issue, "PENDING INTENT ISSUES") for issue in list(pending_intents_queue.queue),
+        #             (issue, "FILE PERMISSION ISSUES") for issue in list(file_permission_queue.queue),
+        #             (issue, "WEB-VIEW ISSUES") for issue in list(web_view_queue.queue) ]
         if not plugin_queue.empty():
             for i in range(plugin_queue.qsize()):
                 results.append((plugin_queue.get(), "PLUGIN ISSUES"))
@@ -907,6 +988,10 @@ def main():
         common.logger.debug("Beginning TapJacking testing")
         findTapJacking.start(common.sourceDirectory)
     else:
+        tapjacking_details = "Since the minSdkVersion is less that 9, it is likely this application is vulnerable to TapJacking. QARK made no attempt to confirm, as the protection would have to be custom code, which is difficult for QARK to examine and understand properly. This vulnerability allows a malicious application to lay on top of this app, while letting the key strokes pass through to the application below. This can cause users to take unwanted actions, within the victim application, similar to Clickjacking on websites. Please select the appropriate options in the exploitation menus to verify manually using QARK's exploit APK. Note: The QARK proof-of-concept is transparent, but in real-world attacks, it would likely not be. This is done solely to aid in testing. For more information: https://media.blackhat.com/ad-12/Niemietz/bh-ad-12-androidmarcus_niemietz-WP.pdf"
+        writeReportSection([ReportIssue(category=ExploitType.MANIFEST, severity=Severity.VULNERABILITY,
+                                       details=tapjacking_details,
+                                       file="manifest.xml"), terminalPrint(data=tapjacking_details)], "PLUGIN ISSUES")
         common.logger.log(common.VULNERABILITY_LEVEL,"Since the minSdkVersion is less that 9, it is likely this application is vulnerable to TapJacking. QARK made no attempt to confirm, as the protection would have to be custom code, which is difficult for QARK to examine and understand properly. This vulnerability allows a malicious application to lay on top of this app, while letting the key strokes pass through to the application below. This can cause users to take unwanted actions, within the victim application, similar to Clickjacking on websites. Please select the appropriate options in the exploitation menus to verify manually using QARK's exploit APK. Note: The QARK proof-of-concept is transparent, but in real-world attacks, it would likely not be. This is done solely to aid in testing. For more information: https://media.blackhat.com/ad-12/Niemietz/bh-ad-12-androidmarcus_niemietz-WP.pdf")
 
 
@@ -995,7 +1080,7 @@ def main():
                 else:
                     common.logger.error(common.config.get('qarkhelper','NOT_A_VALID_OPTION_INTERACTIVE'))
             else:
-                if int(common.args.exploit) in (0,1):
+                if int(common.args.exploit) in (0,1,2):
                     exploit_choice = int(common.args.exploit)
                     break
                 else:
@@ -1011,8 +1096,14 @@ def main():
         # Exploit all vulnerabilities
         print "Generating exploit payloads for all vulnerabilities"
         type_list=['String','StringArray','StringArrayList','Boolean','BooleanArray','Int','Float','Long','LongArray','[]','','IntArray','IntegerArrayList','FloatArray','Double','Char','CharArray','CharSequence','CharSequenceArray','CharSequenceArrayList','Byte','ByteArray', 'Bundle','Short','ShortArray','Serializable','Parcelable','ParcelableArrayList','ParcelableArray','unknownType']
-        shutil.rmtree(common.getConfig("rootDir") +'/build')
-        if str(createSploit.copy_template(common.getConfig("rootDir") + '/exploitAPKs/qark/',common.getConfig("rootDir") + '/build/qark')) is not 'ERROR':
+        # actual_root_dir is exploit destination
+        actual_root_dir = common.getConfig("rootDir") if not common.buildLocation else common.buildLocation
+        common.exploitLocation = actual_root_dir + '/build/qark'
+        try:
+            shutil.rmtree(actual_root_dir + '/build')
+        except:
+            common.logger.debug('The directory at %s doesn\'t exist', actual_root_dir + '/build')
+        if str(createSploit.copy_template(common.getConfig("rootDir") + '/exploitAPKs/qark/', actual_root_dir + '/build/qark')) is not 'ERROR':
             common.exploitLocation = common.getConfig("rootDir") + '/build/qark'
             if len(prov_exp_list)>0:
                 common.logger.info("Sorry, we're still working on the providers")
@@ -1099,7 +1190,7 @@ def main():
                 if install_option:
                     install = "y"
                 else:
-                    install_option = "n"
+                    install = "n"
             if install=='y':
                 apkList = list_all_apk()
                 for apk in apkList:
@@ -1107,12 +1198,12 @@ def main():
                         uninstall(str(apk).split("/")[-1].rstrip(".apk"))
                 common.logger.info("Installing...")
                 try:
-                    common.logger.info("The apk can be found in the "+common.getConfig("rootDir")+"/build/qark directory")
+                    common.logger.info("The apk can be found in the " + actual_root_dir + "/build/qark directory")
                     subprocess.call("adb install " + common.getConfig("rootDir") + "/build/qark/app/build/outputs/apk/app-debug.apk",shell=True)
                 except Exception as e:
                     common.logger.error("Problems installing exploit APK: " + str(e))
             else:
-                common.logger.info("The apk can be found in the "+common.getConfig("rootDir")+"/build/qark directory")
+                common.logger.info("The apk can be found in the "+ actual_root_dir +"/build/qark directory")
     elif exploit_choice == 2:
         # JSON, XML and CSV file formatting
         # Overwrite the CSV file with the header and write the entire data again
@@ -1184,8 +1275,9 @@ def main():
         common.logger.error(
             "Problem with reporting; No html report generated. Please see the readme file for possible solutions.")
 
-    print "Goodbye!"
-    raise SystemExit
+    if not common.runningAutomated:
+        print "Goodbye!"
+        raise SystemExit
 
 if __name__ == "__main__":
     # Create a CSV file to store results
