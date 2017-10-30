@@ -83,7 +83,7 @@ def clear(n):
         print("\n"*n)
 
 def valid_manifest_file(manifest_path):
-    return manifest_path and manifest_path.lower() not in ("false", "f")
+    return bool(manifest_path) and manifest_path.lower() not in ("false", "f")
 
 def get_manifestXML(mf):
     common.manifest = mf
