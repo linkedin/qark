@@ -7,6 +7,8 @@
 
 ## Usage
 
+### Optional:
+
 Install virtualenv:
 ```
 $ pip install virtualenv
@@ -15,6 +17,8 @@ $ pip install virtualenv
 Create virtual environment (you can make sure it is `python2.7` with the `-p` flag):
 ```
 $ virtualenv .
+OR
+$ virtualenv . -p /usr/bin/python
 ```
 
 Activate the virtual environment:
@@ -22,6 +26,7 @@ Activate the virtual environment:
 $ source bin/activate
 ```
 
+### Required
 Install the requirements:
 ```
 $ pip install -r requirements.txt
