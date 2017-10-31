@@ -96,9 +96,10 @@ def apktool(pathToAPK):
     # Create /temp/foo/apktool
     # Run java -jar apktool_2.1.0.jar d /foo/bar/temp/myapp.apk --no-src --force -m --output /foo/bar/temp/apktool/
     # read AndroidManifest.xml and return the content
-    apktool = subprocess.call(['java', '-Djava.awt.headless=true','-jar', common.rootDir + '/lib/apktool_2.1.0.jar', 'd', pathToAPK, '--no-src', '--force', '-m','--output', str(pathToAPK.rsplit(".",1)[0]).rsplit("/",1)[0] + "/apktool"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    print str(pathToAPK.rsplit(".",1)[0]).rsplit("/",1)[0] + "/apktool" + "/AndroidManifest.xml"
-    with open (str(pathToAPK.rsplit(".",1)[0]).rsplit("/",1)[0] + "/apktool" + "/AndroidManifest.xml", "r") as f:
+    output_dir = common.rootDir + "/" + os.path.basename(os.path.normpath(str(pathToAPK.rsplit(".",1)[0]).rsplit("/",1)[0])) + "/apktool"
+    apktool = subprocess.call(['java', '-Djava.awt.headless=true','-jar', common.qark_path + '/lib/apktool_2.1.0.jar', 'd', pathToAPK, '--no-src', '--force', '-m','--output', output_dir], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    common.logger.info("Manifest at {}/AndroidManifest.xml".format(output_dir))
+    with open (output_dir + "/AndroidManifest.xml", "r") as f:
         manifest = f.read()
     pub.sendMessage('manifest', mf=manifest)
     return
@@ -392,6 +393,8 @@ def setup_argparse():
     optional.add_argument("-d", "--debug", dest="debuglevel",
                           help="Debug Level. 10=Debug, 20=INFO, 30=Warning, 40=Error")
     optional.add_argument("-v", "--version", dest="version", help="Print version info", action='store_true')
+    optional.add_argument("-bp", "--buildpath", dest="buildDir",
+                          help="Directory to house reports, decompilation, and log files.", default='')
     optional.add_argument("-r", "--reportdir", dest="reportDir",
                           help="Specify full path for output report directory. Defaults to /report")
     required_group = required.add_mutually_exclusive_group()
@@ -433,30 +436,34 @@ Y88b.Y8b88P    d8888888888   888  T88b    888   Y88b
  "Y888888"    d88P     888   888   T88b   888    Y88b 
         Y8b                                            """
 
-
-
     common.logger = logging.getLogger()
-    common.rootDir = os.path.dirname(os.path.realpath(__file__))
+    parser = setup_argparse()
+
+    common.args = parser.parse_args()
+
+    common.rootDir = os.path.dirname(os.path.realpath(__file__)) if not common.args.buildDir else common.args.buildDir
+    if not os.path.exists(common.rootDir):
+        os.makedirs(common.rootDir)
+
+    common.exploitLocation = '' if not common.args.buildDir else common.args.buildDir
+
     common.runningAutomated = False
-    common.exploitLocation = ''
 
     #Initialize system
     #Verify that settings.properties always exists
-    if not os.path.exists(os.path.dirname(os.path.realpath(__file__)) + "/settings.properties"):
-        f = open(os.path.dirname(os.path.realpath(__file__)) + "/settings.properties",'w')
+    if not os.path.exists(common.rootDir + "/settings.properties"):
+        f = open(common.rootDir + "/settings.properties",'w')
         f.close()
 
     common.writeKey("rootDir", common.rootDir)
 
     common.initialize_logger()
-    parser = setup_argparse()
-
-    common.args = parser.parse_args()
     main()
 
 
 def runAutomated(pathToApk='',pathToReport='', command_line_arguments='', pathToLog=None, buildDir=None):
     os.system('clear')
+    common.logger = logging.getLogger()
     print """ .d88888b.           d8888   8888888b.    888    d8P  
 d88P" "Y88b         d88888   888   Y88b   888   d8P   
 888     888        d88P888   888    888   888  d8P    
@@ -466,40 +473,55 @@ d88P" "Y88b         d88888   888   Y88b   888   d8P
 Y88b.Y8b88P    d8888888888   888  T88b    888   Y88b  
  "Y888888"    d88P     888   888   T88b   888    Y88b 
         Y8b                                            """
-
     if pathToLog:
         logging.basicConfig(filename=pathToLog, level=logging.DEBUG)
 
-    common.rootDir = os.path.dirname(os.path.realpath(__file__))
-    common.writeKey("rootDir", common.rootDir)
-    common.initialize_logger()
-    common.logger = logging.getLogger()
-    if not pathToApk and not pathToReport and not command_line_arguments:
-        common.logger.error("Please specify pathToApk and pathToReport, or command_line_arguments")
-    elif command_line_arguments and (pathToApk or pathToReport):
-        common.logger.info("Running only with command_line_arguments, disregarding pathToApk and pathToReport")
+    common.rootDir = os.path.dirname(os.path.realpath(__file__)) if not buildDir else buildDir
+    if not os.path.exists(common.rootDir):
+        os.makedirs(common.rootDir)
+    if pathToLog and not os.path.exists(pathToLog):
+        os.makedirs(pathToLog)
 
     common.runningAutomated = True
     common.buildLocation = buildDir
 
     #Initialize system
     #Verify that settings.properties always exists
-    if not os.path.exists(os.path.dirname(os.path.realpath(__file__)) + "/settings.properties"):
-        f = open(os.path.dirname(os.path.realpath(__file__)) + "/settings.properties",'w')
-        f.close()
 
     if command_line_arguments:
         parser = setup_argparse()
         try:
             common.args = parser.parse_args(shlex.split(command_line_arguments))
         except:
-            common.logger.exception("Failed to parse command line arguments, arguments: %s", command_line_arguments)
-            common.logger.info("Using defaults instead")
+            logging.exception("Failed to parse command line arguments, arguments: %s", command_line_arguments)
+            logging.info("Using defaults instead")
             run_automated_defaults(pathToApk, pathToReport)
         else:
             common.interactive_mode = False
+            if common.args.buildDir:
+                common.rootDir = common.args.buildDir
+                common.buildLocation = common.args.buildDir
+            if not os.path.exists(common.rootDir):
+                os.makedirs(common.rootDir)
     else:
         run_automated_defaults(pathToApk, pathToReport)
+
+    if not common.buildLocation and not os.path.exists(os.path.dirname(os.path.realpath(__file__)) + "/settings.properties"):
+        f = open(os.path.dirname(os.path.realpath(__file__)) + "/settings.properties",'w')
+        f.close()
+    elif common.buildLocation:
+        f = open(common.buildLocation + "/settings.properties",'w')
+        f.close()
+
+    common.writeKey("rootDir", common.rootDir)
+    common.initialize_logger()
+    if not pathToApk and not pathToReport and not command_line_arguments:
+        common.logger.error("Please specify pathToApk and pathToReport, or command_line_arguments")
+    elif command_line_arguments and (pathToApk or pathToReport):
+        common.logger.info("Running only with command_line_arguments, disregarding pathToApk and pathToReport")
+    elif buildDir:
+        common.logger.info("Running only with buildDir")
+
     main()
 
 
@@ -564,13 +586,18 @@ def main():
     if common.args.basesdk is not None:
         common.writeKey('AndroidSDKPath', str(common.args.basesdk).strip())
 
+    if common.args.buildDir:
+        common.buildLocation = common.args.buildDir
+
+    common.qark_path = os.path.dirname(os.path.abspath(__file__))
+
     #######################################
     #Reset any old report
     report.reset()
     common.set_environment_variables()
     #Copy the exploit code into a separate temp directory
     if not os.path.exists(common.getConfig("rootDir") + "/build"):
-        shutil.copytree(common.getConfig("rootDir") + "/exploitAPKs", common.getConfig("rootDir") + "/build")
+        shutil.copytree(common.qark_path + "/exploitAPKs", common.getConfig("rootDir") + "/build")
 
     common.logger.info(common.config.get('qarkhelper', 'STARTUP'))
 
@@ -653,7 +680,8 @@ def main():
                 unpackAPK.unpack()
                 break
             except Exception as e:
-                continue
+                common.logger.exception("Unable to unpack APK")
+                raise SystemExit
 
         try:
             package = defaultdict(list)
@@ -1207,20 +1235,24 @@ def main():
     elif exploit_choice == 2:
         # JSON, XML and CSV file formatting
         # Overwrite the CSV file with the header and write the entire data again
-        with open('./Report.csv', 'r') as f:
+        start_path = "."
+        if common.buildLocation:
+            start_path = common.buildLocation
+        elif common.reportDir:
+            start_path = common.reportDir
+
+        CSV_PATH = '{start_path}/Report.csv'.format(start_path=start_path)
+        JSON_PATH = '{start_path}./Report.json'.format(start_path=start_path)
+        XML_PATH = '{start_path}/Report.xml'.format(start_path=start_path)
+
+        with open(CSV_PATH, 'r') as f:
             r = csv.reader(f)
             data = [line for line in r]
-        with open('./Report.csv', 'w') as f:
+        with open(CSV_PATH, 'w') as f:
             w = csv.writer(f)
             w.writerow(["severity", "details", "extra", "type"])
             w.writerows(data)
 
-        # Convert CSV to JSON
-        # Constants to make everything easier
-
-        CSV_PATH = './Report.csv'
-        JSON_PATH = './Report.json'
-        XML_PATH = './Report.xml'
 
         # Reads the file the same way that you did
         csv_file = csv.DictReader(open(CSV_PATH, 'r'))
@@ -1235,10 +1267,10 @@ def main():
         file(JSON_PATH, 'w').write(json_object)
 
         # Delete the CSV report as it contains redundant data
-        os.remove('./Report.csv')
+        os.remove(CSV_PATH)
 
         # Remove redundant data from JSON file
-        with open('./Report.json') as fp:
+        with open(JSON_PATH) as fp:
             ds = json.load(fp)  # this file contains the json
 
             mem = {}
@@ -1280,6 +1312,4 @@ def main():
         raise SystemExit
 
 if __name__ == "__main__":
-    # Create a CSV file to store results
-    csv.writer(open('./Report.csv', 'w+'))
     nonAutomatedParseArgs()

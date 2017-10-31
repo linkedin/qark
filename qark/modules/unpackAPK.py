@@ -42,14 +42,18 @@ def unpack():
     """
 	APK to DEX
 	"""
-    logger.info('Unpacking %s', common.apkPath)
     # Get the directory to unpack to
     try:
         dirname, extension = common.apkPath.rsplit(".", 1)
+        if common.buildLocation:
+            dirname = common.buildLocation
+            logger.info('Unpacking %s to %s', common.apkPath, common.buildLocation)
+        else:
+            logger.info('Unpacking %s to %s', common.apkPath, dirname)
         # workaround for cases where path may include whitespace
         file_temp = open(common.apkPath, 'r')
         zf = zipfile.ZipFile(file_temp)
-        logger.info('Zipfile: %s', zf)
+        logger.info('Zipfile: %s', file_temp)
         for filename in [zf.namelist()]:
             if not os.path.exists(dirname + "/"):
                 os.makedirs(dirname + "/")
@@ -59,8 +63,9 @@ def unpack():
             common.pathToUnpackedAPK = dirname + '/'
             return True
     except Exception as e:
+        common.logger.exception("Failed to unpack apk")
         if not common.interactive_mode:
-            logger.error(common.args.pathtoapk + common.config.get('qarkhelper', 'NOT_A_VALID_APK'))
+            logger.error(common.apkPath + common.config.get('qarkhelper', 'NOT_A_VALID_APK'))
             exit()
         logger.error(common.config.get('qarkhelper', 'NOT_A_VALID_APK_INTERACTIVE'))
         raise
@@ -125,12 +130,14 @@ def decompile(path):
 	Converts DEX to JAR(containing class files) and then class files to near original java code using 3 different decompilers and selecting the best available decompiled code
 	"""
     common.pathToDEX = path
-    pathToDex2jar = common.rootDir + "/lib/dex2jar/dex2jar.sh"
-    sp = subprocess.Popen([pathToDex2jar, common.pathToDEX], shell=False, stdout=subprocess.PIPE,
-                          stderr=subprocess.STDOUT)
+    common.logger.debug("Path to dex: %s", common.pathToDEX)
+    pathToDex2jar = common.qark_path + "/lib/dex2jar/dex2jar.sh"
+    common.logger.debug("Path to dex2jar: %s", pathToDex2jar)
+    sp = subprocess.Popen([pathToDex2jar, common.pathToDEX], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     output, error = sp.communicate()
     common.pathToJar = common.pathToDEX.rsplit(".", 1)[0] + "_dex2jar.jar"
     dirname, extension = common.pathToJar.rsplit(".", 1)
+    common.logger.debug("pathToJar: %s", common.pathToJar)
     zf = zipfile.ZipFile(common.pathToJar)
 
     # Total number of class files that need to be decompiled
@@ -232,7 +239,7 @@ def jdcore(path, dirname):
     """
 	calls the jdcore decompiler from command line
 	"""
-    process = subprocess.Popen(["java", "-jar", common.rootDir + "/lib/jd-core-java-1.2.jar", path, dirname],
+    process = subprocess.Popen(["java", "-jar", common.qark_path + "/lib/jd-core-java-1.2.jar", path, dirname],
                                stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
 
@@ -241,7 +248,7 @@ def cfr(path, dirname):
 	calls the cfr decompiler from command line
 	"""
     process = subprocess.Popen(
-        ["java", "-jar", common.rootDir + "/lib/cfr_0_115.jar", path, "--outputdir", dirname + "1"],
+        ["java", "-jar", common.qark_path + "/lib/cfr_0_115.jar", path, "--outputdir", dirname + "1"],
         stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     try:
         while True:
@@ -261,7 +268,7 @@ def procyon(path, dirname):
 	calls the procyon decompiler from command line
 	"""
     process = subprocess.Popen(
-        ["java", "-jar", common.rootDir + "/lib/procyon/procyon-decompiler-0.5.30.jar", path, "-o ", dirname + "2"],
+        ["java", "-jar", common.qark_path + "/lib/procyon/procyon-decompiler-0.5.30.jar", path, "-o ", dirname + "2"],
         stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     try:
         while True:

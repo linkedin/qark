@@ -8,6 +8,7 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.'''
 
 from collections import defaultdict
+import csv
 import os
 import sys
 import re
@@ -416,11 +417,14 @@ def reset():
         common.reportDir = common.getConfig("rootDir") + "/report"
         if common.args.reportDir is not None:
             common.reportDir = common.args.reportDir + "/report"
+        elif common.buildLocation:
+            common.reportDir = common.buildLocation + "/report"
         # common.writeKey("reportDir",report_dir);
-
         if os.path.exists(common.reportDir):
             shutil.rmtree(common.reportDir)
-        shutil.copytree(common.getConfig("rootDir") + "/template3", common.reportDir)
+        shutil.copytree(common.qark_path + "/template3", common.reportDir)
         os.rename(common.reportDir + "/index.html", common.reportDir + "/report.html")
-    except Exception as e:
-        common.logger.debug("Error when trying to reset report")
+        # Create a CSV file to store results
+        csv.writer(open('{}/Report.csv'.format(common.reportDir), 'w+'))
+    except Exception:
+        common.logger.exception("Error when trying to reset report")

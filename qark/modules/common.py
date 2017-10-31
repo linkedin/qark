@@ -77,6 +77,7 @@ badVerifiers = ['ALLOW_ALL_HOSTNAME_VERIFIER']
 sourceDirectory = ""
 parsingerrors = set()
 file_not_found = []
+qark_path = ""
 
 # TODO - Double check this list against : https://android.googlesource.com/platform/frameworks/base/+/master/core/res/AndroidManifest.xml
 # This is a list of broadcasts that only system apps should be able to send. If the attacker already has system level access, it's game over...
@@ -375,7 +376,6 @@ def set_environment_variables():
 
 def initialize_logger():
     logger.setLevel(logging.INFO)
-
     if not os.path.exists(rootDir + '/logs'):
         os.makedirs(rootDir + '/logs')
 

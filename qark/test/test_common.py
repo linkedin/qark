@@ -41,6 +41,11 @@ def test_initialize_logger():
     assert not os.path.isdir("./logs")
     assert 2 >= len(qark.modules.common.logger.handlers)
 
+    # this method has side effects on common.logger, the following resets the logger
+    root = logging.getLogger()
+    map(root.removeHandler, root.handlers[:])
+    map(root.removeFilter, root.filters[:])
+
 
 def test_checkJavaVersion(capsys):
     qark.modules.common.checkJavaVersion()
