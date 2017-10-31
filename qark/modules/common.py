@@ -20,6 +20,7 @@ import logging
 from collections import defaultdict
 import glob
 import subprocess
+import itertools
 
 from xml.dom import minidom
 from modules.IssueType import IssueType, IssueSeverity
@@ -613,19 +614,14 @@ def compare(length, req_length, msg, bye):
     return
 
 
-def dedup(L):
+def dedup(issue_list):
     """
     Given a list, deduplicate it
     """
-    if L:
-        L.sort()
-        last = L[-1]
-        for i in range(len(L) - 2, -1, -1):
-            if last == L[i]:
-                del L[i]
-            else:
-                last = L[i]
-    return L
+    if issue_list:
+        issue_list.sort()
+        issue_list = list(k for k, _ in itertools.groupby(issue_list))
+    return issue_list
 
 
 # find clases that extend something
