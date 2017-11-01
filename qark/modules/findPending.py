@@ -11,8 +11,8 @@ import re, sys
 import logging
 import lib.plyj.parser as plyj
 import lib.plyj.model as m
-from lib.progressbar import *
-from lib.pubsub import pub
+from progressbar import *
+from pubsub import pub
 from modules.report import ReportIssue
 from modules.common import Severity, ReportIssue
 from modules.createExploit import ExploitType

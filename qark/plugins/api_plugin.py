@@ -1,11 +1,16 @@
 import sys
 import os
-sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)) + '../lib')
-from yapsy.IPlugin import IPlugin
-from plugins import PluginUtil
-from modules import common
-from lib.pubsub import pub
 import re
+
+sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)) + '../lib')
+
+from yapsy.IPlugin import IPlugin
+from modules import common, report
+from modules.common import ReportIssue, Severity, terminalPrint, logger
+from modules.createExploit import ExploitType
+from progressbar import *
+from pubsub import pub
+import logging
 
 HARDCODED_API_KEY_ISSUE = "API Key Found\n{}"
 
