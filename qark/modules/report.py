@@ -428,3 +428,28 @@ def reset():
         csv.writer(open('{}/Report.csv'.format(common.reportDir), 'w+'))
     except Exception:
         common.logger.exception("Error when trying to reset report")
+
+
+def write_csv_section(issue, csv_file):
+    """
+    level = 0 represents Information Issue
+    self.extra retrieves information only from the Manifest.xml file. Hence it will be null for issues found from modules and plugins
+    self.data contains details/description for each issue
+    To get the type of Issue, looking at the specific issue keywords from the description is the only option at the moment
+    """
+    severity = issue.get_severity_string()
+
+    if issue.extra:
+        csv_file.writerow([severity, str(issue.details), str(issue.file), str(issue.extra), "Manifest File Check"])
+    elif "WEBVIEWS" in str(issue.details):
+        csv_file.writerow([severity, str(issue.details), str(issue.file), str(issue.extra), "WEB-VIEW ISSUES"])
+    elif "x.509" in str(issue.details) or "certificate" in str(issue.details) or "Man-In-The-Middle" in str(issue.details):
+        csv_file.writerow([severity, str(issue.details), str(issue.file), str(issue.extra), "CERTIFICATE VALIDATION ISSUES"])
+    elif "SecureRandom" in str(issue.details) or "ECB" in str(issue.details) or "key" in str(issue.details):
+        csv_file.writerow([severity, str(issue.details), str(issue.file), str(issue.extra), "CRYPTO ISSUES"])
+    elif "broadcast" in str(issue.details):
+        csv_file.writerow([severity, str(issue.details), str(issue.file), str(issue.extra), "BROADCAST ISSUES"])
+    elif "PendingIntent" in str(issue.details):
+        csv_file.writerow([severity, str(issue.details), str(issue.file), str(issue.extra), "PENDING INTENT ISSUES"])
+    else:
+        csv_file.writerow([severity, str(issue.details), str(issue.file), str(issue.extra), "PLUGIN ISSUES"])

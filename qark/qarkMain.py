@@ -354,6 +354,9 @@ def writeReportSection(results, category):
         common.logger.log(common.HEADER_ISSUES_LEVEL, category)
     if not any(isinstance(x, terminalPrint) for x in results):
         common.logger.info(" No issues to report")
+
+    csv_file = open('./Report.csv', 'a+')
+    writer = csv.writer(csv_file)
     for item in results:
         if isinstance(item, terminalPrint):
             if item.getLevel() == Severity.INFO:
@@ -364,6 +367,9 @@ def writeReportSection(results, category):
                 common.logger.error(item.getData())
             if item.getLevel() == Severity.VULNERABILITY:
                 common.logger.log(common.VULNERABILITY_LEVEL,item.getData())
+        elif isinstance(item, ReportIssue):
+            report.write_csv_section(item, writer)
+    csv_file.close()
 
 def setup_argparse():
     parser = argparse.ArgumentParser(description='QARK - Andr{o}id Source Code Analyzer and Exploitation Tool')
@@ -381,16 +387,16 @@ def setup_argparse():
                       help="Enter the full path to the APK file. Required only when --source==1")
 
     advanced_mutual = advanced.add_mutually_exclusive_group()
-    advanced_mutual.add_argument("-a", "--autodetectcodepath", dest="autodetect",
-                                 help="AutoDetect java source code path based of the path provided for manifest. 1=autodetect, 0=specify manually")
+    advanced_mutual.add_argument("-a", "--autodetectcodepath", dest="autodetect", default=1,
+                                 help="AutoDetect java source code path based off the path provided for manifest. 1=autodetect, 0=specify manually")
     advanced_mutual.add_argument("-c", "--codepath", dest="codepath",
                                  help="Enter the full path to the root folder containing java source. Required only when --source==2")
 
-    optional.add_argument("-e", "--exploit", dest="exploit", help="1 to generate a targeted exploit APK, 0 to skip")
+    optional.add_argument("-e", "--exploit", dest="exploit", default=0, help="2 to generate XML/JSON files, 1 to generate a targeted exploit APK, 0 to skip")
     optional.add_argument("--decompile", action="store_true", help="To stop Qark after decompilation")
     #     optional.add_argument("-n", "--no-progress-bar", dest="noprogressbar", help="dont display progress bar for compatibility reasons", default=False, action='store_true')
-    optional.add_argument("-i", "--install", dest="install", help="1 to install exploit APK on the device, 0 to skip")
-    optional.add_argument("-d", "--debug", dest="debuglevel",
+    optional.add_argument("-i", "--install", action="store_true", help="Install exploit APK on the device")
+    optional.add_argument("-d", "--debug", dest="debuglevel", default=20,
                           help="Debug Level. 10=Debug, 20=INFO, 30=Warning, 40=Error")
     optional.add_argument("-v", "--version", dest="version", help="Print version info", action='store_true')
     optional.add_argument("-bp", "--buildpath", dest="buildDir",
@@ -540,8 +546,8 @@ def main():
             if common.args.apkpath is None:
                 common.logger.error("When selecting --source=1, Please provide the path to the APK via --pathtoapk flag")
                 exit()
-            if common.args.exploit is None:
-                common.logger.error("--exploit flag missing. Possible values 0/1")
+            if int(common.args.exploit) not in (0,1,2):
+                common.logger.error("--exploit flag invalid. Possible values 0/1/2")
                 exit()
             # if common.args.decompile is None:
             #     common.logger.error("--decompile flag missing. Possible values 0/1. 0 to continue with Static Code Analysis and 1 to EXIT after decompilation\n")
@@ -549,10 +555,6 @@ def main():
             # if int(common.args.decompile) not in (0, 1):
             #     common.logger.error("Incorrect value in --decompile flag. Possible values 0/1. 0 to continue with Static Code Analysis and 1 to EXIT after decompilation\n")
             #     exit()
-            if int(common.args.exploit) == 1:
-                if common.args.install is None:
-                    common.logger.error("--install flag missing. Possible values 0/1")
-                    exit()
         if common.args.source == 2:
             if common.args.autodetect is None:
                 if common.args.codepath is None or common.args.manifest is None:
@@ -564,13 +566,6 @@ def main():
                     exit()
                 else:
                     common.args.codepath = common.args.manifest  # auto-detect uses the manifest file path
-            if common.args.exploit is None:
-                common.logger.error("--exploit flag missing. Possible values 0/1")
-                exit()
-            if int(common.args.exploit) == 1:
-                if common.args.install is None:
-                    common.logger.error("--install flag missing. Possible values 0/1")
-                    exit()
 
     if common.args.debuglevel is not None:
         if int(common.args.debuglevel) in range(10,60):
@@ -1250,7 +1245,7 @@ def main():
             data = [line for line in r]
         with open(CSV_PATH, 'w') as f:
             w = csv.writer(f)
-            w.writerow(["severity", "details", "extra", "type"])
+            w.writerow(["severity", "details", "file", "extra", "type"])
             w.writerows(data)
 
 
