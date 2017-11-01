@@ -29,6 +29,8 @@ def test_dedup():
     d = common.dedup
     assert common.dedup([1,2,3]) == [1,2,3]
     assert common.dedup([1,2,3,3]) == [1,2,3]
+    assert common.dedup([1,2,[1,3],3,3,[1,3]]) == [1,2,3, [1,3]]
+    assert common.dedup([[], [], 1, 2, [1,2,3]]) == [1, 2, [], [1,2,3]]
 
 
 def test_initialize_logger():
