@@ -7,6 +7,31 @@
 
 ## Usage
 
+### Optional:
+
+Install virtualenv:
+```
+$ pip install virtualenv
+```
+
+Create virtual environment (you can make sure it is `python2.7` with the `-p` flag):
+```
+$ virtualenv .
+OR
+$ virtualenv . -p /usr/bin/python
+```
+
+Activate the virtual environment:
+```
+$ source bin/activate
+```
+
+### Required
+Install the requirements:
+```
+$ pip install -r requirements.txt
+```
+
 To run in interactive mode:
 ```
 $ python qarkMain.py
@@ -23,7 +48,7 @@ The sampleApps folder contains sample APKs that you can test against QARK
 
 
 ## Requirements
-- python 2.7.6
+- python 2.7.10
 - JRE 1.6+ (preferably 1.7+)
 - OSX or RHEL6.6 (Others may work, but not fully tested)
 
@@ -52,7 +77,6 @@ Included in the types of security vulnerabilities this tool attempts to find are
 
 ## Roadmap
 Things that are coming soon:
-- Rewrite of code to support extensibility
 - Bound Service vulnerability detection and exploitation
 - Content Provider vulnerability detection and exploitation
 - Additional WebView configuration demonstrations
@@ -77,4 +101,8 @@ Copyright 2015 LinkedIn Corp. Licensed under the Apache License, Version 2.0 (th
 Unless required by applicable law or agreed to in writing, software  distributed under the License is distributed on an "AS IS" BASIS,  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 
 ## Recent Updates
+**Version 2.0**
+QARK has previously been self-contained with a lot of Python dependencies living in the `lib/` folder. With the release of `2.0` we remove this and go towards the standard approach of using virtual environments. The usage section has been updated to reflect these changes.
+
+
 Qark has recently been refactored. qark.py has been renamed to qarkMain.py and is now packagable and runnable from other processes via the runAutomated function in qarkMain.py

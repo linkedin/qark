@@ -24,8 +24,8 @@ import itertools
 
 from xml.dom import minidom
 from modules.IssueType import IssueType, IssueSeverity
-from lib import colorama
-from lib.blessed import *
+import colorama
+from blessed import *
 from modules.createExploit import ExploitType
 import csv
 import unittest

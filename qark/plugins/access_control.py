@@ -1,7 +1,7 @@
 from yapsy.IPlugin import IPlugin
 from plugins import PluginUtil
 from modules import common
-from lib.pubsub import pub
+from pubsub import pub
 import lib.plyj.parser as plyj
 import lib.plyj.model as m
 import sys
