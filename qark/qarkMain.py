@@ -353,6 +353,9 @@ def writeReportSection(results, category):
         common.logger.log(common.HEADER_ISSUES_LEVEL, category)
     if not any(isinstance(x, terminalPrint) for x in results):
         common.logger.info(" No issues to report")
+
+    csv_file = open('./Report.csv', 'a+')
+    writer = csv.writer(csv_file)
     for item in results:
         if isinstance(item, terminalPrint):
             if item.getLevel() == Severity.INFO:
@@ -363,6 +366,9 @@ def writeReportSection(results, category):
                 common.logger.error(item.getData())
             if item.getLevel() == Severity.VULNERABILITY:
                 common.logger.log(common.VULNERABILITY_LEVEL,item.getData())
+        elif isinstance(item, ReportIssue):
+            report.write_csv_section(item, writer)
+    csv_file.close()
 
 def setup_argparse():
     parser = argparse.ArgumentParser(description='QARK - Andr{o}id Source Code Analyzer and Exploitation Tool')
@@ -1212,7 +1218,7 @@ def main():
             data = [line for line in r]
         with open('./Report.csv', 'w') as f:
             w = csv.writer(f)
-            w.writerow(["severity", "details", "extra", "type"])
+            w.writerow(["severity", "details", "file", "extra", "type"])
             w.writerows(data)
 
         # Convert CSV to JSON

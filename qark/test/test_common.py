@@ -106,3 +106,16 @@ def test_get_entry_for_component():
     assert ['onReceive'] == qark.modules.common.get_entry_for_component("receiver")
     assert ['onCreate', 'onBind', 'onStartCommand', 'onHandleIntent'] == qark.modules.common.get_entry_for_component("service")
     assert ['onReceive'] == qark.modules.common.get_entry_for_component("provider")
+
+
+def test_report_issue():
+    issue = common.ReportIssue(category="test_category", severity=0, details="test_details",
+                               file="test_filename", name="test_name")
+    assert "INFO" == issue.get_severity_string()
+    issue.severity = 1
+    assert "WARNING" == issue.get_severity_string()
+    issue.severity = 2
+    assert "ERROR" == issue.get_severity_string()
+    issue.severity = 3
+    assert "VULNERABILITY" == issue.get_severity_string()
+    issue.severity = 4
