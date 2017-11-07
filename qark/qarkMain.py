@@ -662,7 +662,7 @@ def main():
             if common.interactive_mode:
                 show=raw_input("Inspect Manifest?[y/n]")
                 if show in ['y','Y']:
-                    common.logger.info("Manifest found at %s", common.manifest)
+                    common.logger.info("Manifest contents: %s", common.manifest)
                     raw_input("Press ENTER key to continue")
             else:
                 common.logger.info(common.manifest)
