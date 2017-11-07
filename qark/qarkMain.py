@@ -387,7 +387,7 @@ def setup_argparse():
                       help="Enter the full path to the APK file. Required only when --source==1")
 
     advanced_mutual = advanced.add_mutually_exclusive_group()
-    advanced_mutual.add_argument("-a", "--autodetectcodepath", dest="autodetect", default=1,
+    advanced_mutual.add_argument("-a", "--autodetectcodepath", dest="autodetect", default=0,
                                  help="AutoDetect java source code path based off the path provided for manifest. 1=autodetect, 0=specify manually")
     advanced_mutual.add_argument("-c", "--codepath", dest="codepath",
                                  help="Enter the full path to the root folder containing java source. Required only when --source==2")
@@ -430,14 +430,14 @@ def run_automated_defaults(pathToReport, pathToApk):
 
 def nonAutomatedParseArgs():
     os.system('clear')
-    print """ .d88888b.           d8888   8888888b.    888    d8P  
-d88P" "Y88b         d88888   888   Y88b   888   d8P   
-888     888        d88P888   888    888   888  d8P    
-888     888       d88P 888   888   d88P   888d88K     
-888     888      d88P  888   8888888P"    8888888b    
-888 Y8b 888     d88P   888   888 T88b     888  Y88b   
-Y88b.Y8b88P    d8888888888   888  T88b    888   Y88b  
- "Y888888"    d88P     888   888   T88b   888    Y88b 
+    print """ .d88888b.           d8888   8888888b.    888    d8P
+d88P" "Y88b         d88888   888   Y88b   888   d8P
+888     888        d88P888   888    888   888  d8P
+888     888       d88P 888   888   d88P   888d88K
+888     888      d88P  888   8888888P"    8888888b
+888 Y8b 888     d88P   888   888 T88b     888  Y88b
+Y88b.Y8b88P    d8888888888   888  T88b    888   Y88b
+ "Y888888"    d88P     888   888   T88b   888    Y88b
         Y8b                                            """
 
 
@@ -464,14 +464,14 @@ Y88b.Y8b88P    d8888888888   888  T88b    888   Y88b
 
 def runAutomated(pathToApk='',pathToReport='', command_line_arguments='', pathToLog=None, buildDir=None):
     os.system('clear')
-    print """ .d88888b.           d8888   8888888b.    888    d8P  
-d88P" "Y88b         d88888   888   Y88b   888   d8P   
-888     888        d88P888   888    888   888  d8P    
-888     888       d88P 888   888   d88P   888d88K     
-888     888      d88P  888   8888888P"    8888888b    
-888 Y8b 888     d88P   888   888 T88b     888  Y88b   
-Y88b.Y8b88P    d8888888888   888  T88b    888   Y88b  
- "Y888888"    d88P     888   888   T88b   888    Y88b 
+    print """ .d88888b.           d8888   8888888b.    888    d8P
+d88P" "Y88b         d88888   888   Y88b   888   d8P
+888     888        d88P888   888    888   888  d8P
+888     888       d88P 888   888   d88P   888d88K
+888     888      d88P  888   8888888P"    8888888b
+888 Y8b 888     d88P   888   888 T88b     888  Y88b
+Y88b.Y8b88P    d8888888888   888  T88b    888   Y88b
+ "Y888888"    d88P     888   888   T88b   888    Y88b
         Y8b                                            """
 
     if pathToLog:
@@ -535,16 +535,19 @@ def main():
             #     common.logger.error("Incorrect value in --decompile flag. Possible values 0/1. 0 to continue with Static Code Analysis and 1 to EXIT after decompilation\n")
             #     exit()
         if common.args.source == 2:
-            if common.args.autodetect is None:
-                if common.args.codepath is None or common.args.manifest is None:
-                    common.logger.error("When selecting --source=2, Please either pass --autodetectcodepath=1 and --manifest, or --manifest False --codepath /path/to/code")
-                    exit()
-            else:
+            if int(common.args.autodetect) == 1:
                 if common.args.manifest is None:
                     common.logger.error("--manifest flag missing. Please provide path to manifest")
                     exit()
                 else:
                     common.args.codepath = common.args.manifest  # auto-detect uses the manifest file path
+            elif int(common.args.autodetect) == 0:
+                if common.args.manifest.lower() not in ("f", "false"):
+                    common.logger.error("--manifest unexpected, should be --manifest False or --manifest F")
+                    exit()
+                if common.args.codepath is None:
+                    common.logger.error("Please specify --codepath to Java files")
+                    exit()
 
     if common.args.debuglevel is not None:
         if int(common.args.debuglevel) in range(10,60):
