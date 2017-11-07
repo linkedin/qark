@@ -100,6 +100,7 @@ def apktool(pathToAPK):
     print str(pathToAPK.rsplit(".",1)[0]).rsplit("/",1)[0] + "/apktool" + "/AndroidManifest.xml"
     with open (str(pathToAPK.rsplit(".",1)[0]).rsplit("/",1)[0] + "/apktool" + "/AndroidManifest.xml", "r") as f:
         manifest = f.read()
+    common.args.manifest = str(pathToAPK.rsplit(".",1)[0]).rsplit("/",1)[0] + "/apktool" + "/AndroidManifest.xml"
     pub.sendMessage('manifest', mf=manifest)
     return
 
@@ -661,7 +662,7 @@ def main():
             if common.interactive_mode:
                 show=raw_input("Inspect Manifest?[y/n]")
                 if show in ['y','Y']:
-                    common.logger.info(common.manifest)
+                    common.logger.info("Manifest contents: %s", common.manifest)
                     raw_input("Press ENTER key to continue")
             else:
                 common.logger.info(common.manifest)
