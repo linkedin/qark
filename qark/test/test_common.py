@@ -29,6 +29,8 @@ def test_dedup():
     d = common.dedup
     assert common.dedup([1,2,3]) == [1,2,3]
     assert common.dedup([1,2,3,3]) == [1,2,3]
+    assert common.dedup([1,2,[1,3],3,3,[1,3]]) == [1,2,3, [1,3]]
+    assert common.dedup([[], [], 1, 2, [1,2,3]]) == [1, 2, [], [1,2,3]]
 
 
 def test_initialize_logger():
@@ -106,3 +108,16 @@ def test_get_entry_for_component():
     assert ['onReceive'] == qark.modules.common.get_entry_for_component("receiver")
     assert ['onCreate', 'onBind', 'onStartCommand', 'onHandleIntent'] == qark.modules.common.get_entry_for_component("service")
     assert ['onReceive'] == qark.modules.common.get_entry_for_component("provider")
+
+
+def test_report_issue():
+    issue = common.ReportIssue(category="test_category", severity=0, details="test_details",
+                               file="test_filename", name="test_name")
+    assert "INFO" == issue.get_severity_string()
+    issue.severity = 1
+    assert "WARNING" == issue.get_severity_string()
+    issue.severity = 2
+    assert "ERROR" == issue.get_severity_string()
+    issue.severity = 3
+    assert "VULNERABILITY" == issue.get_severity_string()
+    issue.severity = 4

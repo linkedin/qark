@@ -20,6 +20,7 @@ import logging
 from collections import defaultdict
 import glob
 import subprocess
+import itertools
 
 from xml.dom import minidom
 from modules.IssueType import IssueType, IssueSeverity
@@ -207,84 +208,6 @@ class terminalPrint():
         self.level = level
 
     def getLevel(self):
-        """
-        level = 0 represents Information Issue
-        self.extra retrieves information only from the Manifest.xml file. Hence it will be null for issues found from modules and plugins
-        self.data contains details/description for each issue
-        To get the type of Issue, looking at the specific issue keywords from the description is the only option at the moment
-        """
-        if self.level == 0:
-            tr = csv.writer(open('./Report.csv', 'a+'))
-
-            if self.extra:
-                tr.writerow(["INFO", str(self.data), str(self.extra), "Manifest File Check"])
-            elif "WEBVIEWS" in str(self.data):
-                tr.writerow(["INFO", str(self.data), str(self.extra), "WEB-VIEW ISSUES"])
-            elif "x.509" in str(self.data) or "certificate" in str(self.data) or "Man-In-The-Middle" in str(self.data):
-                tr.writerow(["INFO", str(self.data), str(self.extra), "CERTIFICATE VALIDATION ISSUES"])
-            elif "SecureRandom" in str(self.data) or "ECB" in str(self.data) or "key" in str(self.data):
-                tr.writerow(["INFO", str(self.data), str(self.extra), "CRYPTO ISSUES"])
-            elif "broadcast" in str(self.data):
-                tr.writerow(["INFO", str(self.data), str(self.extra), "BROADCAST ISSUES"])
-            elif "PendingIntent" in str(self.data):
-                tr.writerow(["INFO", str(self.data), str(self.extra), "PENDING INTENT ISSUES"])
-            else:
-                tr.writerow(["INFO", str(self.data), str(self.extra), "PLUGIN ISSUES"])
-
-        elif self.level == 1:
-            tr = csv.writer(open('./Report.csv', 'a+'))
-
-            if self.extra:
-                tr.writerow(["WARNING", str(self.data), str(self.extra), "Manifest File Check"])
-            elif "WEBVIEWS" in str(self.data):
-                tr.writerow(["WARNING", str(self.data), str(self.extra), "WEB-VIEW ISSUES"])
-            elif "x.509" in str(self.data) or "certificate" in str(self.data) or "Man-In-The-Middle" in str(self.data):
-                tr.writerow(["WARNING", str(self.data), str(self.extra), "CERTIFICATE VALIDATION ISSUES"])
-            elif "SecureRandom" in str(self.data) or "ECB" in str(self.data) or "key" in str(self.data):
-                tr.writerow(["WARNING", str(self.data), str(self.extra), "CRYPTO ISSUES"])
-            elif "broadcast" in str(self.data):
-                tr.writerow(["WARNING", str(self.data), str(self.extra), "BROADCAST ISSUES"])
-            elif "PendingIntent" in str(self.data):
-                tr.writerow(["WARNING", str(self.data), str(self.extra), "PENDING INTENT ISSUES"])
-            else:
-                tr.writerow(["WARNING", str(self.data), str(self.extra), "PLUGIN ISSUES"])
-
-        elif self.level == 2:
-            tr = csv.writer(open('./Report.csv', 'a+'))
-
-            if self.extra:
-                tr.writerow(["ERROR", str(self.data), str(self.extra), "Manifest File Check"])
-            elif "WEBVIEWS" in str(self.data):
-                tr.writerow(["ERROR", str(self.data), str(self.extra), "WEB-VIEW ISSUES"])
-            elif "x.509" in str(self.data) or "certificate" in str(self.data) or "Man-In-The-Middle" in str(self.data):
-                tr.writerow(["ERROR", str(self.data), str(self.extra), "CERTIFICATE VALIDATION ISSUES"])
-            elif "SecureRandom" in str(self.data) or "ECB" in str(self.data) or "key" in str(self.data):
-                tr.writerow(["ERROR", str(self.data), str(self.extra), "CRYPTO ISSUES"])
-            elif "broadcast" in str(self.data):
-                tr.writerow(["ERROR", str(self.data), str(self.extra), "BROADCAST ISSUES"])
-            elif "PendingIntent" in str(self.data):
-                tr.writerow(["ERROR", str(self.data), str(self.extra), "PENDING INTENT ISSUES"])
-            else:
-                tr.writerow(["ERROR", str(self.data), str(self.extra), "PLUGIN ISSUES"])
-
-        elif self.level == 3:
-            tr = csv.writer(open('./Report.csv', 'a+'))
-
-            if self.extra:
-                tr.writerow(["VULNERABILITY", str(self.data), str(self.extra), "Manifest File Check"])
-            elif "WEBVIEWS" in str(self.data):
-                tr.writerow(["VULNERABILITY", str(self.data), str(self.extra), "WEB-VIEW ISSUES"])
-            elif "x.509" in str(self.data) or "certificate" in str(self.data) or "Man-In-The-Middle" in str(self.data):
-                tr.writerow(["VULNERABILITY", str(self.data), str(self.extra), "CERTIFICATE VALIDATION ISSUES"])
-            elif "SecureRandom" in str(self.data) or "ECB" in str(self.data) or "key" in str(self.data):
-                tr.writerow(["VULNERABILITY", str(self.data), str(self.extra), "CRYPTO ISSUES"])
-            elif "broadcast" in str(self.data):
-                tr.writerow(["VULNERABILITY", str(self.data), str(self.extra), "BROADCAST ISSUES"])
-            elif "PendingIntent" in str(self.data):
-                tr.writerow(["VULNERABILITY", str(self.data), str(self.extra), "PENDING INTENT ISSUES"])
-            else:
-                tr.writerow(["VULNERABILITY", str(self.data), str(self.extra), "PLUGIN ISSUES"])
-
         return self.level
 
     def setData(self, data):
@@ -613,19 +536,14 @@ def compare(length, req_length, msg, bye):
     return
 
 
-def dedup(L):
+def dedup(issue_list):
     """
     Given a list, deduplicate it
     """
-    if L:
-        L.sort()
-        last = L[-1]
-        for i in range(len(L) - 2, -1, -1):
-            if last == L[i]:
-                del L[i]
-            else:
-                last = L[i]
-    return L
+    if issue_list:
+        issue_list.sort()
+        issue_list = list(k for k, _ in itertools.groupby(issue_list))
+    return issue_list
 
 
 # find clases that extend something
@@ -1213,7 +1131,7 @@ class ReportIssue():
     name = ""
     extra = {}
 
-    def __init__(self, category="", severity="", details="", file="", name="", extra=None):
+    def __init__(self, category="", severity=0, details="", file="", name="", extra=None):
         self.category = category
         self.severity = severity
         self.details = details
@@ -1259,3 +1177,14 @@ class ReportIssue():
 
     def setExtras(self, key, value):
         self.extra[key] = value
+
+    def get_severity_string(self):
+        if self.severity == Severity.INFO:
+            return "INFO"
+        elif self.severity == Severity.WARNING:
+            return "WARNING"
+        elif self.severity == Severity.ERROR:
+            return "ERROR"
+        elif self.severity == Severity.VULNERABILITY:
+            return "VULNERABILITY"
+        return ""
