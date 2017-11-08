@@ -1,12 +1,14 @@
 import sys
 import os
+import re
 
 sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)) + '../lib')
+
 from yapsy.IPlugin import IPlugin
 from plugins import PluginUtil
 from modules import common
-from lib.pubsub import pub
-import re
+from pubsub import pub
+
 import qarkMain
 
 ORDERED_BROADCAST_ISSUE = ("Data Injection due to exported Broadcast Receiver.\n"

@@ -6,7 +6,7 @@ with open('requirements.txt') as f:
 
 setup(
     name = "qark",
-    version = "1.2.20",
+    version = "1.3.0",
     packages = ['qark/modules','qark/lib', 'qark'],
     include_package_data = True,
 #     scripts = ['qark.py'],

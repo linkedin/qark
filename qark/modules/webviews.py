@@ -19,7 +19,7 @@ from .IssueType import IssueType, IssueSeverity
 from .report import ReportIssue
 from .common import Severity, ReportIssue
 from .createExploit import ExploitType
-from lib.pubsub import pub
+from pubsub import pub
 from . import common
 from .common import terminalPrint
 

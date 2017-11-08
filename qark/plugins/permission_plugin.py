@@ -9,7 +9,7 @@ from yapsy.IPlugin import IPlugin
 from modules import common
 from modules.common import ReportIssue, Severity, terminalPrint
 from modules.createExploit import ExploitType
-from lib.pubsub import pub
+from pubsub import pub
 
 
 class PermissionPlugin(IPlugin):
