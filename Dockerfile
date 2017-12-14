@@ -33,3 +33,5 @@ VOLUME /apk
 # By default QARK can start to analyze apks on the mounted volume.
 # Report will be on the same folder.
 # CMD python qarkMain.py --source 1 --pathtoapk /apk/*.apk --exploit 0 --basepath /qark/android-sdk-linux --reportdir /apk/
+
+ENTRYPOINT ["python", "qarkMain.py"]
