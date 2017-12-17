@@ -330,6 +330,9 @@ def report_badger(identity, objectlist):
         if isinstance(item, ReportIssue):
             report.write_badger(identity, item.getSeverity(), item.getDetails(), item.getExtras())
 
+def get_report_file_path_for(file_extension):
+    return os.path.join(common.reportDir, 'Report.' + file_extension)
+
 def writeReportSection(results, category):
     if category == "CRYPTO ISSUES":
         section = report.Section.CRYPTO_BUGS
@@ -355,7 +358,7 @@ def writeReportSection(results, category):
     if not any(isinstance(x, terminalPrint) for x in results):
         common.logger.info(" No issues to report")
 
-    csv_file = open('./Report.csv', 'a+')
+    csv_file = open(get_report_file_path_for('csv'), 'a+')
     writer = csv.writer(csv_file)
     for item in results:
         if isinstance(item, terminalPrint):
@@ -1201,26 +1204,24 @@ def main():
             else:
                 common.logger.info("The apk can be found in the "+ actual_root_dir +"/build/qark directory")
     elif exploit_choice == 2:
+        CSV_PATH = get_report_file_path_for('csv')
+        JSON_PATH = get_report_file_path_for('json')
+        XML_PATH = get_report_file_path_for('xml')
+
         # JSON, XML and CSV file formatting
         # Overwrite the CSV file with the header and write the entire data again
-        with open('./Report.csv', 'r') as f:
+        with open(CSV_PATH, 'r') as f:
             r = csv.reader(f)
             data = [line for line in r]
-        with open('./Report.csv', 'w') as f:
+        with open(CSV_PATH, 'w') as f:
             w = csv.writer(f)
             w.writerow(["severity", "details", "file", "extra", "type"])
             w.writerows(data)
 
-        # Convert CSV to JSON
-        # Constants to make everything easier
-
-        CSV_PATH = './Report.csv'
-        JSON_PATH = './Report.json'
-        XML_PATH = './Report.xml'
-
         # Reads the file the same way that you did
         csv_file = csv.DictReader(open(CSV_PATH, 'r'))
 
+        # Convert CSV to JSON
         # Created a list and adds the rows to the list
         json_list = []
         for row in csv_file:
@@ -1231,10 +1232,10 @@ def main():
         file(JSON_PATH, 'w').write(json_object)
 
         # Delete the CSV report as it contains redundant data
-        os.remove('./Report.csv')
+        os.remove(CSV_PATH)
 
         # Remove redundant data from JSON file
-        with open('./Report.json') as fp:
+        with open(JSON_PATH) as fp:
             ds = json.load(fp)  # this file contains the json
 
             mem = {}
@@ -1277,5 +1278,5 @@ def main():
 
 if __name__ == "__main__":
     # Create a CSV file to store results
-    csv.writer(open('./Report.csv', 'w+'))
+    csv.writer(open(get_report_file_path_for('csv'), 'w+'))
     nonAutomatedParseArgs()
