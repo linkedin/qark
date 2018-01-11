@@ -96,6 +96,8 @@ def test_decompile(decompiler, build_directory):
         os.path.dirname(os.path.abspath(__file__)))),
 ])
 def test_decompiler_function(decompiler, build_directory, decompiler_name, path_to_decompiler):
+    if os.path.isdir(build_directory):
+        shutil.rmtree(build_directory)
     assert not os.path.isdir(build_directory)
 
     decompiler._decompiler_function(decompiler_name, path_to_decompiler)
