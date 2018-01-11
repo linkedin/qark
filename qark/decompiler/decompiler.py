@@ -9,7 +9,6 @@ import re
 import zipfile
 
 log = logging.getLogger(__name__)
-log.setLevel(logging.DEBUG)
 
 JAVA_VERSION_REGEX = '"(\d+\.\d+\..+)\"'
 LIB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../lib")
@@ -75,7 +74,6 @@ class Decompiler(object):
             self.jar_path = self._run_dex2jar()
 
         try:
-            # devnull = open(os.devnull, 'wb')
             retcode = subprocess.call(
                 shlex.split(DECOMPILER_COMMANDS.get(decompiler.upper()).format(path_to_decompiler=path_to_decompiler,
                                                                        jar=self.jar_path,
@@ -86,8 +84,6 @@ class Decompiler(object):
         else:
             if retcode != 0:
                 log.info("Error running %s, continuing", decompiler)
-        # finally:
-        #     devnull.close()
 
     def run_apktool(self):
         """
