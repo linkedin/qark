@@ -39,7 +39,7 @@ class Decompiler(object):
                                 If directory does not exist it will be created, defaults to same directory as APK
         """
         self.path_to_apk = path_to_apk
-        self.build_directory = build_directory if build_directory else os.path.dirname(path_to_apk)
+        self.build_directory = build_directory if build_directory else os.path.join(os.path.dirname(path_to_apk), "qark")
         self.apk_name = os.path.splitext(os.path.basename(path_to_apk))[0]  # name of APK without the .apk extension
 
         self.manifest_path = None
