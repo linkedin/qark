@@ -1,5 +1,5 @@
 import logging
-from multiprocessing import Pool
+from multiprocessing.pool import ThreadPool
 import os
 import platform
 import shlex
@@ -52,7 +52,7 @@ class Decompiler(object):
 
     def decompile(self):
         """Top-level function which runs each decompiler and waits for them to finish decompilation."""
-        decompiler_pool = Pool(len(self.decompilers))
+        decompiler_pool = ThreadPool(len(self.decompilers))
 
         for decompiler, path in self.decompilers.items():
             os.makedirs(os.path.join(self.build_directory, decompiler.lower()))
@@ -76,8 +76,8 @@ class Decompiler(object):
         try:
             retcode = subprocess.call(
                 shlex.split(DECOMPILER_COMMANDS.get(decompiler.upper()).format(path_to_decompiler=path_to_decompiler,
-                                                                       jar=self.jar_path,
-                                                                       build_directory=self.build_directory)),
+                                                                               jar=self.jar_path,
+                                                                               build_directory=self.build_directory)),
                 )
         except Exception:
             log.exception("%s failed to finish decompiling, continuing", decompiler)
