@@ -34,7 +34,7 @@ class Decompiler(object):
     """
     def __init__(self, path_to_apk, build_directory=None):
         """
-        :param path_to_apk: path to APK to decompile
+        :param path_to_apk: Absolute path to APK to decompile
         :param build_directory: directory to unpack and decompile APK to.
                                 If directory does not exist it will be created, defaults to same directory as APK
         """
