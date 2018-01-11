@@ -36,7 +36,7 @@ class Decompiler(object):
         """
         :param path_to_apk: Absolute path to APK to decompile
         :param build_directory: directory to unpack and decompile APK to.
-                                If directory does not exist it will be created, defaults to same directory as APK
+                                If directory does not exist it will be created, defaults to same directory as APK/qark
         """
         self.path_to_apk = path_to_apk
         self.build_directory = build_directory if build_directory else os.path.join(os.path.dirname(path_to_apk), "qark")
