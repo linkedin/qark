@@ -31,8 +31,9 @@ def test_get_java_version():
 
 
 def test_unpack_apk(decompiler, bad_decompiler, build_directory):
-    assert build_directory + "/classes.dex" == decompiler._unpack_apk()
-    assert os.path.isfile(os.path.join(build_directory + "/classes.dex"))
+    classes_dex_path = os.path.join(build_directory, "classes.dex")
+    assert classes_dex_path == decompiler._unpack_apk()
+    assert os.path.isfile(classes_dex_path)
 
     shutil.rmtree(build_directory)
     assert not os.path.isdir(build_directory)
