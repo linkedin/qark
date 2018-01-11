@@ -171,51 +171,6 @@ class Decompiler(object):
 
         return os.path.join(self.build_directory, "{apk_name}.jar".format(apk_name=self.apk_name))
 
-    '''
-    def _run_jdcore(self):
-        """Runs JDCore on the JAR in the `self.jar_path` (should be created during _run_dex2jar).
-        If `self.jar_path` is None or empty, then it will run dex2jar to get a proper value for it."""
-        if not self.jar_path:
-            log.debug(".jar file path not found, trying to create dex file.")
-            self.jar_path = self._run_dex2jar()
-        os.makedirs(os.path.join(self.build_directory, "jdcore"))
-        retcode = subprocess.call(shlex.split(JDCORE_COMMAND.format(path_to_jdcore=os.path.join(DECOMPILERS_PATH,
-                                                                                                "jd-core-java-1.2.jar"),
-                                                                    jar=self.jar_path,
-                                                                    build_directory=self.build_directory)))
-
-        if retcode != 0:
-            log.info("Error running JDCore, continuing")
-
-    def _run_procyon(self):
-        if not self.jar_path:
-            log.debug(".jar file path not found, trying to create dex file.")
-            self.jar_path = self._run_dex2jar()
-        os.makedirs(os.path.join(self.build_directory, "procyon"))
-        retcode = subprocess.call(shlex.split(PROCYON_COMMAND.format(path_to_procyon=os.path.join(DECOMPILERS_PATH,
-                                                                                                  "procyon-decompiler-0.5.30.jar"),
-                                                                     jar=self.jar_path,
-                                                                     build_directory=self.build_directory)))
-
-        if retcode != 0:
-            log.info("Error running procyon, continuing")
-
-    def _run_cfr(self):
-        if not self.jar_path:
-            log.debug(".jar file path not found, trying to create dex file.")
-            self.jar_path = self._run_dex2jar()
-        os.makedirs(os.path.join(self.build_directory, "cfr"))
-        retcode = subprocess.call(shlex.split(CFR_COMMAND.format(path_to_cfr=os.path.join(DECOMPILERS_PATH, "cfr_0_124.jar"),
-                                                                 jar=self.jar_path,
-                                                                 build_directory=self.build_directory)))
-
-        if retcode != 0:
-            log.info("Error running cfr, continuing")
-    '''
-
-
-
-
 
 def copy_apk_to_zip(path_to_apk):
     """
