@@ -40,3 +40,8 @@ def jdcore_path():
 def procyon_path():
     return os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "lib",
                         "decompilers", "procyon-decompiler-0.5.30.jar")
+
+
+@pytest.fixture(scope="session")
+def vulnerable_manifest_path():
+    return os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_manifest.xml")
