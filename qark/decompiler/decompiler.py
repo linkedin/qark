@@ -122,27 +122,14 @@ class Decompiler(object):
 
     def _unpack_apk(self):
         """
-        Unpacks an APK by making it a .zip file and then extracting its contents.
-        Sets `self.dex_path` to its correct location.
+        Unpacks an APK and extracts its contents.
+        :return: location for `self.dex_path` to use
+        :rtype: os.path object
         """
         try:
-            temp_apk_zip = copy_apk_to_zip(self.path_to_apk)
-        except Exception:
-            raise SystemExit("Unable to copy APK to a ZIP")
-
-        log.debug("Unzipping APK from %s to %s", self.path_to_apk, temp_apk_zip)
-
-        try:
-            unzip_file(temp_apk_zip, destination_to_unzip=self.build_directory)
+            unzip_file(self.path_to_apk, destination_to_unzip=self.build_directory)
         except Exception:
             raise SystemExit("Unable to unzip APK")
-        finally:
-            # clean up copied file
-            log.debug("Removing created file at %s", temp_apk_zip)
-            try:
-                os.remove(temp_apk_zip)
-            except OSError:
-                log.exception("Failed to remove created file at %s. File should be deleted manually", temp_apk_zip)
 
         return os.path.join(self.build_directory, "classes.dex")
 
