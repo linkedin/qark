@@ -5,4 +5,4 @@ python:
 install:
   - pip install -r requirements-test.txt
 script:
-  - python -m pytest
+  - python -m pytest --cov=qark --cov-report term-missing
