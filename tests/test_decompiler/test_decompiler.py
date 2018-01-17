@@ -52,7 +52,7 @@ def test_download_procyon(procyon_path):
 
 
 def test_unzip_file(path_to_apk, build_directory):
-    decompiler.unzip_file(path_to_apk + ".zip", destination_to_unzip=build_directory)
+    decompiler.unzip_file(path_to_apk, destination_to_unzip=build_directory)
 
     with pytest.raises(SystemExit):
         decompiler.unzip_file("1")
