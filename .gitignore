@@ -17,3 +17,6 @@ lextab.py
 qark/test/testData/*
 .idea
 .DS_Store
+*.iml
+lib/
+.cache/
