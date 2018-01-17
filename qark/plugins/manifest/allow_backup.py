@@ -4,7 +4,7 @@ from qark.vulnerability import Severity, Vulnerability
 import logging
 from xml.dom import minidom
 
-log = logging.getLogger(__file__)
+log = logging.getLogger(__name__)
 
 
 class ManifestBackupAllowed(BasePlugin):
