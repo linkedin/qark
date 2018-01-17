@@ -1,10 +1,12 @@
+from __future__ import absolute_import
+
 from os import path
 
 from jinja2 import Environment, PackageLoader, select_autoescape, Template
 
-from vulnerability import (Vulnerability, Severity)
+from qark.vulnerability import (Vulnerability, Severity)
 
-DEFAULT_REPORT_PATH = '{}/report/'.format(path.dirname(path.realpath(__file__)))
+DEFAULT_REPORT_PATH = '{}/report'.format(path.abspath(path.dirname(path.realpath(__file__)) + '/..'))
 
 jinja_env = Environment(
     loader=PackageLoader('qark', 'templates'),
@@ -23,10 +25,9 @@ class Report(object):
     # http://python-3-patterns-idioms-test.readthedocs.io/en/latest/Singleton.html#the-singleton
     __instance = None
 
-    def __new__(cls, val):
+    def __new__(cls):
         if Report.__instance is None:
             Report.__instance = object.__new__(cls)
-        Report.__instance.val = val
         return Report.__instance
 
     def __init__(self, report_path=None):
@@ -50,7 +51,7 @@ class Report(object):
         with open('{report_path}/report.{file_type}'.format(report_path=self.report_path, file_type=file_type),
                   mode='w') as report_file:
             if not template_file:
-                template = env.get_template('{file_type}_report.jinja'.format(file_type))
+                template = jinja_env.get_template('{file_type}_report.jinja'.format(file_type=file_type))
             else:
                 template = Template(template_file)
             report_file.write(template.render(issues=self.issues))
