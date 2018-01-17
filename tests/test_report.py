@@ -23,6 +23,8 @@ def test_report_html_defaults():
     # We remove the issue we added to clean up after ourselves.
     report.issues.remove(issue)
     assert os.path.exists(DEFAULT_REPORT_PATH + '/report.html')
+    # We remove the report, to clean up after ourselves
+    os.remove(DEFAULT_REPORT_PATH + '/report.html')
 
 
 def test_report_html_custom_template():
@@ -33,3 +35,5 @@ def test_report_html_custom_template():
     # We remove the issue we added to clean up after ourselves.
     report.issues.remove(issue)
     assert os.path.exists(DEFAULT_REPORT_PATH + '/report.html')
+    # We remove the report, to clean up after ourselves
+    os.remove(DEFAULT_REPORT_PATH + '/report.html')
