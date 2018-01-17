@@ -4,14 +4,51 @@ import shutil
 import pytest
 
 from qark.decompiler import decompiler
+from qark.decompiler.external_decompiler import JDCore, CFR, Procyon
 
 
-def test_copy_apk_to_zip(path_to_apk):
-    assert path_to_apk + ".zip" == decompiler.copy_apk_to_zip(path_to_apk)
-    assert os.path.isfile(path_to_apk + ".zip")
+def test_download_apktool():
+    if os.path.exists(decompiler.APK_TOOL_PATH):
+        shutil.rmtree(decompiler.APK_TOOL_PATH)
+    assert not os.path.exists(decompiler.APK_TOOL_PATH)
+    decompiler.download_apktool()
 
-    with pytest.raises(SystemExit):
-        decompiler.copy_apk_to_zip("1")
+    assert os.path.exists(decompiler.APK_TOOL_PATH)
+    shutil.rmtree(decompiler.APK_TOOL_PATH)
+    assert not os.path.exists(decompiler.APK_TOOL_PATH)
+
+
+def test_download_dex2jar():
+    if os.path.exists(decompiler.DEX2JAR_PATH):
+        shutil.rmtree(decompiler.DEX2JAR_PATH)
+    assert not os.path.exists(decompiler.DEX2JAR_PATH)
+    decompiler.download_dex2jar()
+
+    assert os.path.exists(decompiler.DEX2JAR_PATH)
+    shutil.rmtree(decompiler.DEX2JAR_PATH)
+    assert not os.path.exists(decompiler.DEX2JAR_PATH)
+
+
+def test_download_cfr(cfr_path):
+    if os.path.isfile(cfr_path):
+        os.remove(cfr_path)
+    assert not os.path.isfile(cfr_path)
+    decompiler.download_cfr()
+
+    assert os.path.isfile(cfr_path)
+    os.remove(cfr_path)
+    assert not os.path.isfile(cfr_path)
+
+
+def test_download_procyon(procyon_path):
+    if os.path.isfile(procyon_path):
+        os.remove(procyon_path)
+    assert not os.path.isfile(procyon_path)
+    decompiler.download_procyon()
+
+    assert os.path.isfile(procyon_path)
+    os.remove(procyon_path)
+    assert not os.path.isfile(procyon_path)
 
 
 def test_unzip_file(path_to_apk, build_directory):
@@ -89,20 +126,18 @@ def test_decompile(decompiler, build_directory):
     assert not os.path.isdir(build_directory)
 
 
-
-@pytest.mark.parametrize("decompiler_name, path_to_decompiler", [
-    ("cfr", "{}/../../lib/decompilers/cfr_0_124.jar".format(os.path.dirname(os.path.abspath(__file__)))),
-    ("jdcore", "{}/../../lib/decompilers/jd-core-java-1.2.jar".format(os.path.dirname(os.path.abspath(__file__)))),
-    ("procyon", "{}/../../lib/decompilers/procyon-decompiler-0.5.30.jar".format(
-        os.path.dirname(os.path.abspath(__file__)))),
+@pytest.mark.parametrize("external_decompiler", [
+    (JDCore()),
+    (CFR()),
+    (Procyon()),
 ])
-def test_decompiler_function(decompiler, build_directory, decompiler_name, path_to_decompiler):
+def test_decompiler_function(decompiler, build_directory, external_decompiler):
     if os.path.isdir(build_directory):
         shutil.rmtree(build_directory)
     assert not os.path.isdir(build_directory)
 
-    decompiler._decompiler_function(decompiler_name, path_to_decompiler)
-    decompiler_build_directory = os.path.join(build_directory, decompiler_name)
+    decompiler._decompiler_function(external_decompiler)
+    decompiler_build_directory = os.path.join(build_directory, external_decompiler.name)
     assert os.path.isdir(decompiler_build_directory)
     assert os.path.isdir(os.path.join(decompiler_build_directory, "org"))
     shutil.rmtree(build_directory)

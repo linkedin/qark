@@ -1,0 +1,3 @@
+[submodule "lib/decompilers/jd-core-java"]
+	path = lib/decompilers/jd-core-java
+	url = https://github.com/nviennot/jd-core-java
