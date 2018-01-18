@@ -36,3 +36,6 @@ class DebuggableManifest(BasePlugin):
             except (KeyError, AttributeError):
                 log.debug("Application section does not have debuggable flag, continuing")
                 continue
+
+
+plugin = DebuggableManifest()

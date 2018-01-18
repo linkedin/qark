@@ -1,4 +1,4 @@
-from qark.plugins.manifest.custom_permissions import get_min_sdk, get_target_sdk
+from qark.plugins.helpers import get_min_sdk, get_target_sdk
 from qark.scanner.plugin import BasePlugin
 from qark.vulnerability import Severity, Vulnerability
 
@@ -209,3 +209,6 @@ class ExportedTags(BasePlugin):
                                              description=EXPORTED.format(tag=tag, tag_name=tag_name),
                                              file_object=file_object))
         return issues
+
+
+plugin = ExportedTags()
