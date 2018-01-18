@@ -28,7 +28,7 @@ class Report(object):
     def __new__(cls, report_path=None):
         if Report.__instance is None:
             Report.__instance = object.__new__(cls)
-            Report.__instance.report_path = report_path
+        Report.__instance.report_path = report_path
         return Report.__instance
 
     def __init__(self, report_path=None):

@@ -35,7 +35,7 @@ def test_report_html_custom_template():
     report = Report()
     issue = Vulnerability(category='Test', issue_name='Test Issue', severity=Severity.VULNERABILITY, description='Test')
     report.issues.add(issue)
-    report.generate_report_file(template_file='./templates/html_report.jinja')
+    report.generate_report_file(template_file=os.path.join('templates', 'html_report.jinja'))
     # We remove the issue we added to clean up after ourselves.
     report.issues.remove(issue)
     assert os.path.exists(os.path.join(DEFAULT_REPORT_PATH, 'report.html'))
