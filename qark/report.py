@@ -4,9 +4,9 @@ from os import path
 
 from jinja2 import Environment, PackageLoader, select_autoescape, Template
 
-from qark.vulnerability import (Vulnerability, Severity)  # noqa:F401
+from qark.vulnerability import (Vulnerability, Severity)  # noqa:F401 These are expected to be used later.
 
-DEFAULT_REPORT_PATH = '{}/report'.format(path.abspath(path.dirname(path.realpath(__file__)) + '/..'))
+DEFAULT_REPORT_PATH = path.join(path.dirname(path.realpath(__file__)), '..', 'report')
 
 jinja_env = Environment(
     loader=PackageLoader('qark', 'templates'),
@@ -48,7 +48,7 @@ class Report(object):
         :param str template_file: The path to an optional template file to override the default.
         """
 
-        with open('{report_path}/report.{file_type}'.format(report_path=self.report_path, file_type=file_type),
+        with open(path.join(self.report_path, 'report.{file_type}'.format(file_type=file_type)),
                   mode='w') as report_file:
             if not template_file:
                 template = jinja_env.get_template('{file_type}_report.jinja'.format(file_type=file_type))
