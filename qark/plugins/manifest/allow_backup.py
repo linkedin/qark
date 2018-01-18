@@ -29,3 +29,6 @@ class ManifestBackupAllowed(BasePlugin):
                 self.issues.append(Issue(category=self.category, severity=self.severity,
                                                  name=self.name, description=self.description,
                                                  file_object=file_object))
+
+
+plugin = ManifestBackupAllowed()
