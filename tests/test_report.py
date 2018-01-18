@@ -15,6 +15,10 @@ def test_report_singleton():
     assert report4.value == 4
 
 
+def test_report_with_report_path():
+    assert Report(report_path=DEFAULT_REPORT_PATH) is Report(report_path=DEFAULT_REPORT_PATH)
+
+
 def test_report_html_defaults():
     report = Report()
     issue = Vulnerability(category='Test', issue_name='Test Issue', severity=Severity.VULNERABILITY, description='Test')

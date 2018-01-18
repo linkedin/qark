@@ -25,9 +25,10 @@ class Report(object):
     # http://python-3-patterns-idioms-test.readthedocs.io/en/latest/Singleton.html#the-singleton
     __instance = None
 
-    def __new__(cls):
+    def __new__(cls, report_path=None):
         if Report.__instance is None:
             Report.__instance = object.__new__(cls)
+            Report.__instance.report_path = report_path
         return Report.__instance
 
     def __init__(self, report_path=None):
