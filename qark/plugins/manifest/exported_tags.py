@@ -139,7 +139,7 @@ class ExportedTags(BasePlugin):
         for tag in self.bad_exported_tags:
             all_tags_of_type_tag = self.manifest_xml.getElementsByTagName(tag)
             for possibly_vulnerable_tag in all_tags_of_type_tag:
-                self.issues.extend(self._check_manifest_issues(possibly_vulnerable_tag, tag, file_object))
+                self.issues.update(self._check_manifest_issues(possibly_vulnerable_tag, tag, file_object))
 
     def _check_manifest_issues(self, possibly_vulnerable_tag, tag, file_object):
         """

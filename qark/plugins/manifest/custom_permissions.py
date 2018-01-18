@@ -31,8 +31,8 @@ class CustomPermissions(BasePlugin):
                     min_sdk = get_min_sdk(manifest_xml)
                     if min_sdk < 21:
                         self.issues.append(Issue(category=self.category, severity=self.severity,
-                                                         name=self.name, description=self.description,
-                                                         file_object=file_object))
+                                                 name=self.name, description=self.description,
+                                                 file_object=file_object))
 
             except KeyError:
                 continue
