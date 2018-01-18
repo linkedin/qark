@@ -4,7 +4,7 @@ from os import path
 
 from jinja2 import Environment, PackageLoader, select_autoescape, Template
 
-from qark.vulnerability import (Vulnerability, Severity)
+from qark.vulnerability import (Vulnerability, Severity)  # noqa:F401
 
 DEFAULT_REPORT_PATH = '{}/report'.format(path.abspath(path.dirname(path.realpath(__file__)) + '/..'))
 
@@ -41,7 +41,7 @@ class Report(object):
         self.issues = set()
         self.report_path = report_path or DEFAULT_REPORT_PATH
 
-    def generate_report_file(self, file_type='html' ,template_file=None):
+    def generate_report_file(self, file_type='html', template_file=None):
         """This method uses Jinja2 to generate a standalone HTML version of the report.
 
         :param str file_type:     The type of file for the report. Defaults to 'html'.
