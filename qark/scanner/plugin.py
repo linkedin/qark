@@ -37,7 +37,7 @@ class BasePlugin(object):
 
     def __init__(self, category=None, issue_name=None, description=None):
         self.category = category
-        self.issues = []
+        self.issues = set()
         self.issue_name = issue_name
         self.description = description
 
