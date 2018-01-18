@@ -11,3 +11,7 @@ def test_run_manifest_checks(scanner):
     #   manifest_path is already set
     scanner._run_manifest_checks()
     assert 0 < len(scanner.issues)
+
+
+def test_singleton(scanner):
+    pass
