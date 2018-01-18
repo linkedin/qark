@@ -26,9 +26,9 @@ class ManifestBackupAllowed(BasePlugin):
         application_sections = manifest_xml.getElementsByTagName("application")
         for application in application_sections:
             if "android:allowBackup" in application.attributes.keys():
-                self.issues.append(Vulnerability(category=self.category, severity=self.severity,
-                                                 issue_name=self.issue_name, description=self.description,
-                                                 file_object=file_object))
+                self.issues.add(Vulnerability(category=self.category, severity=self.severity,
+                                              issue_name=self.issue_name, description=self.description,
+                                              file_object=file_object))
 
 
 plugin = ManifestBackupAllowed()

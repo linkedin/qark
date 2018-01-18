@@ -30,9 +30,9 @@ class CustomPermissions(BasePlugin):
                 if permission.attributes["android:protectionLevel"].value in ("signature", "signatureOrSystem"):
                     min_sdk = get_min_sdk(manifest_xml)
                     if min_sdk < 21:
-                        self.issues.append(Vulnerability(category=self.category, severity=self.severity,
-                                                         issue_name=self.issue_name, description=self.description,
-                                                         file_object=file_object))
+                        self.issues.add(Vulnerability(category=self.category, severity=self.severity,
+                                                      issue_name=self.issue_name, description=self.description,
+                                                      file_object=file_object))
 
             except KeyError:
                 continue

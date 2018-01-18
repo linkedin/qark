@@ -30,9 +30,9 @@ class DebuggableManifest(BasePlugin):
         for application in application_sections:
             try:
                 if application.attributes["android:debuggable"].value.lower() == "true":
-                    self.issues.append(Vulnerability(category=self.category, severity=self.severity,
-                                                     issue_name=self.issue_name, description=self.description,
-                                                     file_object=file_object))
+                    self.issues.add(Vulnerability(category=self.category, severity=self.severity,
+                                                  issue_name=self.issue_name, description=self.description,
+                                                  file_object=file_object))
             except (KeyError, AttributeError):
                 log.debug("Application section does not have debuggable flag, continuing")
                 continue
