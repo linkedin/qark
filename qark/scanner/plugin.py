@@ -31,10 +31,10 @@ def get_plugins(category=None):
 class BasePlugin(object):
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, category=None, issue_name=None, description=None):
+    def __init__(self, category=None, name=None, description=None):
         self.category = category
         self.issues = []
-        self.issue_name = issue_name
+        self.name = name
         self.description = description
 
     @abc.abstractmethod

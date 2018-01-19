@@ -8,7 +8,7 @@ log = logging.getLogger(__name__)
 
 
 class Issue(object):
-    def __init__(self, category, issue_name, severity, description, line_number=None, file_object=None):
+    def __init__(self, category, name, severity, description, line_number=None, file_object=None):
         """
         Create a vulnerability, used by Plugins.
 
@@ -39,7 +39,7 @@ class Issue(object):
 
         self.severity = severity
         self.description = description
-        self.name = issue_name
+        self.name = name
         self.line_number = line_number
         self.file_object = file_object
 

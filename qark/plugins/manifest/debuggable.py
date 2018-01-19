@@ -9,7 +9,7 @@ log = logging.getLogger(__name__)
 
 class DebuggableManifest(BasePlugin):
     def __init__(self):
-        BasePlugin.__init__(self, category="manifest", issue_name="Manifest is manually set to debug",
+        BasePlugin.__init__(self, category="manifest", name="Manifest is manually set to debug",
                             description=("The android:debuggable flag is manually set to true in the"
                                          " AndroidManifest.xml. This will cause your application to be debuggable "
                                          "in production builds and can result in data leakage "
@@ -31,7 +31,7 @@ class DebuggableManifest(BasePlugin):
             try:
                 if application.attributes["android:debuggable"].value.lower() == "true":
                     self.issues.append(Issue(category=self.category, severity=self.severity,
-                                                     issue_name=self.name, description=self.description,
+                                                     name=self.name, description=self.description,
                                                      file_object=file_object))
             except (KeyError, AttributeError):
                 log.debug("Application section does not have debuggable flag, continuing")
