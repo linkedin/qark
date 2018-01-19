@@ -3,6 +3,7 @@ import pytest
 import os
 
 from qark.decompiler.decompiler import Decompiler
+from qark.scanner.scanner import Scanner
 
 
 @pytest.fixture(scope="session")
@@ -18,6 +19,11 @@ def build_directory():
 @pytest.fixture()
 def decompiler(path_to_apk, build_directory):
     return Decompiler(path_to_apk=path_to_apk, build_directory=build_directory)
+
+
+@pytest.fixture()
+def scanner(decompiler):
+    return Scanner(decompiler=decompiler)
 
 
 @pytest.fixture(scope="session")
@@ -44,4 +50,4 @@ def procyon_path():
 
 @pytest.fixture(scope="session")
 def vulnerable_manifest_path():
-    return os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_manifest.xml")
+    return os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_androidmanifest.xml")

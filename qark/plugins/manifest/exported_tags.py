@@ -1,4 +1,4 @@
-from qark.plugins.manifest.custom_permissions import get_min_sdk, get_target_sdk
+from qark.plugins.helpers import get_min_sdk, get_target_sdk, get_manifest_out_of_files
 from qark.scanner.plugin import BasePlugin
 from qark.issue import Severity, Issue
 
@@ -127,19 +127,21 @@ class ExportedTags(BasePlugin):
         self.min_sdk = None
         self.target_sdk = None
 
-    def run(self, file_object):
+    def run(self, files, apk_constants=None):
+        manifest_file = get_manifest_out_of_files(files)
         try:
-            self.manifest_xml = minidom.parse(file_object)
+            self.manifest_xml = minidom.parse(manifest_file)
         except Exception:
             log.exception("Failed to parse manifest file, is it valid syntax?")
             return  # do not raise a SystemExit because other checks can still be ran
-        self.min_sdk = get_min_sdk(self.manifest_xml)
-        self.target_sdk = get_target_sdk(self.manifest_xml)
+
+        self.min_sdk = apk_constants.get("minimum_sdk", get_min_sdk(self.manifest_xml))
+        self.target_sdk = apk_constants.get("target_sdk", get_target_sdk(self.manifest_xml))
 
         for tag in self.bad_exported_tags:
             all_tags_of_type_tag = self.manifest_xml.getElementsByTagName(tag)
             for possibly_vulnerable_tag in all_tags_of_type_tag:
-                self.issues.extend(self._check_manifest_issues(possibly_vulnerable_tag, tag, file_object))
+                self._check_manifest_issues(possibly_vulnerable_tag, tag, manifest_file)
 
     def _check_manifest_issues(self, possibly_vulnerable_tag, tag, file_object):
         """
@@ -148,10 +150,7 @@ class ExportedTags(BasePlugin):
         :param possibly_vulnerable_tag: the tag in as an XML object
         :param str tag: the tag name
         :param file_object: the object of the file being read (manifest)
-        :return: a list of `Vulnerability`
-        :rtype: list
         """
-        issues = set()
         is_exported = "android:exported" in possibly_vulnerable_tag.attributes.keys()
         has_permission = "android:permission" in possibly_vulnerable_tag.attributes.keys()
         has_intent_filters = len(possibly_vulnerable_tag.getElementsByTagName("intent-filter")) > 0
@@ -164,26 +163,25 @@ class ExportedTags(BasePlugin):
 
         if exported == "false":
             # activity is not exported
-            return issues
+            return
 
         if (exported is not None and exported != "false") or tag_is_provider:
             if tag_is_provider and self.min_sdk > 16 or self.target_sdk > 16:
                 # provider is not vulnerable under these conditions, return
-                return issues
+                return
 
             if has_permission and self.min_sdk < 20:
                 # exported tag with permission
-                issues.add(Issue(category="Manifest", name="Exported Tags",
+                self.issues.append(Issue(category="Manifest", name="Exported Tags",
                                          severity=Severity.INFO,
                                          description=EXPORTED_AND_PERMISSION_TAG.format(tag=tag),
                                          file_object=file_object))
             elif exported and not has_intent_filters:
                 # exported tag with no intent filters
-                issues.add(Issue(category="Manifest", name="Exported Tags",
+                self.issues.append(Issue(category="Manifest", name="Exported Tags",
                                          severity=Severity.WARNING,
                                          description=EXPORTED.format(tag=tag, tag_name=tag_name),
                                          file_object=file_object))
-
         for intent_filter in possibly_vulnerable_tag.getElementsByTagName("intent-filter"):
             for action in intent_filter.getElementsByTagName("action"):
                 try:
@@ -194,18 +192,20 @@ class ExportedTags(BasePlugin):
 
                 if protected:
                     # intent filter has protected actions
-                    issues.add(Issue(category="Manifest", name="Protected Exported Tags",
+                    self.issues.append(Issue(category="Manifest", name="Protected Exported Tags",
                                              severity=Severity.INFO,
                                              description=EXPORTED_IN_PROTECTED.format(tag=tag, tag_name=tag_name),
                                              file_object=file_object))
                 elif has_permission and self.min_sdk < 20:
-                    issues.add(Issue(category="Manifest", name="Exported Tag With Permission",
+                    self.issues.append(Issue(category="Manifest", name="Exported Tag With Permission",
                                              severity=Severity.INFO,
                                              description=EXPORTED_AND_PERMISSION_TAG.format(tag=tag, tag_name=tag_name),
                                              file_object=file_object))
                 else:
-                    issues.add(Issue(category="Manifest", name="Exported Tags",
+                    self.issues.append(Issue(category="Manifest", name="Exported Tags",
                                              severity=Severity.WARNING,
                                              description=EXPORTED.format(tag=tag, tag_name=tag_name),
                                              file_object=file_object))
-        return issues
+
+
+plugin = ExportedTags()
