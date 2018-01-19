@@ -16,6 +16,11 @@ def test_run_manifest_checks(scanner):
     assert 0 < len(scanner.issues)
 
 
+def test_run_broadcast_checks(scanner):
+    scanner._run_broadcast_checks()
+    assert 0 < len(scanner.issues)
+
+
 def test_scanner_singleton(decompiler):
     s1 = Scanner(decompiler=decompiler)
     s1.issues = []
