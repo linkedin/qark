@@ -1,0 +1,9 @@
+<html>
+<head><title>Temporary Report Template</title></head>
+<body>
+<h1>Issues</h1>
+{% for issue in issues %}
+{{ issue.severity }} {{ issue.issue_name }}
+{% endfor %}
+</body>
+</html>
