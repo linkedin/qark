@@ -4,6 +4,7 @@ from os import (
     path
 )
 
+from qark.plugins.helpers import get_min_sdk, get_target_sdk
 from qark.scanner.plugin import get_plugin_source, get_plugins
 
 log = logging.getLogger(__name__)
@@ -27,6 +28,8 @@ class Scanner(object):
         :param Decompiler decompiler: the decompiler class that contains decompiled path information
         """
         self.decompiler = decompiler
+        if self.decompiler.manifest_path is None:
+            self.decompiler.manifest_path = self.decompiler.run_apktool()
 
     def run(self):
         """
@@ -47,7 +50,8 @@ class Scanner(object):
                 log.exception("Error loading plugin %s... continuing with next plugin", plugin_name)
                 continue
 
-            plugin.run(files=self.files)
+            plugin.run(files=self.files, extras={"minimum_sdk": get_min_sdk(self.decompiler.manifest_path),
+                                                 "target_sdk": get_target_sdk(self.decompiler.manifest_path)})
             self.issues.update(plugin.issues)
 
     def _gather_files(self):

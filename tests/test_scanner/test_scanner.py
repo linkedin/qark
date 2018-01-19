@@ -1,3 +1,6 @@
+from qark.scanner.scanner import Scanner
+
+
 def test_run(scanner):
     scanner.run()
     assert 0 < len(scanner.issues)
@@ -13,5 +16,12 @@ def test_run_manifest_checks(scanner):
     assert 0 < len(scanner.issues)
 
 
-def test_singleton(scanner):
-    pass
+def test_scanner_singleton(decompiler):
+    s1 = Scanner(decompiler=decompiler)
+    s1.issues = set()
+    s1.issues.add("new_issue")
+
+    s2 = Scanner(decompiler=decompiler)
+    assert s2 is s1
+    assert len(s2.issues) == 1
+    assert s2.issues.pop() == "new_issue"

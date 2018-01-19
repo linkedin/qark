@@ -1,3 +1,4 @@
+from qark.plugins.helpers import get_manifest_out_of_files
 from qark.scanner.plugin import BasePlugin
 from qark.issue import Severity, Issue
 
@@ -16,9 +17,10 @@ class ManifestBackupAllowed(BasePlugin):
                                          "http://developer.android.com/reference/android/R.attr.html#allowBackup"))
         self.severity = Severity.WARNING
 
-    def run(self, file_object):
+    def run(self, files, extras=None):
+        manifest_path = get_manifest_out_of_files(files)
         try:
-            manifest_xml = minidom.parse(file_object)
+            manifest_xml = minidom.parse(manifest_path)
         except Exception:
             log.exception("Failed to parse manifest file, is it valid syntax?")
             return  # do not raise a SystemExit because other checks can still be ran
@@ -28,7 +30,7 @@ class ManifestBackupAllowed(BasePlugin):
             if "android:allowBackup" in application.attributes.keys():
                 self.issues.append(Issue(category=self.category, severity=self.severity,
                                          name=self.name, description=self.description,
-                                         file_object=file_object))
+                                         file_object=manifest_path))
 
 
 plugin = ManifestBackupAllowed()
