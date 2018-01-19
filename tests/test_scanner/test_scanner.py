@@ -19,7 +19,7 @@ def test_run_manifest_checks(scanner):
 def test_scanner_singleton(decompiler):
     s1 = Scanner(decompiler=decompiler)
     s1.issues = set()
-    s1.issues.add("new_issue")
+    s1.issues.append("new_issue")
 
     s2 = Scanner(decompiler=decompiler)
     assert s2 is s1

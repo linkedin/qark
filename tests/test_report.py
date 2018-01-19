@@ -22,7 +22,7 @@ def test_report_with_report_path():
 def test_report_html_defaults():
     report = Report()
     issue = Vulnerability(category='Test', issue_name='Test Issue', severity=Severity.VULNERABILITY, description='Test')
-    report.issues.add(issue)
+    report.issues.append(issue)
     report.generate_report_file()
     # We remove the issue we added to clean up after ourselves.
     report.issues.remove(issue)
@@ -34,7 +34,7 @@ def test_report_html_defaults():
 def test_report_html_custom_template():
     report = Report()
     issue = Vulnerability(category='Test', issue_name='Test Issue', severity=Severity.VULNERABILITY, description='Test')
-    report.issues.add(issue)
+    report.issues.append(issue)
     report.generate_report_file(template_file=os.path.join('templates', 'html_report.jinja'))
     # We remove the issue we added to clean up after ourselves.
     report.issues.remove(issue)

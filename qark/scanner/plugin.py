@@ -42,16 +42,17 @@ class BasePlugin(object):
 
     def __init__(self, category=None, issue_name=None, description=None):
         self.category = category
-        self.issues = set()
+        self.issues = []
         self.issue_name = issue_name
         self.description = description
 
     @abc.abstractmethod
-    def run(self, files, extras=None):
+    def run(self, files, apk_constants=None):
         """
         Method to be called for each plugin to add issues.
 
         :param List[str] files: a list of files gathered by `Scanner` as absolute paths
-        :param dict extras: dictionary containing extra information that some plugins can use (minimum_sdk, target_sdk)
+        :param dict apk_constants: dictionary containing extra information
+                                    that some plugins can use (minimum_sdk, target_sdk)
         """
         pass

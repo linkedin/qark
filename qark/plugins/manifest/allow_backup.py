@@ -17,7 +17,7 @@ class ManifestBackupAllowed(BasePlugin):
                                          "http://developer.android.com/reference/android/R.attr.html#allowBackup"))
         self.severity = Severity.WARNING
 
-    def run(self, files, extras=None):
+    def run(self, files, apk_constants=None):
         manifest_path = get_manifest_out_of_files(files)
         try:
             manifest_xml = minidom.parse(manifest_path)
@@ -28,9 +28,9 @@ class ManifestBackupAllowed(BasePlugin):
         application_sections = manifest_xml.getElementsByTagName("application")
         for application in application_sections:
             if "android:allowBackup" in application.attributes.keys():
-                self.issues.add(Vulnerability(category=self.category, severity=self.severity,
-                                              issue_name=self.issue_name, description=self.description,
-                                              file_object=manifest_path))
+                self.issues.append(Vulnerability(category=self.category, severity=self.severity,
+                                                 issue_name=self.issue_name, description=self.description,
+                                                 file_object=manifest_path))
 
 
 plugin = ManifestBackupAllowed()

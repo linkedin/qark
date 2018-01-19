@@ -20,7 +20,7 @@ class DebuggableManifest(BasePlugin):
                                          "http://developer.android.com/guide/topics/manifest/application-element.html#debug"))
         self.severity = Severity.VULNERABILITY
 
-    def run(self, files, extras=None):
+    def run(self, files, apk_constants=None):
         manifest_path = get_manifest_out_of_files(files)
         try:
             manifest_xml = minidom.parse(manifest_path)
@@ -32,9 +32,9 @@ class DebuggableManifest(BasePlugin):
         for application in application_sections:
             try:
                 if application.attributes["android:debuggable"].value.lower() == "true":
-                    self.issues.add(Vulnerability(category=self.category, severity=self.severity,
-                                                  issue_name=self.issue_name, description=self.description,
-                                                  file_object=manifest_path))
+                    self.issues.append(Vulnerability(category=self.category, severity=self.severity,
+                                                     issue_name=self.issue_name, description=self.description,
+                                                     file_object=manifest_path))
             except (KeyError, AttributeError):
                 log.debug("Application section does not have debuggable flag, continuing")
                 continue
