@@ -2,6 +2,6 @@
 {% for issue in issues %}
 <issue issueid="{{ issue.id }}">
   <severity>{{ issue.severity.name }}</severity>
-  <name>{{ issue.issue_name }}</name>
+  <name>{{ issue.name }}</name>
 </issue>
 {% endfor %}
