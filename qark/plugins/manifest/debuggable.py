@@ -31,7 +31,7 @@ class DebuggableManifest(BasePlugin):
             try:
                 if application.attributes["android:debuggable"].value.lower() == "true":
                     self.issues.append(Issue(category=self.category, severity=self.severity,
-                                                     issue_name=self.issue_name, description=self.description,
+                                                     issue_name=self.name, description=self.description,
                                                      file_object=file_object))
             except (KeyError, AttributeError):
                 log.debug("Application section does not have debuggable flag, continuing")

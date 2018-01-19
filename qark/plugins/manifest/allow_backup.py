@@ -27,5 +27,5 @@ class ManifestBackupAllowed(BasePlugin):
         for application in application_sections:
             if "android:allowBackup" in application.attributes.keys():
                 self.issues.append(Issue(category=self.category, severity=self.severity,
-                                                 issue_name=self.issue_name, description=self.description,
+                                                 issue_name=self.name, description=self.description,
                                                  file_object=file_object))

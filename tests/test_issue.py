@@ -24,7 +24,7 @@ def test_issue_json_single():
     json_output = issue_json(issue)
     json_issue = json.loads(json_output)
     assert json_issue['severity'] == issue.severity.name
-    assert json_issue['name'] == issue.issue_name
+    assert json_issue['name'] == issue.name
 
 
 def test_issue_json_list():
@@ -32,7 +32,7 @@ def test_issue_json_list():
     json_output = issue_json([issue])
     json_issue = json.loads(json_output)
     assert json_issue[0]['severity'] == issue.severity.name
-    assert json_issue[0]['name'] == issue.issue_name
+    assert json_issue[0]['name'] == issue.name
 
 
 def test_IssueEncoder_not_an_issue():

@@ -1,6 +1,7 @@
 import logging
 from enum import Enum
 from json import JSONEncoder, dumps
+from copy import deepcopy
 
 
 log = logging.getLogger(__name__)
@@ -38,7 +39,7 @@ class Issue(object):
 
         self.severity = severity
         self.description = description
-        self.issue_name = issue_name
+        self.name = issue_name
         self.line_number = line_number
         self.file_object = file_object
 
@@ -53,13 +54,9 @@ class Severity(Enum):
 class IssueEncoder(JSONEncoder):
     def default(self, issue):
         if isinstance(issue, Issue):
-            return dict((('category', issue.category),
-                         ('name', issue.issue_name),
-                         ('severity', issue.severity.name),
-                         ('description', issue.description),
-                         ('line_number', issue.line_number),
-                         ('file_object', issue.file_object)
-                         ))
+            working_dict = deepcopy(issue.__dict__)
+            working_dict['severity'] = working_dict['severity'].name
+            return working_dict
         else:
             raise TypeError('Expecting an object of type Issue. Got object of type {}'.format(type(Issue)))
 
