@@ -18,7 +18,7 @@ def test_run_manifest_checks(scanner):
 
 def test_scanner_singleton(decompiler):
     s1 = Scanner(decompiler=decompiler)
-    s1.issues = set()
+    s1.issues = []
     s1.issues.append("new_issue")
 
     s2 = Scanner(decompiler=decompiler)

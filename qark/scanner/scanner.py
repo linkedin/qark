@@ -58,7 +58,7 @@ class Scanner(object):
                 log.exception("Error running plugin %s... continuing with next plugin", plugin_name)
                 continue
 
-            self.issues.update(plugin.issues)
+            self.issues.extend(plugin.issues)
 
     def _gather_files(self):
         """
@@ -68,6 +68,6 @@ class Scanner(object):
         try:
             for (dir_path, dir_names, file_names) in walk(self.decompiler.build_directory):
                 for file_name in file_names:
-                    self.files.append(path.join(dir_path, file_name))
+                    self.files.add(path.join(dir_path, file_name))
         except AttributeError:
             log.debug("Decompiler does not have a build directory")
