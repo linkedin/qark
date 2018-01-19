@@ -2,7 +2,7 @@ from qark.plugins.manifest.allow_backup import ManifestBackupAllowed
 from qark.plugins.manifest.custom_permissions import CustomPermissions
 from qark.plugins.manifest.debuggable import DebuggableManifest
 from qark.plugins.manifest.exported_tags import ExportedTags
-from qark.vulnerability import Severity
+from qark.issue import Severity
 
 import os
 import shutil

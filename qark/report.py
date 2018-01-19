@@ -4,7 +4,7 @@ from os import path
 
 from jinja2 import Environment, PackageLoader, select_autoescape, Template
 
-from qark.vulnerability import (Vulnerability, Severity, vulnerability_json)  # noqa:F401 These are expected to be used later.
+from qark.issue import (Issue, Severity, issue_json)  # noqa:F401 These are expected to be used later.
 
 DEFAULT_REPORT_PATH = path.join(path.dirname(path.realpath(__file__)), '..', 'report')
 
@@ -14,7 +14,7 @@ jinja_env = Environment(
     autoescape=select_autoescape(['html', 'xml'])
 )
 
-jinja_env.filters['vulnerability_json'] = vulnerability_json
+jinja_env.filters['issue_json'] = issue_json
 
 
 class Report(object):

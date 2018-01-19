@@ -1,6 +1,6 @@
 from qark.plugins.manifest.custom_permissions import get_min_sdk, get_target_sdk
 from qark.scanner.plugin import BasePlugin
-from qark.vulnerability import Severity, Vulnerability
+from qark.issue import Severity, Issue
 
 import logging
 from xml.dom import minidom
@@ -173,13 +173,13 @@ class ExportedTags(BasePlugin):
 
             if has_permission and self.min_sdk < 20:
                 # exported tag with permission
-                issues.add(Vulnerability(category="Manifest", issue_name="Exported Tags",
+                issues.add(Issue(category="Manifest", issue_name="Exported Tags",
                                          severity=Severity.INFO,
                                          description=EXPORTED_AND_PERMISSION_TAG.format(tag=tag),
                                          file_object=file_object))
             elif exported and not has_intent_filters:
                 # exported tag with no intent filters
-                issues.add(Vulnerability(category="Manifest", issue_name="Exported Tags",
+                issues.add(Issue(category="Manifest", issue_name="Exported Tags",
                                          severity=Severity.WARNING,
                                          description=EXPORTED.format(tag=tag, tag_name=tag_name),
                                          file_object=file_object))
@@ -194,17 +194,17 @@ class ExportedTags(BasePlugin):
 
                 if protected:
                     # intent filter has protected actions
-                    issues.add(Vulnerability(category="Manifest", issue_name="Protected Exported Tags",
+                    issues.add(Issue(category="Manifest", issue_name="Protected Exported Tags",
                                              severity=Severity.INFO,
                                              description=EXPORTED_IN_PROTECTED.format(tag=tag, tag_name=tag_name),
                                              file_object=file_object))
                 elif has_permission and self.min_sdk < 20:
-                    issues.add(Vulnerability(category="Manifest", issue_name="Exported Tag With Permission",
+                    issues.add(Issue(category="Manifest", issue_name="Exported Tag With Permission",
                                              severity=Severity.INFO,
                                              description=EXPORTED_AND_PERMISSION_TAG.format(tag=tag, tag_name=tag_name),
                                              file_object=file_object))
                 else:
-                    issues.add(Vulnerability(category="Manifest", issue_name="Exported Tags",
+                    issues.add(Issue(category="Manifest", issue_name="Exported Tags",
                                              severity=Severity.WARNING,
                                              description=EXPORTED.format(tag=tag, tag_name=tag_name),
                                              file_object=file_object))

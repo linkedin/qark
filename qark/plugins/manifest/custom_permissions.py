@@ -1,5 +1,5 @@
 from qark.scanner.plugin import BasePlugin
-from qark.vulnerability import Severity, Vulnerability
+from qark.issue import Severity, Issue
 
 import logging
 from xml.dom import minidom
@@ -29,7 +29,7 @@ class CustomPermissions(BasePlugin):
                 if permission.attributes["android:protectionLevel"].value in ("signature", "signatureOrSystem"):
                     min_sdk = get_min_sdk(manifest_xml)
                     if min_sdk < 21:
-                        self.issues.append(Vulnerability(category=self.category, severity=self.severity,
+                        self.issues.append(Issue(category=self.category, severity=self.severity,
                                                          issue_name=self.issue_name, description=self.description,
                                                          file_object=file_object))
 
