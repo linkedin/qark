@@ -1,3 +1,4 @@
+from qark.plugins.helpers import get_manifest_out_of_files
 from qark.scanner.plugin import BasePlugin
 from qark.vulnerability import Severity, Vulnerability
 
@@ -19,9 +20,10 @@ class DebuggableManifest(BasePlugin):
                                          "http://developer.android.com/guide/topics/manifest/application-element.html#debug"))
         self.severity = Severity.VULNERABILITY
 
-    def run(self, file_object):
+    def run(self, files, extras=None):
+        manifest_xml = get_manifest_out_of_files(files)
         try:
-            manifest_xml = minidom.parse(file_object)
+            manifest_xml = minidom.parse(manifest_xml)
         except Exception:
             log.exception("Failed to parse manifest file, is it valid syntax?")
             return  # do not raise a SystemExit because other checks can still be ran
@@ -32,7 +34,7 @@ class DebuggableManifest(BasePlugin):
                 if application.attributes["android:debuggable"].value.lower() == "true":
                     self.issues.add(Vulnerability(category=self.category, severity=self.severity,
                                                   issue_name=self.issue_name, description=self.description,
-                                                  file_object=file_object))
+                                                  file_object=manifest_xml))
             except (KeyError, AttributeError):
                 log.debug("Application section does not have debuggable flag, continuing")
                 continue
