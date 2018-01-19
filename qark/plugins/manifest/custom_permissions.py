@@ -18,9 +18,9 @@ class CustomPermissions(BasePlugin):
         self.severity = Severity.WARNING
 
     def run(self, files, extras=None):
-        manifest_file = get_manifest_out_of_files(files)
+        mainfest_path = get_manifest_out_of_files(files)
         try:
-            manifest_xml = minidom.parse(manifest_file)
+            manifest_xml = minidom.parse(mainfest_path)
         except Exception:
             log.exception("Failed to parse manifest file, is it valid syntax?")
             return  # do not raise a SystemExit because other checks can still be ran
@@ -32,7 +32,7 @@ class CustomPermissions(BasePlugin):
                     if extras.get("minimum_sdk", get_min_sdk(manifest_xml)) < 21:
                         self.issues.append(Issue(category=self.category, severity=self.severity,
                                                  name=self.name, description=self.description,
-                                                 file_object=manifest_file))
+                                                 file_object=mainfest_path))
 
             except KeyError:
                 continue

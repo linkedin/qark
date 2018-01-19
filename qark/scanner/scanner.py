@@ -50,8 +50,13 @@ class Scanner(object):
                 log.exception("Error loading plugin %s... continuing with next plugin", plugin_name)
                 continue
 
-            plugin.run(files=self.files, extras={"minimum_sdk": get_min_sdk(self.decompiler.manifest_path),
-                                                 "target_sdk": get_target_sdk(self.decompiler.manifest_path)})
+            try:
+                plugin.run(files=self.files, extras={"minimum_sdk": get_min_sdk(self.decompiler.manifest_path),
+                                                     "target_sdk": get_target_sdk(self.decompiler.manifest_path)})
+            except Exception:
+                log.exception("Error running plugin %s... continuing with next plugin", plugin_name)
+                continue
+
             self.issues.update(plugin.issues)
 
     def _gather_files(self):
