@@ -1,5 +1,6 @@
+from qark.plugins.helpers import get_manifest_out_of_files
 from qark.scanner.plugin import BasePlugin
-from qark.vulnerability import Severity, Vulnerability
+from qark.issue import Severity, Issue
 
 import logging
 from xml.dom import minidom
@@ -9,7 +10,7 @@ log = logging.getLogger(__name__)
 
 class DebuggableManifest(BasePlugin):
     def __init__(self):
-        BasePlugin.__init__(self, category="manifest", issue_name="Manifest is manually set to debug",
+        BasePlugin.__init__(self, category="manifest", name="Manifest is manually set to debug",
                             description=("The android:debuggable flag is manually set to true in the"
                                          " AndroidManifest.xml. This will cause your application to be debuggable "
                                          "in production builds and can result in data leakage "
@@ -19,9 +20,10 @@ class DebuggableManifest(BasePlugin):
                                          "http://developer.android.com/guide/topics/manifest/application-element.html#debug"))
         self.severity = Severity.VULNERABILITY
 
-    def run(self, file_object):
+    def run(self, files, apk_constants=None):
+        manifest_path = get_manifest_out_of_files(files)
         try:
-            manifest_xml = minidom.parse(file_object)
+            manifest_xml = minidom.parse(manifest_path)
         except Exception:
             log.exception("Failed to parse manifest file, is it valid syntax?")
             return  # do not raise a SystemExit because other checks can still be ran
@@ -30,9 +32,12 @@ class DebuggableManifest(BasePlugin):
         for application in application_sections:
             try:
                 if application.attributes["android:debuggable"].value.lower() == "true":
-                    self.issues.append(Vulnerability(category=self.category, severity=self.severity,
-                                                     issue_name=self.issue_name, description=self.description,
-                                                     file_object=file_object))
+                    self.issues.append(Issue(category=self.category, severity=self.severity,
+                                             name=self.name, description=self.description,
+                                             file_object=manifest_path))
             except (KeyError, AttributeError):
                 log.debug("Application section does not have debuggable flag, continuing")
                 continue
+
+
+plugin = DebuggableManifest()

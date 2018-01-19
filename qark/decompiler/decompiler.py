@@ -3,6 +3,7 @@ from multiprocessing.pool import ThreadPool
 import os
 import platform
 import shlex
+import shutil
 import stat
 import subprocess
 import re
@@ -127,6 +128,8 @@ class Decompiler(object):
             log.exception("Failed to run APKTool with command: %s", custom_apktool_command)
             raise SystemExit("Failed to run APKTool")
 
+        if os.path.isdir(os.path.join(self.build_directory, "original")):
+            shutil.rmtree(os.path.join(self.build_directory, "original"))
         return os.path.join(self.build_directory, "AndroidManifest.xml")
 
     def _unpack_apk(self):

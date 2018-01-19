@@ -4,14 +4,17 @@ from os import path
 
 from jinja2 import Environment, PackageLoader, select_autoescape, Template
 
-from qark.vulnerability import (Vulnerability, Severity)  # noqa:F401 These are expected to be used later.
+from qark.issue import (Issue, Severity, issue_json)  # noqa:F401 These are expected to be used later.
 
 DEFAULT_REPORT_PATH = path.join(path.dirname(path.realpath(__file__)), '..', 'report')
+
 
 jinja_env = Environment(
     loader=PackageLoader('qark', 'templates'),
     autoescape=select_autoescape(['html', 'xml'])
 )
+
+jinja_env.filters['issue_json'] = issue_json
 
 
 class Report(object):
@@ -39,7 +42,7 @@ class Report(object):
         :type report_path: str or None
 
         """
-        self.issues = set()
+        self.issues = []
         self.report_path = report_path or DEFAULT_REPORT_PATH
 
     def generate_report_file(self, file_type='html', template_file=None):
@@ -55,4 +58,4 @@ class Report(object):
                 template = jinja_env.get_template('{file_type}_report.jinja'.format(file_type=file_type))
             else:
                 template = Template(template_file)
-            report_file.write(template.render(issues=self.issues))
+            report_file.write(template.render(issues=list(self.issues)))
