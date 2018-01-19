@@ -1,6 +1,10 @@
 import logging
+from os import (
+    walk,
+    path
+)
 
-from qark.scanner.plugin import get_plugin_source
+from qark.scanner.plugin import get_plugin_source, get_plugins
 
 log = logging.getLogger(__name__)
 
@@ -11,6 +15,9 @@ class Scanner(object):
     def __new__(cls, decompiler):
         if Scanner.__instance is None:
             Scanner.__instance = object.__new__(cls)
+            Scanner.__instance.files = set()
+            Scanner.__instance.issues = set()
+
         Scanner.__instance.decompiler = decompiler
         return Scanner.__instance
 
@@ -20,13 +27,12 @@ class Scanner(object):
         :param Decompiler decompiler: the decompiler class that contains decompiled path information
         """
         self.decompiler = decompiler
-        self.issues = set()
 
     def run(self):
         """
         Runs all the plugin checks by category.
-        :return:
         """
+        self._gather_files()
         self._run_manifest_checks()
 
     def _run_manifest_checks(self):
@@ -34,15 +40,24 @@ class Scanner(object):
         Runs all plugins under `qark.plugins.manifest` and updates `self.issues` with their findings.
         """
         plugin_source = get_plugin_source(category="manifest")
-        if not self.decompiler.manifest_path:
-            self.decompiler.manifest_path = self.decompiler.run_apktool()
-
-        for plugin_name in plugin_source.list_plugins():
+        for plugin_name in get_plugins(category="manifest"):
             try:
                 plugin = plugin_source.load_plugin(plugin_name).plugin
             except Exception:
                 log.exception("Error loading plugin %s... continuing with next plugin", plugin_name)
                 continue
 
-            plugin.run(self.decompiler.manifest_path)
+            plugin.run(files=self.files)
             self.issues.update(plugin.issues)
+
+    def _gather_files(self):
+        """
+        Walks the `Decompiler.build_directory` and updates the `self.files` set with new files.
+        :return:
+        """
+        try:
+            for (dir_path, dir_names, file_names) in walk(self.decompiler.build_directory):
+                for file_name in file_names:
+                    self.files.add(path.join(dir_path, file_name))
+        except AttributeError:
+            log.debug("Decompiler does not have a build directory")
