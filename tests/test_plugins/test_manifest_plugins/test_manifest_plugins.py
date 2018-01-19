@@ -2,7 +2,7 @@ from qark.plugins.manifest.allow_backup import ManifestBackupAllowed
 from qark.plugins.manifest.custom_permissions import CustomPermissions
 from qark.plugins.manifest.debuggable import DebuggableManifest
 from qark.plugins.manifest.exported_tags import ExportedTags
-from qark.vulnerability import Severity
+from qark.issue import Severity
 
 import os
 import shutil
@@ -16,10 +16,9 @@ def test_allow_backup(decompiler, build_directory, vulnerable_manifest_path):
     plugin = ManifestBackupAllowed()
     plugin.run([vulnerable_manifest_path], apk_constants={})
     assert len(plugin.issues) == 1
-    issue = plugin.issues.pop()
-    assert issue.issue_name == plugin.issue_name
-    assert issue.severity == plugin.severity
-    assert issue.category == plugin.category
+    assert plugin.issues[0].name == plugin.name
+    assert plugin.issues[0].severity == plugin.severity
+    assert plugin.issues[0].category == plugin.category
 
     decompiler.manifest_path = decompiler.run_apktool()
     plugin = ManifestBackupAllowed()
@@ -36,10 +35,9 @@ def test_custom_permission(decompiler, build_directory, vulnerable_manifest_path
     plugin = CustomPermissions()
     plugin.run([vulnerable_manifest_path], apk_constants={})
     assert len(plugin.issues) == 1
-    issue = plugin.issues.pop()
-    assert issue.issue_name == plugin.issue_name
-    assert issue.severity == plugin.severity
-    assert issue.category == plugin.category
+    assert plugin.issues[0].name == plugin.name
+    assert plugin.issues[0].severity == plugin.severity
+    assert plugin.issues[0].category == plugin.category
 
     decompiler.manifest_path = decompiler.run_apktool()
     plugin = CustomPermissions()
@@ -61,10 +59,9 @@ def test_debuggable(decompiler, build_directory, vulnerable_manifest_path):
     plugin = DebuggableManifest()
     plugin.run([decompiler.manifest_path], apk_constants={})
     assert len(plugin.issues) == 1  # vulnerable manifest
-    issue = plugin.issues.pop()
-    assert issue.issue_name == plugin.issue_name
-    assert issue.severity == plugin.severity
-    assert issue.category == plugin.category
+    assert plugin.issues[0].name == plugin.name
+    assert plugin.issues[0].severity == plugin.severity
+    assert plugin.issues[0].category == plugin.category
     if os.path.isdir(build_directory):
         shutil.rmtree(build_directory)
 
