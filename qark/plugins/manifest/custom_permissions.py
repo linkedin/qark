@@ -17,7 +17,7 @@ class CustomPermissions(BasePlugin):
                                          "https://github.com/commonsguy/cwac-security/blob/master/PERMS.md"))
         self.severity = Severity.WARNING
 
-    def run(self, files, extras=None):
+    def run(self, files, apk_constants=None):
         mainfest_path = get_manifest_out_of_files(files)
         try:
             manifest_xml = minidom.parse(mainfest_path)
@@ -29,7 +29,7 @@ class CustomPermissions(BasePlugin):
         for permission in permission_sections:
             try:
                 if permission.attributes["android:protectionLevel"].value in ("signature", "signatureOrSystem"):
-                    if extras.get("minimum_sdk", get_min_sdk(manifest_xml)) < 21:
+                    if apk_constants.get("minimum_sdk", get_min_sdk(manifest_xml)) < 21:
                         self.issues.append(Issue(category=self.category, severity=self.severity,
                                                  name=self.name, description=self.description,
                                                  file_object=mainfest_path))

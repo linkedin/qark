@@ -14,7 +14,7 @@ def test_allow_backup(decompiler, build_directory, vulnerable_manifest_path):
         shutil.rmtree(build_directory)
 
     plugin = ManifestBackupAllowed()
-    plugin.run([vulnerable_manifest_path], extras={})
+    plugin.run([vulnerable_manifest_path], apk_constants={})
     assert len(plugin.issues) == 1
     assert plugin.issues[0].name == plugin.name
     assert plugin.issues[0].severity == plugin.severity
@@ -22,7 +22,7 @@ def test_allow_backup(decompiler, build_directory, vulnerable_manifest_path):
 
     decompiler.manifest_path = decompiler.run_apktool()
     plugin = ManifestBackupAllowed()
-    plugin.run([decompiler.manifest_path], extras={})
+    plugin.run([decompiler.manifest_path], apk_constants={})
     assert len(plugin.issues) == 0  # non vulnerable manifest
     if os.path.isdir(build_directory):
         shutil.rmtree(build_directory)
@@ -33,7 +33,7 @@ def test_custom_permission(decompiler, build_directory, vulnerable_manifest_path
         shutil.rmtree(build_directory)
 
     plugin = CustomPermissions()
-    plugin.run([vulnerable_manifest_path], extras={})
+    plugin.run([vulnerable_manifest_path], apk_constants={})
     assert len(plugin.issues) == 1
     assert plugin.issues[0].name == plugin.name
     assert plugin.issues[0].severity == plugin.severity
@@ -41,7 +41,7 @@ def test_custom_permission(decompiler, build_directory, vulnerable_manifest_path
 
     decompiler.manifest_path = decompiler.run_apktool()
     plugin = CustomPermissions()
-    plugin.run([decompiler.manifest_path], extras={})
+    plugin.run([decompiler.manifest_path], apk_constants={})
     assert len(plugin.issues) == 0  # non vulnerable manifest
     if os.path.isdir(build_directory):
         shutil.rmtree(build_directory)
@@ -52,12 +52,12 @@ def test_debuggable(decompiler, build_directory, vulnerable_manifest_path):
         shutil.rmtree(build_directory)
     # the goatdroid manifest is vulnerable. Run it on a non-vulnerable one
     plugin = DebuggableManifest()
-    plugin.run([vulnerable_manifest_path], extras={})
+    plugin.run([vulnerable_manifest_path], apk_constants={})
     assert len(plugin.issues) == 0
 
     decompiler.manifest_path = decompiler.run_apktool()
     plugin = DebuggableManifest()
-    plugin.run([decompiler.manifest_path], extras={})
+    plugin.run([decompiler.manifest_path], apk_constants={})
     assert len(plugin.issues) == 1  # vulnerable manifest
     assert plugin.issues[0].name == plugin.name
     assert plugin.issues[0].severity == plugin.severity
@@ -68,7 +68,7 @@ def test_debuggable(decompiler, build_directory, vulnerable_manifest_path):
 
 def test_exported_tags(vulnerable_manifest_path):
     plugin = ExportedTags()
-    plugin.run([vulnerable_manifest_path], extras={})
+    plugin.run([vulnerable_manifest_path], apk_constants={})
     assert len(plugin.issues) == 6
     for issue in plugin.issues:
         assert Severity.WARNING == issue.severity

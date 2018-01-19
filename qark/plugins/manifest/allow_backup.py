@@ -17,7 +17,7 @@ class ManifestBackupAllowed(BasePlugin):
                                          "http://developer.android.com/reference/android/R.attr.html#allowBackup"))
         self.severity = Severity.WARNING
 
-    def run(self, files, extras=None):
+    def run(self, files, apk_constants=None):
         manifest_path = get_manifest_out_of_files(files)
         try:
             manifest_xml = minidom.parse(manifest_path)

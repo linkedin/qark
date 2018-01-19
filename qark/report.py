@@ -42,7 +42,7 @@ class Report(object):
         :type report_path: str or None
 
         """
-        self.issues = set()
+        self.issues = []
         self.report_path = report_path or DEFAULT_REPORT_PATH
 
     def generate_report_file(self, file_type='html', template_file=None):

@@ -127,7 +127,7 @@ class ExportedTags(BasePlugin):
         self.min_sdk = None
         self.target_sdk = None
 
-    def run(self, files, extras=None):
+    def run(self, files, apk_constants=None):
         manifest_file = get_manifest_out_of_files(files)
         try:
             self.manifest_xml = minidom.parse(manifest_file)
@@ -135,8 +135,8 @@ class ExportedTags(BasePlugin):
             log.exception("Failed to parse manifest file, is it valid syntax?")
             return  # do not raise a SystemExit because other checks can still be ran
 
-        self.min_sdk = extras.get("minimum_sdk", get_min_sdk(self.manifest_xml))
-        self.target_sdk = extras.get("target_sdk", get_target_sdk(self.manifest_xml))
+        self.min_sdk = apk_constants.get("minimum_sdk", get_min_sdk(self.manifest_xml))
+        self.target_sdk = apk_constants.get("target_sdk", get_target_sdk(self.manifest_xml))
 
         for tag in self.bad_exported_tags:
             all_tags_of_type_tag = self.manifest_xml.getElementsByTagName(tag)
@@ -182,7 +182,6 @@ class ExportedTags(BasePlugin):
                                          severity=Severity.WARNING,
                                          description=EXPORTED.format(tag=tag, tag_name=tag_name),
                                          file_object=file_object))
-
         for intent_filter in possibly_vulnerable_tag.getElementsByTagName("intent-filter"):
             for action in intent_filter.getElementsByTagName("action"):
                 try:

@@ -17,7 +17,7 @@ class Scanner(object):
         if Scanner.__instance is None:
             Scanner.__instance = object.__new__(cls)
             Scanner.__instance.files = set()
-            Scanner.__instance.issues = set()
+            Scanner.__instance.issues = []
 
         Scanner.__instance.decompiler = decompiler
         return Scanner.__instance
@@ -51,8 +51,9 @@ class Scanner(object):
                 continue
 
             try:
-                plugin.run(files=self.files, extras={"minimum_sdk": get_min_sdk(self.decompiler.manifest_path),
-                                                     "target_sdk": get_target_sdk(self.decompiler.manifest_path)})
+                plugin.run(files=self.files, apk_constants={"minimum_sdk": get_min_sdk(self.decompiler.manifest_path),
+                                                            "target_sdk": get_target_sdk(
+                                                                self.decompiler.manifest_path)})
             except Exception:
                 log.exception("Error running plugin %s... continuing with next plugin", plugin_name)
                 continue
@@ -67,6 +68,6 @@ class Scanner(object):
         try:
             for (dir_path, dir_names, file_names) in walk(self.decompiler.build_directory):
                 for file_name in file_names:
-                    self.files.add(path.join(dir_path, file_name))
+                    self.files.append(path.join(dir_path, file_name))
         except AttributeError:
             log.debug("Decompiler does not have a build directory")

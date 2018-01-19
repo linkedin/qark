@@ -20,7 +20,7 @@ class DebuggableManifest(BasePlugin):
                                          "http://developer.android.com/guide/topics/manifest/application-element.html#debug"))
         self.severity = Severity.VULNERABILITY
 
-    def run(self, files, extras=None):
+    def run(self, files, apk_constants=None):
         manifest_path = get_manifest_out_of_files(files)
         try:
             manifest_xml = minidom.parse(manifest_path)
