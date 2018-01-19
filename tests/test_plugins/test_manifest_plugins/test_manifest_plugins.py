@@ -2,7 +2,7 @@ from qark.plugins.manifest.allow_backup import ManifestBackupAllowed
 from qark.plugins.manifest.custom_permissions import CustomPermissions
 from qark.plugins.manifest.debuggable import DebuggableManifest
 from qark.plugins.manifest.exported_tags import ExportedTags
-from qark.vulnerability import Severity
+from qark.issue import Severity
 
 import os
 import shutil
@@ -16,7 +16,7 @@ def test_allow_backup(decompiler, build_directory, vulnerable_manifest_path):
     plugin = ManifestBackupAllowed()
     plugin.run(vulnerable_manifest_path)
     assert len(plugin.issues) == 1
-    assert plugin.issues[0].issue_name == plugin.issue_name
+    assert plugin.issues[0].name == plugin.name
     assert plugin.issues[0].severity == plugin.severity
     assert plugin.issues[0].category == plugin.category
 
@@ -35,7 +35,7 @@ def test_custom_permission(decompiler, build_directory, vulnerable_manifest_path
     plugin = CustomPermissions()
     plugin.run(vulnerable_manifest_path)
     assert len(plugin.issues) == 1
-    assert plugin.issues[0].issue_name == plugin.issue_name
+    assert plugin.issues[0].name == plugin.name
     assert plugin.issues[0].severity == plugin.severity
     assert plugin.issues[0].category == plugin.category
 
@@ -59,7 +59,7 @@ def test_debuggable(decompiler, build_directory, vulnerable_manifest_path):
     plugin = DebuggableManifest()
     plugin.run(decompiler.manifest_path)
     assert len(plugin.issues) == 1  # vulnerable manifest
-    assert plugin.issues[0].issue_name == plugin.issue_name
+    assert plugin.issues[0].name == plugin.name
     assert plugin.issues[0].severity == plugin.severity
     assert plugin.issues[0].category == plugin.category
     if os.path.isdir(build_directory):

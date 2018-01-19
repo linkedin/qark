@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+{% for issue in issues %}
+<issue issueid="{{ issue.id }}">
+  <severity>{{ issue.severity.name }}</severity>
+  <name>{{ issue.name }}</name>
+</issue>
+{% endfor %}

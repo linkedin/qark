@@ -1,5 +1,5 @@
 from qark.scanner.plugin import BasePlugin
-from qark.vulnerability import Severity, Vulnerability
+from qark.issue import Severity, Issue
 
 import logging
 from xml.dom import minidom
@@ -9,7 +9,7 @@ log = logging.getLogger(__name__)
 
 class ManifestBackupAllowed(BasePlugin):
     def __init__(self):
-        BasePlugin.__init__(self, category="manifest", issue_name="Backup is allowed in manifest",
+        BasePlugin.__init__(self, category="manifest", name="Backup is allowed in manifest",
                             description=("Backups enabled: Potential for data theft via local attacks via adb backup, "
                                          "if the device has USB debugging enabled (not common). "
                                          "More info: "
@@ -26,6 +26,6 @@ class ManifestBackupAllowed(BasePlugin):
         application_sections = manifest_xml.getElementsByTagName("application")
         for application in application_sections:
             if "android:allowBackup" in application.attributes.keys():
-                self.issues.append(Vulnerability(category=self.category, severity=self.severity,
-                                                 issue_name=self.issue_name, description=self.description,
+                self.issues.append(Issue(category=self.category, severity=self.severity,
+                                                 name=self.name, description=self.description,
                                                  file_object=file_object))

@@ -1,5 +1,5 @@
 from qark.scanner.plugin import BasePlugin
-from qark.vulnerability import Severity, Vulnerability
+from qark.issue import Severity, Issue
 
 import logging
 from xml.dom import minidom
@@ -9,7 +9,7 @@ log = logging.getLogger(__name__)
 
 class CustomPermissions(BasePlugin):
     def __init__(self):
-        BasePlugin.__init__(self, category="manifest", issue_name="Custom permissions are enabled in the manifest",
+        BasePlugin.__init__(self, category="manifest", name="Custom permissions are enabled in the manifest",
                             description=("This permission can be obtained by malicious apps installed prior to this "
                                          "one, without the proper signature. Applicable to Android Devices prior to "
                                          "L (Lollipop). More info: "
@@ -29,8 +29,8 @@ class CustomPermissions(BasePlugin):
                 if permission.attributes["android:protectionLevel"].value in ("signature", "signatureOrSystem"):
                     min_sdk = get_min_sdk(manifest_xml)
                     if min_sdk < 21:
-                        self.issues.append(Vulnerability(category=self.category, severity=self.severity,
-                                                         issue_name=self.issue_name, description=self.description,
+                        self.issues.append(Issue(category=self.category, severity=self.severity,
+                                                         name=self.name, description=self.description,
                                                          file_object=file_object))
 
             except KeyError:
