@@ -17,6 +17,7 @@ def test_blank_file():
             plugin.run(file)
         assert plugin.issues == []
 
+
 def test_seeding_secure_random():
     no_bug_files = ['secure_random_no_args1.java']
     buggy_files = ['secure_random_args1.java', 'secure_random_args1.java']
@@ -30,11 +31,6 @@ def test_seeding_secure_random():
         assert len(plugin.issues) == i
         plugin.run(file)
         assert len(plugin.issues) == i + 1
-
-
-
-def test_ecb_cipher_usage():
-    plugin = ECBCipherCheck()
 
 
 def test_packaged_private_keys():
@@ -52,4 +48,3 @@ def test_packaged_private_keys():
     for file in public_key_files:
         plugin.run(file)
         assert len(plugin.issues) == num_issues
-

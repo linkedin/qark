@@ -1,71 +1,54 @@
+import os
 import logging
 
 import re
 from plyj.parser import Parser
-import plyj.model as m
+import javalang
 
 from qark.scanner.plugin import BasePlugin
-from qark.vulnerability import Severity, Vulnerability
+from qark.issue import Severity, Issue
 
 log = logging.getLogger(__name__)
 
-class ECBCipherCheck(BasePlugin):
 
+class ECBCipherCheck(BasePlugin):
     def __init__(self):
 
-        BasePlugin.__init__(self, category="crypto", issue_name="ECB Cipher Usage",
+        BasePlugin.__init__(self, category="crypto", name="ECB Cipher Usage",
                             description=("ECB mode is an insecure encryption technique and prone to data leakage"))
 
         self.severity = Severity.VULNERABILITY
         self.parser = Parser()
         self.tree = None
 
-
-    def run(self, file_object):
+    def _process_file(self, filepath):
+        pass
         try:
-            self.tree = self.parser.parse_file(file_object)
-            if not self.tree:
-                return
+            with open(filepath, 'r') as f:
+                body = f.read()
         except Exception:
-            log.exception("Unable to create tree for %s" + str(file_object))
+            log.exception("Unable to read file")
             return
-        class_declaration_bodies = [type_decl.body for type_decl in self.tree.type_declarations if type(type_decl) is m.ClassDeclaration]
-        for body in class_declaration_bodies:
-            try:
-                self._recursive_ecb_check_final(body, file_object)
-            except:
-                log.exception("Error running recursive_ecb_check in cryptoFlaws.py")
 
+        try:
+            tree = javalang.parse.parse(body)
+            method_invocations = tree.filter(javalang.tree.MethodInvocation)
+            for node_path, method_invocation_node in method_invocations:
+                try:
+                    method_name = method_invocation_node.member
+                    encryption_type = method_invocation_node.arguments[0].value
+                    qualifier = method_invocation_node.qualifier  # the thing that getInstance is called on
+                    if method_name == 'getInstance' and qualifier == 'Cipher' and re.search(r'.*/ECB/.*',
+                                                                                            encryption_type):
+                        description = "getInstance should not be called with ECB as the cipher mode, as it is insecure."
+                        self.issues.append(
+                            Issue(self.category, self.name, self.severity, description, file_object=filepath))
+                except Exception:
+                    continue
+        except Exception:
+            log.exception("Couldn't parse the java file: %s", filepath)
 
-    def _ecb_method_invocation_check(self, token, filepath):
-        for literal in [x for x in token.arguments if type(x) is m.Literal]:
-            # sets mode to ECB
-            if re.search(r'.*\/ECB\/.*', str(literal.value)):
-                description = "getInstance should not be called with ECB as the cipher mode, as it is insecure."
-                self.issues.append(Vulnerability(self.category, self.issue_name, self.severity, description, file_object=filepath))
-            # sets mode to something other than ECB
-            elif re.search(r'.*/.*/.*', str(literal.value)):
-                return
-            # No mode set
-            elif str(literal.value) == '':
-                description = "getInstance should not be called with ECB as the cipher mode, as it is insecure."
-                self.issues.append(Vulnerability(self.category, self.issue_name, self.severity, description, file_object=filepath))
-
-
-    def _is_target_function(self, token):
-        # TODO - need to verify .getInstance is actually being invoked on a Cipher object
-        is_method_invocation = type(token) is m.MethodInvocation
-        is_correct_function_name = getattr(token, 'name', None) == 'getInstance'
-        has_arguments = hasattr(token, 'arguments')
-        return all((is_method_invocation, is_correct_function_name, has_arguments))
-
-
-    def _recursive_ecb_check_final(self, token, filepath):
-        if self._is_target_function(token):
-            self._ecb_method_invocation_check(token, filepath)
-        elif type(token) is list:
-            for item in token:
-                self._recursive_ecb_check_final(item, filepath)
-        elif hasattr(token, 'fields'):
-            for field in token.fields:
-                self._recursive_ecb_check_final(getattr(token, field), filepath)
+    def run(self, files, apk_constants=None):
+        relevant_files = [file for file in files if os.path.splitext(file)[1] == '.java']
+        for file in relevant_files:
+            self._process_file(file)
