@@ -40,14 +40,18 @@ class ImplicitIntentToPendingIntent(BasePlugin):
                       if os.path.splitext(decompiled_file.lower())[1] == ".java")
 
         for java_file in java_files:
-            with open(java_file, "r") as java_file_to_read:
-                file_contents = java_file_to_read.read()
+            try:
+                with open(java_file, "r") as java_file_to_read:
+                    file_contents = java_file_to_read.read()
 
-                # simple search to avoid files that are not vulnerable
-                if (re.search("new Intent", file_contents) is None or
-                        re.search(r"({pending_intent_method})".format(
-                            pending_intent_method="|".join(PENDING_INTENT_METHODS)), file_contents) is None):
-                    continue
+                    # simple search to avoid files that are not vulnerable
+                    if (re.search("new Intent", file_contents) is None or
+                            re.search(r"({pending_intent_method})".format(
+                                pending_intent_method="|".join(PENDING_INTENT_METHODS)), file_contents) is None):
+                        continue
+            except IOError:
+                log.debug("File does not exist %s, continuing", java_file)
+                continue
 
             try:
                 parsed_tree = javalang.parse.parse(file_contents)
@@ -68,12 +72,12 @@ class ImplicitIntentToPendingIntent(BasePlugin):
 
         :param parsed_tree: `javalang.tree.parse` object
         """
-        # need to see if these references end up in methodinvocations
+        # get all method invocations that are in PENDING_INTENT_METHODS
         pending_intent_invocations = ((path, method_invocation) for path, method_invocation
                                       in parsed_tree.filter(MethodInvocation)
                                       if method_invocation.member in PENDING_INTENT_METHODS)
 
-        for path, pending_intent_invocation in pending_intent_invocations:
+        for _, pending_intent_invocation in pending_intent_invocations:
             # iterate over every argument in the pending intent call, looking for a "new Intent()"
             for method_argument in pending_intent_invocation.arguments:
                 for _, creation in method_argument.filter(ClassCreator):
