@@ -3,6 +3,7 @@ from qark.scanner.plugin import BasePlugin
 from qark.issue import Severity, Issue
 
 import logging
+import os
 import re
 from xml.dom import minidom
 
@@ -100,7 +101,7 @@ class SendBroadcastReceiverPermission(BasePlugin):
                 log.debug("Error parsing file %s, continuing", java_file)
                 continue
             self.current_file = java_file
-            for method_invocation in parsed_tree.filter(MethodInvocation):
+            for _, method_invocation in parsed_tree.filter(MethodInvocation):
                 self._check_method_invocation(method_invocation, parsed_tree.imports)
 
     def _check_method_invocation(self, method_invocation, imports):
@@ -111,9 +112,9 @@ class SendBroadcastReceiverPermission(BasePlugin):
         :param javalang.tree.MethodInvocation method_invocation: method being called
         :param list imports: list of imports
         """
-        method_name = method_invocation[1].member
-        num_arguments = len(method_invocation[1].arguments)
-        if method_invocation[1].member in BROADCAST_METHODS:
+        method_name = method_invocation.member
+        num_arguments = len(method_invocation.arguments)
+        if method_invocation.member in BROADCAST_METHODS:
             name = None
             description = None
 
