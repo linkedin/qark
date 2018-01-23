@@ -83,12 +83,16 @@ class SendBroadcastReceiverPermission(BasePlugin):
 
         java_files = (decompiled_file for decompiled_file in files if decompiled_file.lower().endswith(".java"))
         for java_file in java_files:
-            with open(java_file, "r") as java_file_to_read:
-                file_contents = java_file_to_read.read()
+            try:
+                with open(java_file, "r") as java_file_to_read:
+                    file_contents = java_file_to_read.read()
 
-                # really simple check to see if the file has the methods we are interested in before parsing the AST
-                if not re.search("({broadcasts})".format(broadcasts="|".join(BROADCAST_METHODS)), file_contents):
-                    continue
+                    # really simple check to see if the file has the methods we are interested in before parsing the AST
+                    if not re.search("({broadcasts})".format(broadcasts="|".join(BROADCAST_METHODS)), file_contents):
+                        continue
+            except IOError:
+                log.debug("File does not exist %s, continuing", java_file)
+                continue
 
             try:
                 parsed_tree = javalang.parse.parse(file_contents)
