@@ -1,6 +1,7 @@
+import os
 import logging
 
-from plyj.parser import Parser
+import javalang
 
 from qark.scanner.plugin import BasePlugin
 from qark.issue import Severity, Issue
@@ -9,6 +10,9 @@ log = logging.getLogger(__name__)
 
 
 class SeedWithSecureRandom(BasePlugin):
+
+    INSECURE_FUNCTIONS = ("setSeed", "generateSeed")
+
     def __init__(self):
 
         BasePlugin.__init__(self, category="crypto", name="Random number generator is seeded with SecureSeed",
@@ -16,20 +20,39 @@ class SeedWithSecureRandom(BasePlugin):
                                          "This may be useful for testing, but not for secure use"))
 
         self.severity = Severity.WARNING
-        self.parser = Parser()
         self.tree = None
 
-    def run(self, file_object):
+    def _imports_secure_seed(self, tree):
+        """Checks if a tree imports java.security.SecureRandom, and returns True if the import exists"""
+        imports = tree.filter(javalang.tree.Import)
+        for path, curr_import in imports:
+            if curr_import.path == 'java.security.SecureRandom':
+                return True
+        return False
+
+    def _process_file(self, filepath):
         try:
-            self.tree = self.parser.parse_file(file_object)
-            if not self.tree:
-                return
+            with open(filepath, 'r') as f:
+                body = f.read()
         except Exception:
-            log.exception("Unable to create tree for %s" + str(file_object))
+            log.exception("Unable to read file")
             return
 
-        for import_decl in self.tree.import_declarations:
-            for setter_func in ("setSeed", "generateSeed"):
-                if 'SecureRandom' in import_decl.name.value and setter_func in str(self.tree):
-                    self.issues.append(Issue(self.category, self.name, self.severity, self.description,
-                                             file_object=file_object))
+        try:
+            tree = javalang.parse.parse(body)
+        except Exception:
+            log.exception("Couldn't parse the java file: %s", filepath)
+
+        if not self._imports_secure_seed(tree):  # doesn't import the insecure function
+            return
+
+        method_invocations = tree.filter(javalang.tree.MethodInvocation)
+        for node_path, method_invocation_node in method_invocations:
+            if method_invocation_node.member in SeedWithSecureRandom.INSECURE_FUNCTIONS:
+                self.issues.append(Issue(self.category, self.name, self.severity, self.description,
+                                         file_object=filepath))
+
+    def run(self, files, apk_constants=None):
+        relevant_files = [file_path for file_path in files if os.path.splitext(file_path)[1] == '.java']
+        for file_path in relevant_files:
+            self._process_file(file_path)

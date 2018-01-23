@@ -47,6 +47,6 @@ class ECBCipherCheck(BasePlugin):
                 continue
 
     def run(self, files, apk_constants=None):
-        relevant_files = [file_path for file_path in files if os.path.splitext(file)[1] == '.java']
-        for file in relevant_files:
-            self._process_file(file)
+        relevant_files = [file_path for file_path in files if os.path.splitext(file_path)[1] == '.java']
+        for file_path in relevant_files:
+            self._process_file(file_path)
