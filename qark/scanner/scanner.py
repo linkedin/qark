@@ -38,6 +38,7 @@ class Scanner(object):
         self._gather_files()
         self._run_manifest_checks()
         self._run_broadcast_checks()
+        self._run_intent_checks()
 
     def _run_manifest_checks(self):
         """
@@ -67,6 +68,28 @@ class Scanner(object):
         """
         plugin_source = get_plugin_source(category="broadcast")
         for plugin_name in get_plugins(category="broadcast"):
+            try:
+                plugin = plugin_source.load_plugin(plugin_name).plugin
+            except Exception:
+                log.exception("Error loading plugin %s... continuing with next plugin", plugin_name)
+                continue
+
+            try:
+                plugin.run(files=self.files, apk_constants={"minimum_sdk": get_min_sdk(self.decompiler.manifest_path),
+                                                            "target_sdk": get_target_sdk(
+                                                                self.decompiler.manifest_path)})
+            except Exception:
+                log.exception("Error running plugin %s... continuing with next plugin", plugin_name)
+                continue
+
+            self.issues.extend(plugin.issues)
+
+    def _run_intent_checks(self):
+        """
+        Runs all plugins under `qark.plugins.intent` and updates `self.issues` with their findings.
+        """
+        plugin_source = get_plugin_source(category="intent")
+        for plugin_name in get_plugins(category="intent"):
             try:
                 plugin = plugin_source.load_plugin(plugin_name).plugin
             except Exception:
