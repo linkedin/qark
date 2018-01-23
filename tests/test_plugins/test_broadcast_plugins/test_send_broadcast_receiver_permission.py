@@ -20,7 +20,7 @@ def test_send_broadcast_receiver_permission(decompiler, build_directory, vulnera
             files.append(os.path.join(dir_path, file_name))
     plugin.run(files)
 
-    assert len(plugin.issues) > 0  # vulnerable APK
+    assert len(plugin.issues) == 2  # vulnerable APK
     if os.path.isdir(build_directory):
         shutil.rmtree(build_directory)
 
