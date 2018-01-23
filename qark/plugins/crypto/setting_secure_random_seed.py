@@ -20,7 +20,6 @@ class SeedWithSecureRandom(BasePlugin):
                                          "This may be useful for testing, but not for secure use"))
 
         self.severity = Severity.WARNING
-        self.tree = None
 
     def _imports_secure_seed(self, tree):
         """Checks if a tree imports java.security.SecureRandom, and returns True if the import exists"""
@@ -47,7 +46,7 @@ class SeedWithSecureRandom(BasePlugin):
             return
 
         method_invocations = tree.filter(javalang.tree.MethodInvocation)
-        for node_path, method_invocation_node in method_invocations:
+        for _, method_invocation_node in method_invocations:
             if method_invocation_node.member in SeedWithSecureRandom.INSECURE_FUNCTIONS:
                 self.issues.append(Issue(self.category, self.name, self.severity, self.description,
                                          file_object=filepath))

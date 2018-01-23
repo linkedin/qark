@@ -17,7 +17,6 @@ class ECBCipherCheck(BasePlugin):
                             description=("ECB mode is an insecure encryption technique and prone to data leakage"))
 
         self.severity = Severity.VULNERABILITY
-        self.tree = None
 
     def _process_file(self, filepath):
         try:
