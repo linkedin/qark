@@ -82,7 +82,8 @@ class SendBroadcastReceiverPermission(BasePlugin):
                 else:
                     self.below_min_sdk_21 = False
 
-        java_files = (decompiled_file for decompiled_file in files if decompiled_file.lower().endswith(".java"))
+        java_files = (decompiled_file for decompiled_file in files
+                      if os.path.splitext(decompiled_file.lower())[1] == ".java")
         for java_file in java_files:
             try:
                 with open(java_file, "r") as java_file_to_read:
