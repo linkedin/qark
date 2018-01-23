@@ -36,7 +36,7 @@ def test_seeding_secure_random():
 def test_packaged_private_keys():
     key_dir = os.path.join(curr_dir, 'keys')
     plugin = PackagedPrivateKeys()
-    assert len(plugin.issues) is 0
+    assert len(plugin.issues) == 0
     private_key_files = ['rsa-key', 'dsa-key', 'ed25519-key', 'ecdsa-key']
     for i, file_path in enumerate(private_key_files):
         absolute_path = os.path.join(key_dir, file_path)
