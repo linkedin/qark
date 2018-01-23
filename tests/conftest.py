@@ -51,3 +51,9 @@ def procyon_path():
 @pytest.fixture(scope="session")
 def vulnerable_manifest_path():
     return os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_androidmanifest.xml")
+
+
+@pytest.fixture(scope="session")
+def vulnerable_broadcast_path():
+    return os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_java_files",
+                        "send_broadcast_receiver_permission.java")
