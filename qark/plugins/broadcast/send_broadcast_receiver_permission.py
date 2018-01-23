@@ -77,7 +77,7 @@ class SendBroadcastReceiverPermission(BasePlugin):
             self.below_min_sdk_21 = apk_constants["min_sdk"] < 21
         except (KeyError, TypeError):
             for decompiled_file in files:
-                if decompiled_file.lower().endswith("androidmanifest.xml"):
+                if decompiled_file.lower().endswith("{separator}androidmanifest.xml".format(separator=os.sep)):
                     self.below_min_sdk_21 = get_min_sdk(manifest_xml=minidom.parse(decompiled_file)) < 21
                 else:
                     self.below_min_sdk_21 = False
