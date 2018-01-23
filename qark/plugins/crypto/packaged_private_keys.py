@@ -20,7 +20,7 @@ class PackagedPrivateKeys(BasePlugin):
         for file_path in files:
             for regex in PackagedPrivateKeys.PRIVATE_KEY_REGEXES:
                 if run_regex(file_path, regex):
-                    log.info("It appears there is a private key embedded in your application: %s", file_path)
+                    log.debug("It appears there is a private key embedded in your application: %s", file_path)
                     description = "It appears there is a private key embedded in your application in the following file:"
                     self.issues.append(
                         Issue(self.category, self.name, self.severity, description, file_object=file_path))
