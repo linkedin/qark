@@ -60,6 +60,10 @@ STICKY_BROADCAST = (
 
 
 class SendBroadcastReceiverPermission(BasePlugin):
+    """
+    This plugin checks certain broadcast methods to see if they are using an insecure version,
+    based on number of arguments.
+    """
     def __init__(self):
         BasePlugin.__init__(self, category="broadcast")
         self.severity = Severity.WARNING
@@ -96,6 +100,13 @@ class SendBroadcastReceiverPermission(BasePlugin):
                 self._check_method_invocation(method_invocation, parsed_tree.imports)
 
     def _check_method_invocation(self, method_invocation, imports):
+        """
+        Checks the type of method that is being called and the amount of arguments and adds it to the issues list if it
+        results in a warning or vulnerability.
+
+        :param javalang.tree.MethodInvocation method_invocation: method being called
+        :param list imports: list of imports
+        """
         method_name = method_invocation[1].member
         num_arguments = len(method_invocation[1].arguments)
         if method_invocation[1].member in BROADCAST_METHODS:
@@ -155,6 +166,14 @@ class SendBroadcastReceiverPermission(BasePlugin):
                                 broadcast_type=method_name)
 
     def _add_issue(self, name, description, broadcast_type, severity=Severity.WARNING):
+        """
+        Helper method to append issues to the plugin.
+
+        :param str name: issue name
+        :param str description: issue description
+        :param str broadcast_type: type of broadcast from `BROADCAST_METHODS`
+        :param Severity severity: issue severity
+        """
         self.issues.append(Issue(
             category=self.category, severity=severity, name=name,
             description=description.format(file_name=self.current_file,
@@ -164,6 +183,13 @@ class SendBroadcastReceiverPermission(BasePlugin):
 
 
 def has_local_broadcast_imported(import_tree):
+    """
+    Helper function to determine if the import tree contains any broadcast import.
+
+    :param list import_tree: `javalang` import tree
+    :return: True if import tree has broadcast import, else False
+    :rtype: bool
+    """
     return any([import_declaration.path in LOCAL_BROADCAST_IMPORTS for import_declaration in import_tree])
 
 
