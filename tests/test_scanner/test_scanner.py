@@ -24,6 +24,12 @@ def test_run_broadcast_checks(scanner):
     assert 0 == len(scanner.issues)  # goatdroid not using these methods
 
 
+def test_run_intent_checks(scanner):
+    scanner.issues = []
+    scanner._run_intent_checks()
+    assert 0 == len(scanner.issues)  # goatdroid doesnt have any of these vulnerabilities
+
+
 def test_scanner_singleton(decompiler):
     s1 = Scanner(decompiler=decompiler)
     s1.issues = []
