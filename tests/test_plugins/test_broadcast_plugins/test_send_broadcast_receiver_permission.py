@@ -4,23 +4,8 @@ import os
 import shutil
 
 
-def test_send_broadcast_receiver_permission(decompiler, build_directory, vulnerable_broadcast_path):
+def test_send_broadcast_receiver_permission(build_directory, vulnerable_broadcast_path):
     # set the path to manifest file
-    if os.path.isdir(build_directory):
-        shutil.rmtree(build_directory)
-
-    decompiler._run_dex2jar()
-    decompiler.run_apktool()
-    decompiler.decompile()
-
-    plugin = SendBroadcastReceiverPermission()
-    files = []
-    for (dir_path, dir_names, file_names) in os.walk(build_directory):
-        for file_name in file_names:
-            files.append(os.path.join(dir_path, file_name))
-    plugin.run(files)
-
-    assert len(plugin.issues) > 0  # vulnerable APK
     if os.path.isdir(build_directory):
         shutil.rmtree(build_directory)
 
