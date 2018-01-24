@@ -1,8 +1,17 @@
 import logging
+import os
 import re
 from xml.dom import minidom
 
 log = logging.getLogger(__name__)
+
+EXCLUDE_REGEXES = (r'^\s*(//|/\*)',
+                   r'^\s*\*',
+                   r'.*\*\/$',
+                   r'^\s*Log\..\(',
+                   r'(.*)(public|private)\s(String|List)')
+
+EXCLUSION_REGEX = re.compile("|".join(EXCLUDE_REGEXES))
 
 
 def get_min_sdk(manifest_xml):
@@ -69,24 +78,30 @@ def get_manifest_out_of_files(files):
 def run_regex(filename, rex):
     """
     Read a file line by line, run a regular expression against the content and return list of things that require inspection
+
+    :param str filename: path to file
+    :param rex: can be a compiled regex or a string of the regex to search
     """
     things_to_inspect = []
     try:
         with open(filename) as f:
             for curr_line in f:
                 if re.search(rex, curr_line):
-                    if re.match(r'^\s*(//|/\*)', curr_line):  # exclude single-line or beginning comments
-                        pass
-                    elif re.match(r'^\s*\*', curr_line):  # exclude lines that are comment bodies
-                        pass
-                    elif re.match(r'.*\*\/$', curr_line):  # exclude lines that are closing comments
-                        pass
-                    elif re.match(r'^\s*Log\..\(', curr_line):  # exclude Logging functions
-                        pass
-                    elif re.match(r'(.*)(public|private)\s(String|List)', curr_line):  # exclude declarations
+                    # exclude everythingin EXCLUDE_REGEXES
+                    if re.match(EXCLUSION_REGEX, curr_line):
                         pass
                     else:
                         things_to_inspect.append(curr_line)
-    except Exception:
-        log.exception("Unable to read file: " + str(filename) + " results will be inaccurate")
+    except IOError:
+        log.debug("Unable to read file: %s results will be inaccurate", filename)
     return things_to_inspect
+
+
+def java_files_from_files(files):
+    """
+    Returns a generator of everything in `files` that ends with the `.java` extension.
+
+    :param list files:
+    :return: generator of file paths
+    """
+    return (file_path for file_path in files if os.path.splitext(file_path.lower())[1] == '.java')
