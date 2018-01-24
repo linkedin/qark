@@ -56,6 +56,7 @@ class Scanner(object):
             min_sdk = target_sdk = 1
 
         for plugin_name in get_plugins(category=category):
+
             try:
                 plugin = plugin_source.load_plugin(plugin_name).plugin
             except Exception:
