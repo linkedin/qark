@@ -16,6 +16,8 @@ PENDING_INTENT_METHODS = ("getActivities",
                           "getActivity",
                           "getBroadcast",
                           )
+PENDING_INTENT_REGEX = re.compile(
+    "({pending_intent_method})".format(pending_intent_method="|".join(PENDING_INTENT_METHODS)))
 
 
 class ImplicitIntentToPendingIntent(BasePlugin):
@@ -46,8 +48,7 @@ class ImplicitIntentToPendingIntent(BasePlugin):
 
                     # simple search to avoid files that are not vulnerable
                     if (re.search("new Intent", file_contents) is None or
-                            re.search(r"({pending_intent_method})".format(
-                                pending_intent_method="|".join(PENDING_INTENT_METHODS)), file_contents) is None):
+                            re.search(PENDING_INTENT_REGEX, file_contents) is None):
                         continue
             except IOError:
                 log.debug("File does not exist %s, continuing", java_file)
@@ -73,11 +74,11 @@ class ImplicitIntentToPendingIntent(BasePlugin):
         :param parsed_tree: `javalang.tree.parse` object
         """
         # get all method invocations that are in PENDING_INTENT_METHODS
-        pending_intent_invocations = ((path, method_invocation) for path, method_invocation
+        pending_intent_invocations = (method_invocation for _, method_invocation
                                       in parsed_tree.filter(MethodInvocation)
                                       if method_invocation.member in PENDING_INTENT_METHODS)
 
-        for _, pending_intent_invocation in pending_intent_invocations:
+        for pending_intent_invocation in pending_intent_invocations:
             # iterate over every argument in the pending intent call, looking for a "new Intent()"
             for method_argument in pending_intent_invocation.arguments:
                 for _, creation in method_argument.filter(ClassCreator):
