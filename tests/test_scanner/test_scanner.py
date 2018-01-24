@@ -1,7 +1,19 @@
 from qark.scanner.scanner import Scanner
 
+import os
+import shutil
 
-def test_run(scanner):
+
+def test_run(scanner, build_directory, decompiler):
+    if os.path.isdir(build_directory):
+        shutil.rmtree(build_directory)
+
+    decompiler._run_dex2jar()
+    decompiler.run_apktool()
+    decompiler.decompile()
+
+    scanner.issues = []
+    scanner.decompiler = decompiler
     scanner.run()
     assert 0 < len(scanner.issues)
 
@@ -22,6 +34,12 @@ def test_run_broadcast_checks(scanner):
     scanner.issues = []
     scanner._run_broadcast_checks()
     assert 0 == len(scanner.issues)  # goatdroid not using these methods
+
+
+def test_run_file_checks(scanner):
+    scanner.issues = []
+    scanner._run_file_checks()
+    assert 0 == len(scanner.issues)
 
 
 def test_scanner_singleton(decompiler):

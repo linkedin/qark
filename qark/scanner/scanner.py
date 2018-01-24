@@ -38,6 +38,7 @@ class Scanner(object):
         self._gather_files()
         self._run_manifest_checks()
         self._run_broadcast_checks()
+        self._run_file_checks()
 
     def _run_manifest_checks(self):
         """
@@ -63,10 +64,32 @@ class Scanner(object):
 
     def _run_broadcast_checks(self):
         """
-        Runs all plugins under `qark.plugins.manifest` and updates `self.issues` with their findings.
+        Runs all plugins under `qark.plugins.broadcast` and updates `self.issues` with their findings.
         """
         plugin_source = get_plugin_source(category="broadcast")
         for plugin_name in get_plugins(category="broadcast"):
+            try:
+                plugin = plugin_source.load_plugin(plugin_name).plugin
+            except Exception:
+                log.exception("Error loading plugin %s... continuing with next plugin", plugin_name)
+                continue
+
+            try:
+                plugin.run(files=self.files, apk_constants={"minimum_sdk": get_min_sdk(self.decompiler.manifest_path),
+                                                            "target_sdk": get_target_sdk(
+                                                                self.decompiler.manifest_path)})
+            except Exception:
+                log.exception("Error running plugin %s... continuing with next plugin", plugin_name)
+                continue
+
+            self.issues.extend(plugin.issues)
+
+    def _run_file_checks(self):
+        """
+        Runs all plugins under `qark.plugins.file` and updates `self.issues` with their findings.
+        """
+        plugin_source = get_plugin_source(category="file")
+        for plugin_name in get_plugins(category="file"):
             try:
                 plugin = plugin_source.load_plugin(plugin_name).plugin
             except Exception:
@@ -89,7 +112,7 @@ class Scanner(object):
         :return:
         """
         try:
-            for (dir_path, dir_names, file_names) in walk(self.decompiler.build_directory):
+            for (dir_path, _, file_names) in walk(self.decompiler.build_directory):
                 for file_name in file_names:
                     self.files.add(path.join(dir_path, file_name))
         except AttributeError:
