@@ -37,7 +37,6 @@ class Scanner(object):
         """
         self._gather_files()
         self._run_manifest_checks()
-        self._run_intent_checks()
         self._run_broadcast_checks()
         self._run_intent_checks()
 
@@ -84,7 +83,7 @@ class Scanner(object):
                 continue
 
             self.issues.extend(plugin.issues)
-    
+
     def _run_broadcast_checks(self):
         """
         Runs all plugins under `qark.plugins.broadcast` and updates `self.issues` with their findings.
