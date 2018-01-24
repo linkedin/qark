@@ -23,16 +23,17 @@ class ECBCipherCheck(BasePlugin):
             with open(filepath, 'r') as f:
                 body = f.read()
         except Exception:
-            log.exception("Unable to read file")
+            log.debug("Unable to read file")
             return
 
         try:
             tree = javalang.parse.parse(body)
         except Exception:
-            log.exception("Couldn't parse the java file: %s", filepath)
+            log.debug("Couldn't parse the java file: %s", filepath)
+            return
 
         method_invocations = tree.filter(javalang.tree.MethodInvocation)
-        for node_path, method_invocation_node in method_invocations:
+        for _, method_invocation_node in method_invocations:
             try:
                 method_name = method_invocation_node.member
                 encryption_type = method_invocation_node.arguments[0].value
