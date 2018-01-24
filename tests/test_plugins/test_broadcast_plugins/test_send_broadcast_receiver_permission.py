@@ -4,11 +4,7 @@ import os
 import shutil
 
 
-def test_send_broadcast_receiver_permission(build_directory, vulnerable_broadcast_path):
-    # set the path to manifest file
-    if os.path.isdir(build_directory):
-        shutil.rmtree(build_directory)
-
+def test_send_broadcast_receiver_permission(vulnerable_broadcast_path):
     plugin = SendBroadcastReceiverPermission()
     plugin.run([vulnerable_broadcast_path])
     assert len(plugin.issues) == 8
