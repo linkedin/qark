@@ -94,4 +94,3 @@ def test_min_sdk(apk_constants):
         assert "Tap Jacking possible" == issue.name
         assert TAP_JACKING == issue.description
         assert plugin.category == issue.category
-    plugin.issues = []
