@@ -40,6 +40,12 @@ def test_run_file_checks(scanner):
     scanner.issues = []
     scanner._run_file_checks()
     assert 0 == len(scanner.issues)
+    
+    
+def test_run_intent_checks(scanner):
+    scanner.issues = []
+    scanner._run_intent_checks()
+    assert 0 == len(scanner.issues)  # goatdroid doesnt have any of these vulnerabilities
 
 
 def test_scanner_singleton(decompiler):
