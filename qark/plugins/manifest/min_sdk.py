@@ -24,7 +24,6 @@ class MinSDK(BasePlugin):
     def __init__(self):
         BasePlugin.__init__(self, category="manifest")
         self.severity = Severity.WARNING
-        self.apk_constants = None
 
     def run(self, files, apk_constants=None):
         try:
