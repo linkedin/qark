@@ -114,10 +114,10 @@ class Scanner(object):
         plugin_source = get_plugin_source(category="file")
         for plugin_name in get_plugins(category="file"):
           try:
-                plugin = plugin_source.load_plugin(plugin_name).plugin
-            except Exception:
-                log.exception("Error loading plugin %s... continuing with next plugin", plugin_name)
-                continue
+            plugin = plugin_source.load_plugin(plugin_name).plugin
+          except Exception:
+            log.exception("Error loading plugin %s... continuing with next plugin", plugin_name)
+            continue
 
             try:
                 plugin.run(files=self.files, apk_constants={"minimum_sdk": get_min_sdk(self.decompiler.manifest_path),
