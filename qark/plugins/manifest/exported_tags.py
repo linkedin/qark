@@ -118,10 +118,12 @@ EXPORTED = ("The {tag} {tag_name} is exported, but not protected by any permissi
             "{tag} tags could leave them vulnerable to attack by malicious apps. The "
             "{tag} tags should be reviewed for vulnerabilities, such as injection and information leakage.")
 
+EXPORTED_TAGS_ISSUE_NAME = "Exported tags"
+
 
 class ExportedTags(BasePlugin):
     def __init__(self):
-        BasePlugin.__init__(self, category="manifest", name="Exported tags")
+        BasePlugin.__init__(self, category="manifest", name=EXPORTED_TAGS_ISSUE_NAME)
         self.bad_exported_tags = ("activity", "activity-alias", "service", "receiver", "provider")
         self.manifest_xml = None
         self.min_sdk = None
@@ -175,13 +177,13 @@ class ExportedTags(BasePlugin):
 
             if has_permission and self.min_sdk < 20:
                 # exported tag with permission
-                self.issues.append(Issue(category="Manifest", name="Exported Tags",
+                self.issues.append(Issue(category="Manifest", name=self.name,
                                          severity=Severity.INFO,
                                          description=EXPORTED_AND_PERMISSION_TAG.format(tag=tag),
                                          file_object=file_object))
             elif exported and not has_intent_filters:
                 # exported tag with no intent filters
-                self.issues.append(Issue(category="Manifest", name="Exported Tags",
+                self.issues.append(Issue(category="Manifest", name=self.name,
                                          severity=Severity.WARNING,
                                          description=EXPORTED.format(tag=tag, tag_name=tag_name),
                                          file_object=file_object))
@@ -205,7 +207,7 @@ class ExportedTags(BasePlugin):
                                              description=EXPORTED_AND_PERMISSION_TAG.format(tag=tag, tag_name=tag_name),
                                              file_object=file_object))
                 else:
-                    self.issues.append(Issue(category="Manifest", name="Exported Tags",
+                    self.issues.append(Issue(category="Manifest", name=self.name,
                                              severity=Severity.WARNING,
                                              description=EXPORTED.format(tag=tag, tag_name=tag_name),
                                              file_object=file_object))

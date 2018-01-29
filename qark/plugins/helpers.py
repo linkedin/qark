@@ -1,6 +1,7 @@
 import logging
 import os
 import re
+import shutil
 from xml.dom import minidom
 
 from javalang.tree import MethodInvocation
@@ -154,3 +155,10 @@ def get_min_sdk_from_files(files, apk_constants=None):
             if decompiled_file.lower().endswith("{separator}androidmanifest.xml".format(separator=os.sep)):
                 return get_min_sdk(decompiled_file)
     return 1
+
+
+def copy_directory_to_location(directory_to_copy, destination):
+    try:
+        shutil.copytree(src=directory_to_copy, dst=destination)
+    except Exception:
+        raise
