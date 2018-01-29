@@ -11,5 +11,5 @@ def test_gradle_build(decompiler, build_directory, vulnerable_manifest_path):
                          issues=[],
                          apk_name="test_apk",
                          manifest_path=vulnerable_manifest_path,
-                         sdk_path="/Users/ndavenpo/Repos/qark/android-sdk_r24.0.2-macosx/android-sdk-macosx")
+                         sdk_path="/Users/nwalsh/IdeaProjects/qark/android-sdk_r24.0.2-macosx/android-sdk-macosx")
     builder._build_apk()

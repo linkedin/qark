@@ -115,3 +115,10 @@ def java_files_from_files(files):
     :return: generator of file paths
     """
     return (file_path for file_path in files if os.path.splitext(file_path.lower())[1] == '.java')
+
+
+def copy_directory_to_location(directory_to_copy, destination):
+    try:
+        shutil.copytree(src=directory_to_copy, dst=destination)
+    except Exception:
+        raise
