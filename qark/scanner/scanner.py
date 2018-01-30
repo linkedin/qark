@@ -80,9 +80,8 @@ class Scanner(object):
             self.files.add(self.decompiler.path_to_source)
             return
 
-        walk_directory = self.decompiler.build_directory
         try:
-            for (dir_path, _, file_names) in walk(walk_directory):
+            for (dir_path, _, file_names) in walk(self.decompiler.build_directory):
                 for file_name in file_names:
                     self.files.add(path.join(dir_path, file_name))
         except AttributeError:

@@ -105,3 +105,13 @@ def copy_directory_to_location(directory_to_copy, destination):
         shutil.copytree(src=directory_to_copy, dst=destination)
     except Exception:
         raise
+
+
+def java_files_from_files(files):
+    """
+    Returns a generator of everything in `files` that ends with the `.java` extension.
+
+    :param list files:
+    :return: generator of file paths
+    """
+    return (file_path for file_path in files if os.path.splitext(file_path.lower())[1] == '.java')
