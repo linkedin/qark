@@ -81,6 +81,7 @@ def test_exported_tags(vulnerable_manifest_path):
 @pytest.mark.parametrize("apk_constants", [
     None,
     {"min_sdk": 8},
+    {},
 ])
 def test_min_sdk(apk_constants):
     plugin = MinSDK()
