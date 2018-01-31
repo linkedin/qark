@@ -1,11 +1,11 @@
 import logging
-import os
 
 import javalang
 from javalang.tree import MethodDeclaration, MethodInvocation, ReturnStatement, StatementExpression
 
 from qark.issue import Issue, Severity
 from qark.scanner.plugin import BasePlugin
+from qark.plugins.helpers import java_files_from_files
 
 log = logging.getLogger(__name__)
 
@@ -50,16 +50,16 @@ class CertValidation(BasePlugin):
         except javalang.parser.JavaSyntaxError:
             log.debug("Couldn't parse the java file: %s", filepath)
             return
-
+        current_file = filepath
         cert_methods = (method_declaration for _, method_declaration in tree.filter(MethodDeclaration)
                         if method_declaration.name in CERT_METHODS)
         for cert_method in cert_methods:
             if cert_method.name == "checkServerTrusted":
-                self._check_server_trusted(cert_method)
+                self._check_server_trusted(cert_method, current_file)
             elif cert_method.name == "onReceivedSslError":
-                self._on_received_ssl_error(cert_method)
+                self._on_received_ssl_error(cert_method, current_file)
 
-    def _check_server_trusted(self, cert_method):
+    def _check_server_trusted(self, cert_method, current_file):
         """
         Determines if the `checkServerTrusted` method is overriden with either no function body (defaults to allow)
         or if the body just returns.
@@ -67,13 +67,17 @@ class CertValidation(BasePlugin):
         if not cert_method.body:
             self.issues.append(Issue(category=self.category, name="Empty certificate method",
                                      severity=self.severity,
-                                     description=CHECK_SERVER_TRUSTED + MITM_DESCRIPTION))
+                                     description=CHECK_SERVER_TRUSTED + MITM_DESCRIPTION,
+                                     file_object=current_file,
+                                     line_number=cert_method.position))
         elif len(cert_method.body) == 1 and type(cert_method.body[0]) is ReturnStatement:
             self.issues.append(Issue(category=self.category, name="Empty (return) certificate method",
                                      severity=self.severity,
-                                     description=CHECK_SERVER_TRUSTED + MITM_DESCRIPTION))
+                                     description=CHECK_SERVER_TRUSTED + MITM_DESCRIPTION,
+                                     file_object=current_file,
+                                     line_number=cert_method.position))
 
-    def _on_received_ssl_error(self, cert_method):
+    def _on_received_ssl_error(self, cert_method, current_file):
         """
         Determines if the `onReceivedSslError` method is overriden with a body of `handler.proceed()` which will
         drop SSL errors.
@@ -83,10 +87,12 @@ class CertValidation(BasePlugin):
                 if method_invocation.member == "proceed":
                     self.issues.append(Issue(category=self.category, name="Unsafe implementation of onReceivedSslError",
                                              severity=self.severity,
-                                             description=ON_RECEIVED_SSL_DESC))
+                                             description=ON_RECEIVED_SSL_DESC,
+                                             file_object=current_file,
+                                             line_number=method_invocation.position))
 
     def run(self, files, apk_constants=None):
-        relevant_files = (file_path for file_path in files if os.path.splitext(file_path.lower())[1] == '.java')
+        relevant_files = java_files_from_files(files)
         for file_path in relevant_files:
             self._process_file(file_path)
 

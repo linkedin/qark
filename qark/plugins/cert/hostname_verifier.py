@@ -1,11 +1,11 @@
 import logging
-import os
 
 import javalang
 from javalang.tree import ClassCreator, MemberReference, MethodInvocation
 
 from qark.issue import Issue, Severity
 from qark.scanner.plugin import BasePlugin
+from qark.plugins.helpers import java_files_from_files
 
 log = logging.getLogger(__name__)
 
@@ -34,8 +34,6 @@ class HostnameVerifier(BasePlugin):
     def __init__(self):
         BasePlugin.__init__(self, category="cert")
         self.severity = Severity.WARNING
-        self.current_file = None
-        self.tree = None
 
     def _process_file(self, filepath):
         try:
@@ -46,34 +44,34 @@ class HostnameVerifier(BasePlugin):
             return
 
         try:
-            self.tree = javalang.parse.parse(file_contents)
+            tree = javalang.parse.parse(file_contents)
         except javalang.parser.JavaSyntaxError:
             log.debug("Couldn't parse the java file: %s", filepath)
             return
 
-        self.current_file = filepath
-        self._allow_all_hostname_verifier_created()
-        self._set_hostname_verifier_allow_all()
+        current_file = filepath
+        self._allow_all_hostname_verifier_created(tree, current_file)
+        self._set_hostname_verifier_allow_all(tree, current_file)
 
-    def _allow_all_hostname_verifier_created(self):
+    def _allow_all_hostname_verifier_created(self, tree, current_file):
         """
         Checks for a class creation of `AllowAllHostnameVerifier`.
 
         :param tree: javalang parsed tree
         """
-        hostname_verifiers = [hostname_verifier for _, hostname_verifier in self.tree.filter(ClassCreator)
+        hostname_verifiers = [hostname_verifier for _, hostname_verifier in tree.filter(ClassCreator)
                               if hostname_verifier.type.name == "AllowAllHostnameVerifier"]
         if hostname_verifiers:
             self.issues.append(Issue(category=self.category, name="Allow all hostname verifier used",
                                      severity=Severity.WARNING, description=ALLOW_ALL_HOSTNAME_VERIFIER_DESC,
-                                     file_object=self.current_file))
+                                     file_object=current_file))
 
-    def _set_hostname_verifier_allow_all(self):
+    def _set_hostname_verifier_allow_all(self, tree, current_file):
         """Check for setHostnameVerifier with argument ALLOW_ALL_HOSTNAME_VERIFIER
 
         :param tree: javalang parsed tree
         """
-        set_hostname_verifiers = (allow_all_verifier for _, allow_all_verifier in self.tree.filter(MethodInvocation)
+        set_hostname_verifiers = (allow_all_verifier for _, allow_all_verifier in tree.filter(MethodInvocation)
                                   if allow_all_verifier.member == "setHostnameVerifier"
                                   and len(allow_all_verifier.arguments) == 1
                                   and type(allow_all_verifier.arguments[0]) is MemberReference
@@ -81,10 +79,10 @@ class HostnameVerifier(BasePlugin):
         for set_hostname_verifier in set_hostname_verifiers:
             self.issues.append(Issue(category=self.category, name="setHostnameVerifier set to ALLOW_ALL",
                                      severity=Severity.WARNING, description=ALLOW_ALL_HOSTNAME_VERIFIER_DESC,
-                                     file_object=self.current_file, line_number=set_hostname_verifier.position))
+                                     file_object=current_file, line_number=set_hostname_verifier.position))
 
     def run(self, files, apk_constants=None):
-        relevant_files = (file_path for file_path in files if os.path.splitext(file_path.lower())[1] == '.java')
+        relevant_files = java_files_from_files(files)
         for file_path in relevant_files:
             self._process_file(file_path)
 
