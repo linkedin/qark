@@ -53,6 +53,6 @@ class BasePlugin(object):
 
         :param List[str] files: a list of files gathered by `Scanner` as absolute paths
         :param dict apk_constants: dictionary containing extra information
-                                    that some plugins can use (minimum_sdk, target_sdk)
+                                    that some plugins can use (min_sdk, target_sdk)
         """
         pass
