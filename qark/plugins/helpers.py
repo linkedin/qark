@@ -14,14 +14,18 @@ EXCLUDE_REGEXES = (r'^\s*(//|/\*)',
 EXCLUSION_REGEX = re.compile("|".join(EXCLUDE_REGEXES))
 
 
-def get_min_sdk(manifest_xml):
+def get_min_sdk(manifest_xml, files=None):
     """
     Given the manifest as a `minidom.parse`'d object or path to manifest,
     try to get the minimum SDK the manifest specifies.
 
     :param manifest_xml: object after parsing the XML
+    :param Set[str] files: list of files received from Scanner
     :return: int of the version if it exists, else 1 (the default)
     """
+    if files:
+        manifest_xml = get_manifest_out_of_files(files)
+
     if isinstance(manifest_xml, str):
         manifest_xml = minidom.parse(manifest_xml)
 
@@ -39,13 +43,17 @@ def get_min_sdk(manifest_xml):
         return 1
 
 
-def get_target_sdk(manifest_xml):
+def get_target_sdk(manifest_xml, files=None):
     """
     Given the manifest as a `minidom.parse`'d object, try to get the target SDK the manifest specifies.
 
     :param manifest_xml: object after parsing the XML
+    :param Set[str] files: list of files received from Scanner
     :return: int of the version if it exists, else 1 (the default)
     """
+    if files:
+        manifest_xml = get_manifest_out_of_files(files)
+
     if isinstance(manifest_xml, str):
         manifest_xml = minidom.parse(manifest_xml)
 
@@ -88,12 +96,14 @@ def run_regex(filename, rex):
             for curr_line in f:
                 if re.search(rex, curr_line):
                     # exclude everythingin EXCLUDE_REGEXES
-                    if re.match(EXCLUSION_REGEX, curr_line):
-                        pass
-                    else:
+                    if not re.match(EXCLUSION_REGEX, curr_line):
                         things_to_inspect.append(curr_line)
     except IOError:
-        log.debug("Unable to read file: %s results will be inaccurate", filename)
+        log.debug("Unable to open file: %s results will be inaccurate", filename)
+    except UnicodeDecodeError:
+        pass
+    except Exception:
+        log.exception("Failed to read file: %s", filename)
     return things_to_inspect
 
 
