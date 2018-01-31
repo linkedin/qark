@@ -6,6 +6,7 @@ import javalang
 
 from qark.scanner.plugin import BasePlugin
 from qark.issue import Severity, Issue
+from qark.plugins.helpers import java_files_from_files
 
 log = logging.getLogger(__name__)
 
@@ -28,7 +29,7 @@ class ECBCipherCheck(BasePlugin):
 
         try:
             tree = javalang.parse.parse(body)
-        except Exception:
+        except (javalang.parser.JavaSyntaxError, IndexError):
             log.debug("Couldn't parse the java file: %s", filepath)
             return
 
@@ -47,6 +48,9 @@ class ECBCipherCheck(BasePlugin):
                 continue
 
     def run(self, files, apk_constants=None):
-        relevant_files = (file_path for file_path in files if os.path.splitext(file_path)[1] == '.java')
+        relevant_files = java_files_from_files(files)
         for file_path in relevant_files:
             self._process_file(file_path)
+
+
+plugin = ECBCipherCheck()

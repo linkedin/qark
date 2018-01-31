@@ -5,6 +5,7 @@ import javalang
 
 from qark.scanner.plugin import BasePlugin
 from qark.issue import Severity, Issue
+from qark.plugins.helpers import java_files_from_files
 
 log = logging.getLogger(__name__)
 
@@ -23,10 +24,7 @@ class SeedWithSecureRandom(BasePlugin):
 
     def _imports_secure_seed(self, tree):
         """Checks if a tree imports java.security.SecureRandom, and returns True if the import exists"""
-        for curr_import in tree.imports:
-            if curr_import.path == 'java.security.SecureRandom':
-                return True
-        return False
+        return any([imp.path == "java.security.SecureRandom" for imp in tree.imports])
 
     def _process_file(self, filepath):
         try:
@@ -38,8 +36,9 @@ class SeedWithSecureRandom(BasePlugin):
 
         try:
             tree = javalang.parse.parse(body)
-        except Exception:
-            log.exception("Couldn't parse the java file: %s", filepath)
+        except (javalang.parser.JavaSyntaxError, IndexError):
+            log.debug("Couldn't parse the java file: %s", filepath)
+            return
 
         if not self._imports_secure_seed(tree):  # doesn't import the insecure function
             return
@@ -51,6 +50,9 @@ class SeedWithSecureRandom(BasePlugin):
                                          file_object=filepath))
 
     def run(self, files, apk_constants=None):
-        relevant_files = [file_path for file_path in files if os.path.splitext(file_path)[1] == '.java']
+        relevant_files = java_files_from_files(files)
         for file_path in relevant_files:
             self._process_file(file_path)
+
+
+plugin = SeedWithSecureRandom()

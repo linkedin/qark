@@ -129,13 +129,16 @@ class ExportedTags(BasePlugin):
 
     def run(self, files, apk_constants=None):
         manifest_file = get_manifest_out_of_files(files)
+        if not manifest_file:
+            return
+
         try:
             self.manifest_xml = minidom.parse(manifest_file)
         except Exception:
             log.exception("Failed to parse manifest file, is it valid syntax?")
             return  # do not raise a SystemExit because other checks can still be ran
 
-        self.min_sdk = apk_constants.get("minimum_sdk", get_min_sdk(self.manifest_xml))
+        self.min_sdk = apk_constants.get("min_sdk", get_min_sdk(self.manifest_xml))
         self.target_sdk = apk_constants.get("target_sdk", get_target_sdk(self.manifest_xml))
 
         for tag in self.bad_exported_tags:

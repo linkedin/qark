@@ -47,7 +47,7 @@ class CertValidation(BasePlugin):
 
         try:
             tree = javalang.parse.parse(file_contents)
-        except javalang.parser.JavaSyntaxError:
+        except (javalang.parser.JavaSyntaxError, IndexError):
             log.debug("Couldn't parse the java file: %s", filepath)
             return
         current_file = filepath
