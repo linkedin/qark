@@ -28,13 +28,13 @@ class Report(object):
     # http://python-3-patterns-idioms-test.readthedocs.io/en/latest/Singleton.html#the-singleton
     __instance = None
 
-    def __new__(cls, report_path=None):
+    def __new__(cls, issues=None, report_path=None):
         if Report.__instance is None:
             Report.__instance = object.__new__(cls)
-        Report.__instance.report_path = report_path
+
         return Report.__instance
 
-    def __init__(self, report_path=None):
+    def __init__(self, issues=None, report_path=None):
         """This will give you an instance of a report, with a default report path which is local
         to where QARK is on the file system.
 
@@ -42,7 +42,7 @@ class Report(object):
         :type report_path: str or None
 
         """
-        self.issues = []
+        self.issues = issues if issues is not None else []
         self.report_path = report_path or DEFAULT_REPORT_PATH
 
     def generate_report_file(self, file_type='html', template_file=None):
