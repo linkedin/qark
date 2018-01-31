@@ -46,25 +46,47 @@ class Decompiler(object):
         """
         self.path_to_apk = path_to_apk
         self.build_directory = build_directory if build_directory else os.path.join(os.path.dirname(path_to_apk), "qark")
+
+        # validate we are running on an APK, Directory, or Java source code
+        if not os.path.exists(self.path_to_apk):
+            return
+
+        if os.path.isfile(self.path_to_apk) and os.path.splitext(self.path_to_apk.lower())[1] not in (".java", ".apk"):
+            return
+
+        if os.path.isdir(path_to_apk) or os.path.splitext(path_to_apk.lower())[1] == ".java":
+            self.source_code = True
+            self.manifest_path = None
+            log.debug("Decompiler got directory to run on, assuming Java source code")
+            return
+
+        self.source_code = False
         self.apk_name = os.path.splitext(os.path.basename(path_to_apk))[0]  # name of APK without the .apk extension
 
-        self.manifest_path = None
-        self.dex_path = None
-        self.jar_path = None
+        self.dex_path = self._unpack_apk()
+        self.jar_path = self._run_dex2jar()
+        self.manifest_path = self.run_apktool()
 
         self.decompilers = DECOMPILERS
         for decompiler in self.decompilers:
             if decompiler.name == "procyon":
+                log.debug("Downloading %s...", decompiler.name)
                 download_procyon()
             elif decompiler.name == "cfr":
+                log.debug("Downloading %s...", decompiler.name)
                 download_cfr()
 
     def decompile(self):
         """Top-level function which runs each decompiler and waits for them to finish decompilation."""
+        if self.source_code:
+            return
+
         decompiler_pool = ThreadPool(len(self.decompilers))
 
         for decompiler in self.decompilers:
-            os.makedirs(os.path.join(self.build_directory, decompiler.name))
+            if not os.path.isdir(os.path.join(self.build_directory, decompiler.name)):
+                os.makedirs(os.path.join(self.build_directory, decompiler.name))
+            log.debug("Starting decompilation with %s", decompiler.name)
             decompiler_pool.apply_async(self._decompiler_function, args=(decompiler,))
 
         decompiler_pool.close()
@@ -121,15 +143,20 @@ class Decompiler(object):
 
         custom_apktool_command = APK_TOOL_COMMAND.format(apktool_path=apktool_path,
                                                          path_to_apk=self.path_to_apk,
-                                                         build_directory=self.build_directory)
+                                                         build_directory=os.path.join(self.build_directory, "apktool"))
         try:
             subprocess.call(shlex.split(custom_apktool_command))
         except Exception:
             log.exception("Failed to run APKTool with command: %s", custom_apktool_command)
             raise SystemExit("Failed to run APKTool")
 
-        if os.path.isdir(os.path.join(self.build_directory, "original")):
-            shutil.rmtree(os.path.join(self.build_directory, "original"))
+        # copy valid XML file to correct location
+        shutil.copy(os.path.join(self.build_directory, "apktool", "AndroidManifest.xml"),
+                    os.path.join(self.build_directory, "AndroidManifest.xml"))
+
+        # remove the apktool generated files (only needed manifest file)
+        shutil.rmtree(os.path.join(self.build_directory, "apktool"))
+
         return os.path.join(self.build_directory, "AndroidManifest.xml")
 
     def _unpack_apk(self):
@@ -138,10 +165,7 @@ class Decompiler(object):
         :return: location for `self.dex_path` to use
         :rtype: os.path object
         """
-        try:
-            unzip_file(self.path_to_apk, destination_to_unzip=self.build_directory)
-        except Exception:
-            raise SystemExit("Unable to unzip APK")
+        unzip_file(self.path_to_apk, destination_to_unzip=self.build_directory)
 
         return os.path.join(self.build_directory, "classes.dex")
 
