@@ -4,7 +4,6 @@ import os
 import shutil
 
 
-
 def test_run(scanner, decompiler):
     decompiler.decompile()
 
@@ -13,7 +12,7 @@ def test_run(scanner, decompiler):
     scanner.run()
     assert 0 < len(scanner.issues)
 
-'''
+
 def test_run_manifest_checks(scanner):
     scanner.issues = []
     scanner._run_checks("manifest")
@@ -24,14 +23,14 @@ def test_run_manifest_checks(scanner):
     scanner.issues = []
     scanner._run_checks("manifest")
     assert 7 == len(scanner.issues)
-'''
+
 
 def test_run_broadcast_checks(scanner):
     scanner.issues = []
     scanner._run_checks("broadcast")
     assert 0 < len(scanner.issues)
 
-'''
+
 def test_run_file_checks(scanner):
     scanner.issues = []
     scanner._run_checks("file")
@@ -53,4 +52,3 @@ def test_scanner_singleton(decompiler):
     assert s2 is s1
     assert len(s2.issues) == 1
     assert s2.issues.pop() == "new_issue"
-'''
