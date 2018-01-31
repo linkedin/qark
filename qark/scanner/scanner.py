@@ -10,6 +10,9 @@ from qark.scanner.plugin import get_plugin_source, get_plugins
 log = logging.getLogger(__name__)
 
 
+PLUGIN_CATEGORIES = ("manifest", "broadcast", "file", "crypto", "intent", "cert")
+
+
 class Scanner(object):
     __instance = None
 
@@ -28,6 +31,9 @@ class Scanner(object):
         :param Decompiler decompiler: the decompiler class that contains decompiled path information
         """
         self.decompiler = decompiler
+        if decompiler.source_code:
+            return
+
         if self.decompiler.manifest_path is None:
             self.decompiler.manifest_path = self.decompiler.run_apktool()
 
@@ -36,17 +42,22 @@ class Scanner(object):
         Runs all the plugin checks by category.
         """
         self._gather_files()
-        self._run_manifest_checks()
-        self._run_broadcast_checks()
-        self._run_file_checks()
-        self._run_intent_checks()
+        for category in PLUGIN_CATEGORIES:
+            self._run_checks(category=category)
 
-    def _run_manifest_checks(self):
+    def _run_checks(self, category):
         """
-        Runs all plugins under `qark.plugins.manifest` and updates `self.issues` with their findings.
+        Runs all plugins under `qark.plugins.category` and updates `self.issues` with their findings.
         """
-        plugin_source = get_plugin_source(category="manifest")
-        for plugin_name in get_plugins(category="manifest"):
+        plugin_source = get_plugin_source(category=category)
+        try:
+            min_sdk = get_min_sdk(self.decompiler.manifest_path, files=self.files)
+            target_sdk = get_target_sdk(self.decompiler.manifest_path, files=self.files)
+        except AttributeError:
+            # manifest path is not set, assume min_sdk and target_sdk
+            min_sdk = target_sdk = 15
+
+        for plugin_name in get_plugins(category=category):
             try:
                 plugin = plugin_source.load_plugin(plugin_name).plugin
             except Exception:
@@ -54,97 +65,8 @@ class Scanner(object):
                 continue
 
             try:
-                plugin.run(files=self.files, apk_constants={"minimum_sdk": get_min_sdk(self.decompiler.manifest_path),
-                                                            "target_sdk": get_target_sdk(
-                                                                self.decompiler.manifest_path)})
-            except Exception:
-                log.exception("Error running plugin %s... continuing with next plugin", plugin_name)
-                continue
-
-            self.issues.extend(plugin.issues)
-
-    def _run_intent_checks(self):
-        """
-        Runs all plugins under `qark.plugins.intent` and updates `self.issues` with their findings.
-        """
-        plugin_source = get_plugin_source(category="intent")
-        for plugin_name in get_plugins(category="intent"):
-            try:
-                plugin = plugin_source.load_plugin(plugin_name).plugin
-            except Exception:
-                log.exception("Error loading plugin %s... continuing with next plugin", plugin_name)
-                continue
-
-            try:
-                plugin.run(files=self.files, apk_constants={"minimum_sdk": get_min_sdk(self.decompiler.manifest_path),
-                                                            "target_sdk": get_target_sdk(
-                                                                self.decompiler.manifest_path)})
-            except Exception:
-                log.exception("Error running plugin %s... continuing with next plugin", plugin_name)
-                continue
-
-            self.issues.extend(plugin.issues)
-
-    def _run_broadcast_checks(self):
-        """
-        Runs all plugins under `qark.plugins.broadcast` and updates `self.issues` with their findings.
-        """
-        plugin_source = get_plugin_source(category="broadcast")
-        for plugin_name in get_plugins(category="broadcast"):
-            try:
-                plugin = plugin_source.load_plugin(plugin_name).plugin
-            except Exception:
-                log.exception("Error loading plugin %s... continuing with next plugin", plugin_name)
-                continue
-
-            try:
-                plugin.run(files=self.files, apk_constants={"minimum_sdk": get_min_sdk(self.decompiler.manifest_path),
-                                                            "target_sdk": get_target_sdk(
-                                                                self.decompiler.manifest_path)})
-            except Exception:
-                log.exception("Error running plugin %s... continuing with next plugin", plugin_name)
-                continue
-
-            self.issues.extend(plugin.issues)
-
-    def _run_file_checks(self):
-        """
-        Runs all plugins under `qark.plugins.file` and updates `self.issues` with their findings.
-        """
-        plugin_source = get_plugin_source(category="file")
-        for plugin_name in get_plugins(category="file"):
-          try:
-            plugin = plugin_source.load_plugin(plugin_name).plugin
-          except Exception:
-            log.exception("Error loading plugin %s... continuing with next plugin", plugin_name)
-            continue
-
-            try:
-                plugin.run(files=self.files, apk_constants={"minimum_sdk": get_min_sdk(self.decompiler.manifest_path),
-                                                            "target_sdk": get_target_sdk(
-                                                                self.decompiler.manifest_path)})
-            except Exception:
-                log.exception("Error running plugin %s... continuing with next plugin", plugin_name)
-                continue
-
-            self.issues.extend(plugin.issues)
-            
-    def _run_intent_checks(self):
-        """
-        Runs all plugins under `qark.plugins.intent` and updates `self.issues` with their findings.
-        """
-        plugin_source = get_plugin_source(category="intent")
-        for plugin_name in get_plugins(category="intent"):
-            try:
-                plugin = plugin_source.load_plugin(plugin_name).plugin
-            except Exception:
-                log.exception("Error loading plugin %s... continuing with next plugin", plugin_name)
-                continue
-
-            try:
-                plugin.run(files=self.files, apk_constants={"minimum_sdk": get_min_sdk(self.decompiler.manifest_path),
-                                                            "target_sdk": get_target_sdk(
-                                                                self.decompiler.manifest_path)})
+                plugin.run(files=self.files, apk_constants={"min_sdk": min_sdk,
+                                                            "target_sdk": target_sdk})
             except Exception:
                 log.exception("Error running plugin %s... continuing with next plugin", plugin_name)
                 continue
@@ -156,8 +78,13 @@ class Scanner(object):
         Walks the `Decompiler.build_directory` and updates the `self.files` set with new files.
         :return:
         """
+        if path.splitext(self.decompiler.path_to_apk.lower())[1] == ".java":
+            self.files.add(self.decompiler.path_to_apk)
+            return
+
+        walk_directory = self.decompiler.build_directory
         try:
-            for (dir_path, _, file_names) in walk(self.decompiler.build_directory):
+            for (dir_path, _, file_names) in walk(walk_directory):
                 for file_name in file_names:
                     self.files.add(path.join(dir_path, file_name))
         except AttributeError:
