@@ -24,5 +24,11 @@ def test_full_sca(path_to_apk, build_directory):
     assert 0 == result.exit_code
 
     # scan a file that has an issue
-    result = runner.invoke(cli, ["--java", "build_directory/cfr/android/support/v4/content/LocalBroadcastManager.java"])
+    result = runner.invoke(cli, ["--java", os.path.join(os.path.dirname(os.path.abspath(__file__)), "build_directory",
+                                                        "cfr",
+                                                        "android",
+                                                        "support",
+                                                        "v4",
+                                                        "content",
+                                                        "LocalBroadcastManager.java")])
     assert 0 == result.exit_code
