@@ -13,7 +13,7 @@ def path_to_apk():
 
 @pytest.fixture(scope="session")
 def build_directory():
-    return os.path.join(os.path.dirname(os.path.abspath(__file__)), "unzip_apk")
+    return os.path.join(os.path.dirname(os.path.abspath(__file__)), "build_directory")
 
 
 @pytest.fixture()
