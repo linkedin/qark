@@ -34,6 +34,11 @@ class Scanner(object):
         :param Decompiler decompiler: the decompiler class that contains decompiled path information
         """
         self.decompiler = decompiler
+        if decompiler.source_code:
+            return
+
+        if self.decompiler.manifest_path is None:
+            self.decompiler.manifest_path = self.decompiler.run_apktool()
 
     def run(self):
         """
@@ -56,7 +61,6 @@ class Scanner(object):
             min_sdk = target_sdk = 1
 
         for plugin_name in get_plugins(category=category):
-
             try:
                 plugin = plugin_source.load_plugin(plugin_name).plugin
             except Exception:
@@ -80,9 +84,9 @@ class Scanner(object):
         if path.splitext(self.decompiler.path_to_source.lower())[1] == ".java":
             self.files.add(self.decompiler.path_to_source)
             return
-
+        walk_directory = self.decompiler.build_directory
         try:
-            for (dir_path, _, file_names) in walk(self.decompiler.build_directory):
+            for (dir_path, _, file_names) in walk(walk_directory):
                 for file_name in file_names:
                     self.files.add(path.join(dir_path, file_name))
         except AttributeError:
