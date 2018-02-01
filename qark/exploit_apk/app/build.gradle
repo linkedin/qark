@@ -1,0 +1,116 @@
+apply plugin: 'com.android.application'
+
+import org.codehaus.groovy.runtime.StackTraceUtils
+
+int[] sdksAvailable() {
+
+    def sdks = new ByteArrayOutputStream()
+    exec {
+        commandLine androidSDKDir()+'tools/android', 'list'
+        standardOutput = sdks
+    }
+    sdks = sdks
+            // get the output
+            .toString()
+            // split to strings
+            .split('\n')
+            // leave only strings with API levels
+            .findAll { it ==~ /\s*API level:.*/ }
+            // extract the API levels
+            .collect { (it =~ /\s*API level:\s*(\d+).*/)[0][1].toInteger() }
+            // sort from highest to lowest
+            .sort( { a, b -> b <=> a } )
+    sdks
+}
+
+int highestSdkAvailable(int defaultSdk) {
+    try {
+        def sdks = sdksAvailable()
+        def highestSdk = sdks[0]
+        if (highestSdk != null) {
+            println "Using highest found SDK " + highestSdk
+            highestSdk
+        } else {
+            println "No installed SDKs found. Using default SDK " + defaultSdk
+            defaultSdk
+        }
+    } catch (any) {
+        println "Exception while determining highest SDK. Using default SDK " +
+                defaultSdk
+        StackTraceUtils.sanitize(any).printStackTrace()
+        defaultSdk
+    }
+}
+
+String androidSDKDir() {
+    def androidExecPath = new ByteArrayOutputStream()
+    exec {
+        commandLine 'pwd'
+        standardOutput = androidExecPath
+    }
+
+    def path = androidExecPath.toString().substring(0, androidExecPath.toString().lastIndexOf('/build/qark/app'))
+    println path + "/settings.properties"
+
+    Properties properties = new Properties()
+    File propertiesFile = new File(path + '/settings.properties')
+    propertiesFile.withInputStream {
+        properties.load(it)
+    }
+    println properties.AndroidSDKPath
+
+    return properties.AndroidSDKPath
+}
+
+String[] buildToolsAvailable() {
+    def buildToolsDir = new File(androidSDKDir(), "build-tools")
+    buildToolsDir.list().sort { a, b -> b <=> a }
+}
+
+String latestBuildToolsAvailable(String defaultBuildTools) {
+    try {
+        def buildToolsVersions = buildToolsAvailable()
+        def latestBuildTools = buildToolsVersions[0]
+        if (latestBuildTools != null) {
+            println "Using latest found build tools " + latestBuildTools
+            latestBuildTools
+        } else {
+            println "No installed build tools found. Using default build tools " +
+                    defaultBuildTools
+            defaultBuildTools
+        }
+    } catch (any) {
+        println "Exception while determining latest build tools. Using default build tools " +
+                defaultBuildTools
+        StackTraceUtils.sanitize(any).printStackTrace()
+        defaultBuildTools
+    }
+}
+
+android {
+    compileSdkVersion highestSdkAvailable(21)
+    buildToolsVersion latestBuildToolsAvailable("21.1.2")
+    defaultConfig {
+        applicationId 'com.secbro.qark'
+        minSdkVersion 7
+        targetSdkVersion 21
+        versionCode 1
+        versionName "1.0"
+    }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_7
+        targetCompatibility = JavaVersion.VERSION_1_7
+    }
+    buildTypes {
+        release {
+        }
+    }
+    productFlavors {
+    }
+}
+
+dependencies {
+    compile 'com.android.support:appcompat-v7:22.2.1'
+    compile 'com.android.support:design:22.2.1'
+    compile 'com.android.support:recyclerview-v7:22.2.1'
+}
