@@ -31,11 +31,6 @@ class Scanner(object):
         :param Decompiler decompiler: the decompiler class that contains decompiled path information
         """
         self.decompiler = decompiler
-        if decompiler.source_code:
-            return
-
-        if self.decompiler.manifest_path is None:
-            self.decompiler.manifest_path = self.decompiler.run_apktool()
 
     def run(self):
         """
