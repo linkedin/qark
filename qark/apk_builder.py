@@ -54,7 +54,7 @@ INTENT_EXTRAS_STRINGS = (r'getExtras\(\s*[0-9A-Za-z_\"\'.]+',
                          r'getShortExtra\(\s*[0-9A-Za-z_\"\'.]+'
                          r'getStringArrayExtra\(\s*[0-9A-Za-z_\"\'.]+'
                          r'getStringArrayListExtra\(\s*[0-9A-Za-z_\"\'.]+'
-                         
+
                          # These are not necessarily Intent extras, but may contain them
                          r'getString\(\s*[0-9A-Za-z_\"\'.]+'
                          )
@@ -134,12 +134,12 @@ class APKBuilder(object):
 
         return found_exported_tag_issues
 
-    def _write_intent_to_strings_xml(self, intent_name, value):
+    def _write_key_value_to_strings_xml(self, key, value):
         """
-        Checks if `intent_name` exists in the parsed XML `self.string_xml_path`, if it does not it creates a new
+        Checks if `key` exists in the parsed XML `self.string_xml_path`, if it does not it creates a new
         element and appends it to the XML tree and then updates the file.
 
-        :param intent_name:
+        :param key:
         :param value:
         :return:
         """
@@ -149,8 +149,8 @@ class APKBuilder(object):
             log.exception("Strings file for exploit APK does not exist")
             raise SystemExit("Strings file for exploit APK does not exist")
 
-        if not strings_xml.find(intent_name):
-            new_element = ElementTree.SubElement(strings_xml.getroot(), "string", attrib={"name": intent_name})
+        if not strings_xml.find(key):
+            new_element = ElementTree.SubElement(strings_xml.getroot(), "string", attrib={"name": key})
             new_element.text = value
 
             strings_xml.write(self.strings_xml_path)
@@ -211,6 +211,8 @@ class APKBuilder(object):
         current_directory = os.getcwd()
         try:
             os.chdir(self.exploit_apk_path)
+
+            self._write_key_value_to_strings_xml('packageName', self.package_name)
 
             self._write_properties_file({"sdk.dir": self.sdk_path})
             command = "./gradlew assembleDebug"
