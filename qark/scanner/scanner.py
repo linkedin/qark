@@ -78,8 +78,8 @@ class Scanner(object):
         Walks the `Decompiler.build_directory` and updates the `self.files` set with new files.
         :return:
         """
-        if path.splitext(self.decompiler.path_to_apk.lower())[1] == ".java":
-            self.files.add(self.decompiler.path_to_apk)
+        if path.splitext(self.decompiler.path_to_source.lower())[1] == ".java":
+            self.files.add(self.decompiler.path_to_source)
             return
 
         walk_directory = self.decompiler.build_directory

@@ -6,7 +6,7 @@ import os
 import shutil
 
 
-def test_full_sca(path_to_apk, build_directory):
+def test_full_sca(path_to_source, build_directory):
     if os.path.isdir(build_directory):
         shutil.rmtree(build_directory)
     os.environ['LC_ALL'] = 'en_US.utf-8'
@@ -15,7 +15,7 @@ def test_full_sca(path_to_apk, build_directory):
     runner = CliRunner()
 
     # decompile and run scans on goatdroid APK putting output to build_directory
-    result = runner.invoke(cli, ["--apk", path_to_apk, "--build-path", build_directory])
+    result = runner.invoke(cli, ["--apk", path_to_source, "--build-path", build_directory])
     assert 0 == result.exit_code
 
 

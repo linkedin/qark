@@ -31,7 +31,7 @@ log = logging.getLogger(__name__)
 @click.version_option()
 def cli(sdk_path, build_path, debug, source, report_type, exploit_apk):
     click.secho("Decompiling...")
-    decompiler = Decompiler(path_to_apk=source, build_directory=build_path)
+    decompiler = Decompiler(path_to_source=source, build_directory=build_path)
     decompiler.decompile()
 
     click.secho("Running scans...")

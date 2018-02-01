@@ -26,7 +26,7 @@ DEX2JAR_PATH = os.path.join(LIB_PATH, DEX2JAR_NAME)
 DECOMPILERS_PATH = os.path.join(LIB_PATH, "decompilers")
 
 APK_TOOL_COMMAND = ("java -Djava.awt.headless=true -jar {apktool_path}/apktool.jar "
-                    "d {path_to_apk} --no-src --force -m --output {build_directory}")
+                    "d {path_to_source} --no-src --force -m --output {build_directory}")
 DEX2JAR_COMMAND = "{dex2jar_path} {path_to_dex} -o {build_directory}/{apk_name}.jar"
 
 
@@ -38,30 +38,30 @@ class Decompiler(object):
     Each decompiler should have at most the following keys in their command string:
     {path_to_decompiler}, {jar}, {build_directory} -- Keys can be less than these but there can be no extra keys.
     """
-    def __init__(self, path_to_apk, build_directory=None):
+    def __init__(self, path_to_source, build_directory=None):
         """
-        :param path_to_apk: Absolute path to APK to decompile
+        :param path_to_source: Path to directory, APK, or a .java file
         :param build_directory: directory to unpack and decompile APK to.
                                 If directory does not exist it will be created, defaults to same directory as APK/qark
         """
-        self.path_to_apk = path_to_apk
-        self.build_directory = build_directory if build_directory else os.path.join(os.path.dirname(path_to_apk), "qark")
+        self.path_to_source = path_to_source
+        self.build_directory = build_directory if build_directory else os.path.join(os.path.dirname(path_to_source), "qark")
 
         # validate we are running on an APK, Directory, or Java source code
-        if not os.path.exists(self.path_to_apk):
+        if not os.path.exists(self.path_to_source):
             return
 
-        if os.path.isfile(self.path_to_apk) and os.path.splitext(self.path_to_apk.lower())[1] not in (".java", ".apk"):
+        if os.path.isfile(self.path_to_source) and os.path.splitext(self.path_to_source.lower())[1] not in (".java", ".apk"):
             return
 
-        if os.path.isdir(path_to_apk) or os.path.splitext(path_to_apk.lower())[1] == ".java":
+        if os.path.isdir(path_to_source) or os.path.splitext(path_to_source.lower())[1] == ".java":
             self.source_code = True
             self.manifest_path = None
             log.debug("Decompiler got directory to run on, assuming Java source code")
             return
 
         self.source_code = False
-        self.apk_name = os.path.splitext(os.path.basename(path_to_apk))[0]  # name of APK without the .apk extension
+        self.apk_name = os.path.splitext(os.path.basename(path_to_source))[0]  # name of APK without the .apk extension
 
         self.dex_path = self._unpack_apk()
         self.jar_path = self._run_dex2jar()
@@ -142,7 +142,7 @@ class Decompiler(object):
             raise SystemExit("Failed to create path to apktool")
 
         custom_apktool_command = APK_TOOL_COMMAND.format(apktool_path=apktool_path,
-                                                         path_to_apk=self.path_to_apk,
+                                                         path_to_source=self.path_to_source,
                                                          build_directory=os.path.join(self.build_directory, "apktool"))
         try:
             subprocess.call(shlex.split(custom_apktool_command))
@@ -151,7 +151,7 @@ class Decompiler(object):
             raise SystemExit("Failed to run APKTool")
 
         # copy valid XML file to correct location
-        shutil.copy(os.path.join(self.build_directory, "apktool", "AndroidManifest.xml"),
+        shutil.move(os.path.join(self.build_directory, "apktool", "AndroidManifest.xml"),
                     os.path.join(self.build_directory, "AndroidManifest.xml"))
 
         # remove the apktool generated files (only needed manifest file)
@@ -165,7 +165,7 @@ class Decompiler(object):
         :return: location for `self.dex_path` to use
         :rtype: os.path object
         """
-        unzip_file(self.path_to_apk, destination_to_unzip=self.build_directory)
+        unzip_file(self.path_to_source, destination_to_unzip=self.build_directory)
 
         return os.path.join(self.build_directory, "classes.dex")
 
