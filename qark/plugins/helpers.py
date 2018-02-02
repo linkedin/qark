@@ -51,7 +51,7 @@ def get_target_sdk(manifest_xml, files=None):
     :param Set[str] files: list of files received from Scanner
     :return: int of the version if it exists, else 1 (the default)
     """
-    if files:
+    if manifest_xml is None and files:
         manifest_xml = get_manifest_out_of_files(files)
 
     if isinstance(manifest_xml, str):
