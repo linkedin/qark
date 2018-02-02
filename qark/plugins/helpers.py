@@ -23,7 +23,7 @@ def get_min_sdk(manifest_xml, files=None):
     :param Set[str] files: list of files received from Scanner
     :return: int of the version if it exists, else 1 (the default)
     """
-    if files:
+    if manifest_xml is None and files:
         manifest_xml = get_manifest_out_of_files(files)
 
     if isinstance(manifest_xml, str):
@@ -101,7 +101,7 @@ def run_regex(filename, rex):
     except IOError:
         log.debug("Unable to open file: %s results will be inaccurate", filename)
     except UnicodeDecodeError:
-        pass
+        log.debug("Error reading file: %s most likely it is of an invalid type", filename)
     except Exception:
         log.exception("Failed to read file: %s", filename)
     return things_to_inspect

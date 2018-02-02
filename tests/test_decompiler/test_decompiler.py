@@ -67,16 +67,13 @@ def test_get_java_version():
     assert not java_version.endswith('"')
 
 
-def test_ran_unpack_apk(decompiler, bad_decompiler):
+def test_ran_unpack_apk(decompiler):
     classes_dex_path = os.path.join(decompiler.build_directory, "classes.dex")
     assert classes_dex_path == decompiler.dex_path
     assert os.path.isfile(classes_dex_path)
 
     shutil.rmtree(decompiler.build_directory)
     assert not os.path.isdir(decompiler.build_directory)
-
-    with pytest.raises(SystemExit):
-        bad_decompiler._unpack_apk()
 
 
 def test_ran_apktool(decompiler):

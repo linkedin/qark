@@ -49,7 +49,7 @@ class Decompiler(object):
 
         # validate we are running on an APK, Directory, or Java source code
         if not os.path.exists(self.path_to_source):
-            return
+            raise ValueError("Invalid path, path must be to an APK, directory, or a Java file")
 
         if os.path.isfile(self.path_to_source) and os.path.splitext(self.path_to_source.lower())[1] not in (".java", ".apk"):
             return

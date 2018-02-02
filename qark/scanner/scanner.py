@@ -50,7 +50,7 @@ class Scanner(object):
             target_sdk = get_target_sdk(self.decompiler.manifest_path, files=self.files)
         except AttributeError:
             # manifest path is not set, assume min_sdk and target_sdk
-            min_sdk = target_sdk = 15
+            min_sdk = target_sdk = 1
 
         for plugin_name in get_plugins(category=category):
             try:

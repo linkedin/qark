@@ -27,11 +27,6 @@ def scanner(decompiler):
 
 
 @pytest.fixture(scope="session")
-def bad_decompiler():
-    return Decompiler("1")
-
-
-@pytest.fixture(scope="session")
 def cfr_path():
     return os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "lib", "decompilers", "cfr_0_124.jar")
 
