@@ -30,6 +30,9 @@ class MinSDK(BasePlugin):
             min_sdk = apk_constants["min_sdk"]
         except (KeyError, TypeError):
             manifest_path = get_manifest_out_of_files(files)
+            if not manifest_path:
+                return
+
             try:
                 manifest_xml = minidom.parse(manifest_path)
             except Exception:

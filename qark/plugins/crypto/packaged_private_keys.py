@@ -24,3 +24,6 @@ class PackagedPrivateKeys(BasePlugin):
                     description = "It appears there is a private key embedded in your application in the following file:"
                     self.issues.append(
                         Issue(self.category, self.name, self.severity, description, file_object=file_path))
+
+
+plugin = PackagedPrivateKeys()

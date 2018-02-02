@@ -22,6 +22,9 @@ class DebuggableManifest(BasePlugin):
 
     def run(self, files, apk_constants=None):
         manifest_path = get_manifest_out_of_files(files)
+        if not manifest_path:
+            return
+
         try:
             manifest_xml = minidom.parse(manifest_path)
         except Exception:

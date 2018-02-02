@@ -4,12 +4,7 @@ import os
 import shutil
 
 
-def test_run(scanner, build_directory, decompiler):
-    if os.path.isdir(build_directory):
-        shutil.rmtree(build_directory)
-
-    decompiler._run_dex2jar()
-    decompiler.run_apktool()
+def test_run(scanner, decompiler):
     decompiler.decompile()
 
     scanner.issues = []
@@ -20,31 +15,31 @@ def test_run(scanner, build_directory, decompiler):
 
 def test_run_manifest_checks(scanner):
     scanner.issues = []
-    scanner._run_manifest_checks()
+    scanner._run_checks("manifest")
     assert 7 == len(scanner.issues)
 
     # this should hit the other code path where
     #   manifest_path is already set
     scanner.issues = []
-    scanner._run_manifest_checks()
+    scanner._run_checks("manifest")
     assert 7 == len(scanner.issues)
 
 
 def test_run_broadcast_checks(scanner):
     scanner.issues = []
-    scanner._run_broadcast_checks()
-    assert 0 == len(scanner.issues)  # goatdroid not using these methods
+    scanner._run_checks("broadcast")
+    assert 0 < len(scanner.issues)
 
 
 def test_run_file_checks(scanner):
     scanner.issues = []
-    scanner._run_file_checks()
+    scanner._run_checks("file")
     assert 0 == len(scanner.issues)
-    
-    
+
+
 def test_run_intent_checks(scanner):
     scanner.issues = []
-    scanner._run_intent_checks()
+    scanner._run_checks("intent")
     assert 0 == len(scanner.issues)  # goatdroid doesnt have any of these vulnerabilities
 
 

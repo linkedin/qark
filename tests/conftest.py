@@ -7,28 +7,23 @@ from qark.scanner.scanner import Scanner
 
 
 @pytest.fixture(scope="session")
-def path_to_apk():
+def path_to_source():
     return os.path.join(os.path.dirname(os.path.abspath(__file__)), "goatdroid.apk")
 
 
 @pytest.fixture(scope="session")
 def build_directory():
-    return os.path.join(os.path.dirname(os.path.abspath(__file__)), "unzip_apk")
+    return os.path.join(os.path.dirname(os.path.abspath(__file__)), "build_directory")
 
 
 @pytest.fixture()
-def decompiler(path_to_apk, build_directory):
-    return Decompiler(path_to_apk=path_to_apk, build_directory=build_directory)
+def decompiler(path_to_source, build_directory):
+    return Decompiler(path_to_source=path_to_source, build_directory=build_directory)
 
 
 @pytest.fixture()
 def scanner(decompiler):
     return Scanner(decompiler=decompiler)
-
-
-@pytest.fixture(scope="session")
-def bad_decompiler():
-    return Decompiler("1")
 
 
 @pytest.fixture(scope="session")

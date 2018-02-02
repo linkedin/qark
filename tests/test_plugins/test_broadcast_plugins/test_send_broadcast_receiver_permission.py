@@ -1,8 +1,5 @@
 from qark.plugins.broadcast.send_broadcast_receiver_permission import SendBroadcastReceiverPermission
 
-import os
-import shutil
-
 
 def test_send_broadcast_receiver_permission(vulnerable_broadcast_path):
     plugin = SendBroadcastReceiverPermission()

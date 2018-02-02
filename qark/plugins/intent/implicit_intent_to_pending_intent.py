@@ -56,7 +56,7 @@ class ImplicitIntentToPendingIntent(BasePlugin):
 
             try:
                 parsed_tree = javalang.parse.parse(file_contents)
-            except javalang.parser.JavaSyntaxError:
+            except (javalang.parser.JavaSyntaxError, IndexError):
                 log.debug("Error parsing file %s, continuing", java_file)
                 continue
 
