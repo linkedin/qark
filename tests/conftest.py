@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 import pytest
 
 import os
@@ -45,7 +47,8 @@ def procyon_path():
 
 @pytest.fixture(scope="session")
 def vulnerable_manifest_path():
-    return os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_androidmanifest.xml")
+    return os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_xml_files",
+                        "test_androidmanifest.xml")
 
 
 @pytest.fixture(scope="session")

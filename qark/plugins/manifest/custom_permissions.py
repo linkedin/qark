@@ -1,9 +1,11 @@
-from qark.plugins.helpers import get_min_sdk, get_manifest_out_of_files
+from qark.manifest_helpers import get_min_sdk
+from qark.plugins.helpers import get_manifest_out_of_files
 from qark.scanner.plugin import BasePlugin
 from qark.issue import Severity, Issue
 
 import logging
 from xml.dom import minidom
+from qark import manifest_helpers
 
 log = logging.getLogger(__name__)
 

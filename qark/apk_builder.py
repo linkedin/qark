@@ -1,10 +1,13 @@
+from __future__ import absolute_import
+
 import logging
 import os
 import re
 import shlex
 import shutil
 import subprocess
-from xml.etree import ElementTree
+from qark.manifest_helpers import get_package_from_manifest
+from qark.xml_helpers import write_key_value_to_xml
 
 try:
     import ConfigParser as configparser
@@ -134,85 +137,13 @@ class APKBuilder(object):
 
         return found_exported_tag_issues
 
-    def _write_key_value_to_strings_xml(self, key, value):
-        """
-        Checks if `key` exists in the parsed XML `self.string_xml_path`, if it does not it creates a new
-        element and appends it to the XML tree and then updates the file.
-
-        :param key:
-        :param value:
-        :return:
-        """
-        try:
-            strings_xml = ElementTree.parse(self.strings_xml_path)
-        except IOError:
-            log.exception("Strings file for exploit APK does not exist")
-            raise SystemExit("Strings file for exploit APK does not exist")
-
-        if not strings_xml.find(key):
-            new_element = ElementTree.SubElement(strings_xml.getroot(), "string", attrib={"name": key})
-            new_element.text = value
-
-            strings_xml.write(self.strings_xml_path)
-
-    def _write_intent_id_to_xml(self, intent_id):
-        """
-        Checks if `intent_name` exists in the parsed XML `self.string_xml_path`, if it does not it creates a new
-        element and appends it to the XML tree and then updates the file.
-
-        :param intent_name:
-        :param value:
-        :return:
-        """
-        try:
-            strings_xml = ElementTree.parse(self.intent_ids_xml_path)
-        except IOError:
-            log.exception("Strings file for exploit APK does not exist")
-            raise SystemExit("Strings file for exploit APK does not exist")
-        """
-        if not strings_xml.findall("string-array"):
-            new_element = ElementTree.SubElement(strings_xml.getroot(), "string", attrib={"name": intent_name})
-            new_element.text = value
-
-            strings_xml.write(self.strings_xml_path)
-        """
-
-    def _write_intent_to_extra_keys_xml(self, intent_name, key):
-        """
-        Checks if `intent_name` is name of a `string-array`, if it does not exist it creates a new
-        element and appends it to the XML tree and then updates the file, if it exists it updates the existing element.
-
-        :param intent_name:
-        :param value:
-        """
-        try:
-            strings_xml = ElementTree.parse(self.extra_keys_xml_path)
-        except IOError:
-            log.exception("Extra keys file for exploit APK does not exist")
-            raise SystemExit("Extra keys file for exploit APK does not exist")
-
-        # attempt to update the intent if it exists
-        for string_array in strings_xml.findall("string-array"):
-            if string_array.attrib.get("name") == intent_name:
-                sub_element_item = ElementTree.SubElement(string_array, "item")
-                sub_element_item.text = key
-
-                strings_xml.write(self.strings_xml_path)
-                return
-
-        # write the intent as it does not exist
-        new_string_array = ElementTree.SubElement(strings_xml.getroot(), "string-array", attrib={"name": intent_name})
-        sub_element_item = ElementTree.SubElement(new_string_array, "item")
-        sub_element_item.text = key
-
-        strings_xml.write(self.strings_xml_path)
 
     def _build_apk(self):
         current_directory = os.getcwd()
         try:
             os.chdir(self.exploit_apk_path)
 
-            self._write_key_value_to_strings_xml('packageName', self.package_name)
+            write_key_value_to_xml('packageName', self.package_name, self.strings_xml_path)
 
             self._write_properties_file({"sdk.dir": self.sdk_path})
             command = "./gradlew assembleDebug"
@@ -259,18 +190,3 @@ class APKBuilder(object):
             cp.readfp(config)
 
             return dict(cp.items('dummy_section'))
-
-
-def get_package_from_manifest(manifest_path):
-    """
-    Gets the package name from an AndroidManifest.xml file path
-
-    :param manifest_path: path to android manifest
-    :return: package name if exists
-    """
-    try:
-        manifest_xml = ElementTree.parse(manifest_path)
-    except IOError:
-        raise
-
-    return manifest_xml.getroot().attrib.get("package")

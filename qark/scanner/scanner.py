@@ -1,11 +1,14 @@
+from __future__ import absolute_import
+
 import logging
 from os import (
     walk,
     path
 )
 
-from qark.plugins.helpers import get_min_sdk, get_target_sdk
+from qark.manifest_helpers import get_min_sdk, get_target_sdk
 from qark.scanner.plugin import get_plugin_source, get_plugins
+from qark import manifest_helpers
 
 log = logging.getLogger(__name__)
 

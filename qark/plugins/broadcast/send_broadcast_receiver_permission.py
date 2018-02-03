@@ -1,4 +1,5 @@
-from qark.plugins.helpers import get_min_sdk, java_files_from_files
+from qark.plugins.helpers import java_files_from_files
+from qark.manifest_helpers import get_min_sdk
 from qark.scanner.plugin import BasePlugin
 from qark.issue import Severity, Issue
 
@@ -9,6 +10,7 @@ from xml.dom import minidom
 
 import javalang
 from javalang.tree import MethodInvocation
+from qark import manifest_helpers
 
 
 log = logging.getLogger(__name__)
@@ -78,7 +80,7 @@ class SendBroadcastReceiverPermission(BasePlugin):
         except (KeyError, TypeError):
             for decompiled_file in files:
                 if decompiled_file.lower().endswith("{separator}androidmanifest.xml".format(separator=os.sep)):
-                    self.below_min_sdk_21 = get_min_sdk(manifest_xml=minidom.parse(decompiled_file)) < 21
+                    self.below_min_sdk_21 = manifest_helpers.get_min_sdk(manifest_xml=minidom.parse(decompiled_file)) < 21
                 else:
                     self.below_min_sdk_21 = False
 
