@@ -1,5 +1,6 @@
 from xml.etree import ElementTree
 
+
 def write_key_value_to_xml(key, value, path):
     """
     Checks if `key` exists in the parsed XML `path`, if it does not it creates a new
@@ -53,3 +54,15 @@ def write_key_value_to_string_array_xml(array_name, value, path):
     sub_element_item.text = value
 
     strings_xml.write(path)
+
+
+def get_manifest_out_of_files(files):
+    """
+    Parses `files` for a file that ends with `androidmanifest.xml`.
+    :param Set[str] files: list of paths to files as absolute paths
+    :return: manifest string if in `files`, else None
+    """
+    for file_name in files:
+        if file_name.lower().endswith("androidmanifest.xml"):
+            return file_name
+    return None
