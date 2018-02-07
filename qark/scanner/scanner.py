@@ -8,7 +8,6 @@ from os import (
 
 from qark.manifest_helpers import get_min_sdk, get_target_sdk
 from qark.scanner.plugin import get_plugin_source, get_plugins
-from qark import manifest_helpers
 
 log = logging.getLogger(__name__)
 
@@ -68,8 +67,9 @@ class Scanner(object):
                 continue
 
             try:
-                plugin.run(files=self.files, apk_constants={"min_sdk": min_sdk,
-                                                            "target_sdk": target_sdk})
+                plugin.run(files=self.files, apk_constants={"minimum_sdk": get_min_sdk(self.decompiler.manifest_path),
+                                                            "target_sdk": get_target_sdk(
+                                                                self.decompiler.manifest_path)})
             except Exception:
                 log.exception("Error running plugin %s... continuing with next plugin", plugin_name)
                 continue
