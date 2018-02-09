@@ -2,12 +2,10 @@ from __future__ import absolute_import
 
 import logging
 import os
-import re
 import shlex
 import shutil
 import subprocess
-from qark.manifest_helpers import get_package_from_manifest
-from qark.xml_helpers import write_key_value_to_xml
+from qark.plugins.manifest_helpers import get_package_from_manifest
 
 try:
     import ConfigParser as configparser
@@ -17,7 +15,7 @@ except ModuleNotFoundError:
     from io import StringIO
 
 from qark.plugins.helpers import copy_directory_to_location
-from qark.plugins.manifest.exported_tags import EXPORTED_TAGS_ISSUE_NAME
+from qark.xml_helpers import write_key_value_to_string_array_xml, write_key_value_to_xml
 
 log = logging.getLogger(__name__)
 
@@ -28,41 +26,8 @@ COMPONENT_ENTRIES = {"activity": ("onCreate", "onStart"),
                      "service": ("onCreate", "onBind", "onStartCommand", "onHandleIntent"),
                      "provider": ("onReceive",)
                      }
-INTENT_EXTRAS_STRINGS = (r'getExtras\(\s*[0-9A-Za-z_\"\'.]+',
-                         r'getStringExtra\(\s*[0-9A-Za-z_\"\'.]+'
-                         r'getIntExtra\s*[0-9A-Za-z_\"\'.]+'
-                         r'getIntArrayExtra\(\s*[0-9A-Za-z_\"\'.]+'
-                         r'getFloatExtra\(\s*[0-9A-Za-z_\"\'.]+'
-                         r'getFloatArrayExtra\(\s*[0-9A-Za-z_\"\'.]+'
-                         r'getDoubleExtra\(\s*[0-9A-Za-z_\"\'.]+'
-                         r'getDoubleArrayExtra\(\s*[0-9A-Za-z_\"\'.]+'
-                         r'getCharExtra\(\s*[0-9A-Za-z_\"\'.]+'
-                         r'getCharArrayExtra\(\s*[0-9A-Za-z_\"\'.]+'
-                         r'getByteExtra\(\s*[0-9A-Za-z_\"\'.]+'
-                         r'getByteArrayExtra\(\s*[0-9A-Za-z_\"\'.]+'
-                         r'getBundleExtra\(\s*[0-9A-Za-z_\"\'.]+'
-                         r'getBooleanExtra\(\s*[0-9A-Za-z_\"\'.]+'
-                         r'getBooleanArrayExtra\(\s*[0-9A-Za-z_\"\'.]+'
-                         r'getCharSequenceArrayExtra\(\s*[0-9A-Za-z_\"\'.]+'
-                         r'getCharSequenceArrayListExtra\(\s*[0-9A-Za-z_\"\'.]+'
-                         r'getCharSequenceExtra\(\s*[0-9A-Za-z_\"\'.]+'
-                         r'getInterArrayListExtra\(\s*[0-9A-Za-z_\"\'.]+'
-                         r'getLongArrayExtra\(\s*[0-9A-Za-z_\"\'.]+'
-                         r'getLongExtra\(\s*[0-9A-Za-z_\"\'.]+'
-                         r'getParcelableArrayExtra\(\s*[0-9A-Za-z_\"\'.]+'
-                         r'getParcelableArrayListExtra\(\s*[0-9A-Za-z_\"\'.]+'
-                         r'getParcelableExtra\(\s*[0-9A-Za-z_\"\'.]+'
-                         r'getSeriablizableExtra\(\s*[0-9A-Za-z_\"\'.]+'
-                         r'getShortArrayExtra\(\s*[0-9A-Za-z_\"\'.]+'
-                         r'getShortExtra\(\s*[0-9A-Za-z_\"\'.]+'
-                         r'getStringArrayExtra\(\s*[0-9A-Za-z_\"\'.]+'
-                         r'getStringArrayListExtra\(\s*[0-9A-Za-z_\"\'.]+'
-                         # These are not necessarily Intent extras, but may contain them
-                         r'getString\(\s*[0-9A-Za-z_\"\'.]+'
-                         )
-INTENT_REGEX = re.compile("({extra_regex})".format(extra_regex="|".join(INTENT_EXTRAS_STRINGS)))
 
-EXPLOIT_APK_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "exploit_apk")
+EXPLOIT_APK_TEMPLATE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "exploit_apk")
 
 
 class APKBuilder(object):
@@ -82,7 +47,7 @@ class APKBuilder(object):
         :param list issues: List of `Issue` found from the scanner
         :param str apk_name: name of the examined APK
         """
-        self.exploit_apk_path = os.path.join(exploit_apk_path, "exploit_{apk_name}".format(apk_name=apk_name))
+        self.exploit_apk_path = os.path.join(exploit_apk_path, "{apk_name}_exploit_apk".format(apk_name=apk_name))
 
         # need to remove directory if it exists otherwise shutil.copytree will error from helper
         if os.path.isdir(self.exploit_apk_path):
@@ -90,10 +55,10 @@ class APKBuilder(object):
 
         # copy template exploit APK to exploit location
         try:
-            copy_directory_to_location(directory_to_copy=EXPLOIT_APK_PATH, destination=self.exploit_apk_path)
+            copy_directory_to_location(directory_to_copy=EXPLOIT_APK_TEMPLATE_PATH, destination=self.exploit_apk_path)
         except Exception:
-            log.exception("Failed to copy %s to %s", EXPLOIT_APK_PATH, self.exploit_apk_path)
-            raise SystemExit("Failed to copy %s to %s", EXPLOIT_APK_PATH, self.exploit_apk_path)
+            log.exception("Failed to copy %s to %s", EXPLOIT_APK_TEMPLATE_PATH, self.exploit_apk_path)
+            raise SystemExit("Failed to copy %s to %s", EXPLOIT_APK_TEMPLATE_PATH, self.exploit_apk_path)
 
         values_path = os.path.join(self.exploit_apk_path, "app", "src", "main", "res", "values")
         self.strings_xml_path = os.path.join(values_path, "strings.xml")
@@ -110,104 +75,37 @@ class APKBuilder(object):
             log.exception("Failed to read manifest file at %s", manifest_path)
             raise SystemExit("Failed to read manifest file at %s", manifest_path)
 
-        self.exported_activities = self._get_exported_tags(tag_type="activity")
-        self.exported_services = self._get_exported_tags(tag_type="service")
+    def build(self):
+        self._write_additional_exploits()
+        self._build_apk()
 
-    def _get_intent_extras(self):
-        for exported_activity in self.exported_activities:
-            pass
+    def _write_additional_exploits(self):
+        for issue in self.issues:
+            self._write_exported_tags(issue)
 
-
-    def _get_exported_tags(self, tag_type="activity"):
-        """
-        Iterate over issues looking for exported tags of type `tag_type`. Return a set of found issues.
-
-        :param tag_type: `tag_type` in ("activity", "activity-alias", "service", "receiver", "provider")
-        :return: set of `Issue` of every issue found with `tag_type`
-        :rtype: set
-        """
-        exported_tag_issues = (issue for issue in self.issues if issue.name == EXPORTED_TAGS_ISSUE_NAME)
-        found_exported_tag_issues = set()
-
-        for exported_tag_issue in exported_tag_issues:
-            # find all tags of `tag_type`
-            if re.search("\s{tag}\stags\s".format(tag=tag_type), exported_tag_issue.description):
-                found_exported_tag_issues.add(exported_tag_issue)
-
-        return found_exported_tag_issues
-
-    def _write_intent_to_strings_xml(self, intent_name, value):
-        """
-        Checks if `intent_name` exists in the parsed XML `self.string_xml_path`, if it does not it creates a new
-        element and appends it to the XML tree and then updates the file.
-
-        :param intent_name:
-        :param value:
-        :return:
-        """
-        try:
-            strings_xml = ElementTree.parse(self.strings_xml_path)
-        except IOError:
-            log.exception("Strings file for exploit APK does not exist")
-            raise SystemExit("Strings file for exploit APK does not exist")
-
-        if not strings_xml.find(intent_name):
-            new_element = ElementTree.SubElement(strings_xml.getroot(), "string", attrib={"name": intent_name})
-            new_element.text = value
-
-            strings_xml.write(self.strings_xml_path)
-
-    def _write_intent_id_to_xml(self, intent_id):
-        """
-        Checks if `intent_name` exists in the parsed XML `self.string_xml_path`, if it does not it creates a new
-        element and appends it to the XML tree and then updates the file.
-
-        :param intent_name:
-        :param value:
-        :return:
-        """
-        try:
-            strings_xml = ElementTree.parse(self.intent_ids_xml_path)
-        except IOError:
-            log.exception("Strings file for exploit APK does not exist")
-            raise SystemExit("Strings file for exploit APK does not exist")
-        """
-        if not strings_xml.findall("string-array"):
-            new_element = ElementTree.SubElement(strings_xml.getroot(), "string", attrib={"name": intent_name})
-            new_element.text = value
-
-            strings_xml.write(self.strings_xml_path)
-        """
-
-    def _write_intent_to_extra_keys_xml(self, intent_name, key):
-        """
-        Checks if `intent_name` is name of a `string-array`, if it does not exist it creates a new
-        element and appends it to the XML tree and then updates the file, if it exists it updates the existing element.
-
-        :param intent_name:
-        :param value:
-        """
-        try:
-            strings_xml = ElementTree.parse(self.extra_keys_xml_path)
-        except IOError:
-            log.exception("Extra keys file for exploit APK does not exist")
-            raise SystemExit("Extra keys file for exploit APK does not exist")
-
-        # attempt to update the intent if it exists
-        for string_array in strings_xml.findall("string-array"):
-            if string_array.attrib.get("name") == intent_name:
-                sub_element_item = ElementTree.SubElement(string_array, "item")
-                sub_element_item.text = key
-
-                strings_xml.write(self.strings_xml_path)
+    def _write_exported_tags(self, issue):
+        if issue.apk_exploit_dict:
+            try:
+                tag_enum = issue.apk_exploit_dict["exported_enum"]
+                tag_name = issue.apk_exploit_dict["tag_name"]
+                package_name = issue.apk_exploit_dict["package_name"]
+            except KeyError:
+                # issue is not the right type to write these values
                 return
 
-        # write the intent as it does not exist
-        new_string_array = ElementTree.SubElement(strings_xml.getroot(), "string-array", attrib={"name": intent_name})
-        sub_element_item = ElementTree.SubElement(new_string_array, "item")
-        sub_element_item.text = key
+            arguments = issue.apk_exploit_dict.get("arguments")
+            new_key = write_key_value_to_string_array_xml(array_name=tag_enum.parent.value,
+                                                          value=tag_enum.type.value,
+                                                          path=self.intent_ids_xml_path)
 
-        strings_xml.write(self.strings_xml_path)
+            # write extraKeys for tags that need it
+            if arguments is not None and tag_enum.type.value in ("activity", "broadcast", "provider", "receiver"):
+                for argument in arguments:
+                    write_key_value_to_string_array_xml(array_name=new_key,
+                                                        value=argument,
+                                                        path=self.extra_keys_xml_path,
+                                                        add_id=False)
+            write_key_value_to_xml(key=new_key, value=package_name + tag_name, path=self.strings_xml_path)
 
     def _build_apk(self):
         current_directory = os.getcwd()
@@ -237,7 +135,7 @@ class APKBuilder(object):
         mode = "a" if append else "w"
         with open(self.properties_file_path, mode) as properties_file:
             for key, value in dict_to_write.items():
-                properties_file.write("{key}={value}".format(key=key, value=value))
+                properties_file.write("{key}={value}\n".format(key=key, value=value))
 
     def _read_properties_file(self):
         """

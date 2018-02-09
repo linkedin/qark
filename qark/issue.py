@@ -8,14 +8,15 @@ log = logging.getLogger(__name__)
 
 
 class Issue(object):
-    def __init__(self, category, name, severity, description, line_number=None, file_object=None):
+    def __init__(self, category, name, severity, description, line_number=None, file_object=None, apk_exploit_dict=None):
         """
         Create a vulnerability, used by Plugins.
 
         :param str category: category to put the vulnerability in the report.
-        :param severity: severity of the vulnerability, Severity.INFO, Severity.VULNERABILITY, Severity.ERROR, or Severity.WARNING.
-        :param line_number: line number of where the vulnerability was found.
-        :param file_object: file where the vulnerability occurred.
+        :param Severity severity: severity of the vulnerability, Severity.INFO, Severity.VULNERABILITY, Severity.ERROR, or Severity.WARNING.
+        :param Tuple[int, int] line_number: line number of where the vulnerability was found.
+        :param str file_object: file where the vulnerability occurred.
+        :param Dict apk_exploit_dict: dictionary containing information that is needed to build the exploit apk
         """
         self.category = category
 
@@ -42,6 +43,7 @@ class Issue(object):
         self.name = name
         self.line_number = line_number
         self.file_object = file_object
+        self.apk_exploit_dict = apk_exploit_dict
 
 
 class Severity(Enum):

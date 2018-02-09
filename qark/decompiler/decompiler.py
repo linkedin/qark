@@ -45,14 +45,14 @@ class Decompiler(object):
                                 If directory does not exist it will be created, defaults to same directory as APK/qark
         """
         self.path_to_source = path_to_source
-        self.build_directory = build_directory if build_directory else os.path.join(os.path.dirname(path_to_source), "qark")
+        self.build_directory = os.path.join(build_directory, "qark") if build_directory else os.path.join(os.path.dirname(path_to_source), "qark")
+        if os.path.exists(self.build_directory):
+            shutil.rmtree(self.build_directory)
 
         # validate we are running on an APK, Directory, or Java source code
-        if not os.path.exists(self.path_to_source):
+        if os.path.isfile(self.path_to_source) and os.path.splitext(self.path_to_source.lower())[1] not in (".java",
+                                                                                                            ".apk"):
             raise ValueError("Invalid path, path must be to an APK, directory, or a Java file")
-
-        if os.path.isfile(self.path_to_source) and os.path.splitext(self.path_to_source.lower())[1] not in (".java", ".apk"):
-            return
 
         if os.path.isdir(path_to_source) or os.path.splitext(path_to_source.lower())[1] == ".java":
             self.source_code = True

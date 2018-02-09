@@ -1,12 +1,58 @@
-from qark.manifest_helpers import get_min_sdk, get_target_sdk
-from qark.plugins.helpers import get_manifest_out_of_files
+from qark.plugins.manifest_helpers import get_min_sdk, get_target_sdk, get_package_from_manifest
+from qark.plugins.helpers import get_manifest_out_of_files, java_files_from_files
 from qark.scanner.plugin import BasePlugin
 from qark.issue import Severity, Issue
 
+import os
 import logging
 from xml.dom import minidom
 
+from enum import Enum
+import javalang
+from javalang.tree import Literal, MethodDeclaration, MethodInvocation
+
 log = logging.getLogger(__name__)
+
+COMPONENT_ENTRIES = {"activity": {"onCreate", "onStart"},
+                     "activity-alias": {"onCreate", "onStart"},
+                     "receiver": {"onReceive", },
+                     "service": {"onCreate", "onBind", "onStartCommand", "onHandleIntent"},
+                     "provider": {"onReceive", }}
+
+# it seems like get, getInt, getString are the ones that are used for decompiled APKs
+EXTRAS_METHOD_NAMES = [
+    'getExtras',
+    'getStringExtra',
+    'getIntExtra',
+    'getIntArrayExtra',
+    'getFloatExtra',
+    'getFloatArrayExtra',
+    'getDoubleExtra',
+    'getDoubleArrayExtra',
+    'getCharExtra',
+    'getCharArrayExtra',
+    'getByteExtra',
+    'getByteArrayExtra',
+    'getBundleExtra',
+    'getBooleanExtra',
+    'getBooleanArrayExtra',
+    'getCharSequenceArrayExtra',
+    'getCharSequenceArrayListExtra',
+    'getCharSequenceExtra',
+    'getIntegerArrayListExtra',
+    'getLongArrayExtra',
+    'getLongExtra',
+    'getParcelableArrayExtra',
+    'getParcelableArrayListExtra',
+    'getParcelableExtra',
+    'getSerializableExtra',
+    'getShortArrayExtra',
+    'getShortExtra',
+    'getStringArrayExtra',
+    'getStringArrayListExtra',
+    'getString',
+    'getInt',
+]
 
 PROTECTED_BROADCASTS = ['android.intent.action.SCREEN_OFF', 'android.intent.action.SCREEN_ON',
                         'android.intent.action.USER_PRESENT', 'android.intent.action.TIME_TICK',
@@ -122,6 +168,40 @@ EXPORTED = ("The {tag} {tag_name} is exported, but not protected by any permissi
 EXPORTED_TAGS_ISSUE_NAME = "Exported tags"
 
 
+class Receiver(Enum):
+    id = 1
+    type = "receiver"
+    parent = "exportedReceivers"
+
+
+class Provider(Enum):
+    id = 2
+    type = "provider"
+    parent = "exportedContentProviders"
+
+
+class Activity(Enum):
+    id = 3
+    type = "activity"
+    parent = "exportedActivities"
+
+
+class Broadcast(Enum):
+    id = 4
+    type = "broadcast"
+    parent = "exportedBroadcasts"
+
+
+class Service(Enum):
+    id = 5
+    parent = "exportedServices"
+    type = "service"
+
+
+TAG_INFO = {"receiver": Receiver, "provider": Provider, "activity": Activity,
+            "activity-alias": Activity, "service": Service}
+
+
 class ExportedTags(BasePlugin):
     def __init__(self):
         BasePlugin.__init__(self, category="manifest", name=EXPORTED_TAGS_ISSUE_NAME)
@@ -129,6 +209,7 @@ class ExportedTags(BasePlugin):
         self.manifest_xml = None
         self.min_sdk = None
         self.target_sdk = None
+        self.package_name = None
 
     def run(self, files, apk_constants=None):
         manifest_file = get_manifest_out_of_files(files)
@@ -143,11 +224,14 @@ class ExportedTags(BasePlugin):
 
         self.min_sdk = apk_constants.get("min_sdk", get_min_sdk(self.manifest_xml))
         self.target_sdk = apk_constants.get("target_sdk", get_target_sdk(self.manifest_xml))
+        self.package_name = apk_constants.get("package_name", get_package_from_manifest(manifest_file))
 
         for tag in self.bad_exported_tags:
             all_tags_of_type_tag = self.manifest_xml.getElementsByTagName(tag)
             for possibly_vulnerable_tag in all_tags_of_type_tag:
                 self._check_manifest_issues(possibly_vulnerable_tag, tag, manifest_file)
+
+        self._add_exported_tags_arguments_to_issue(list(java_files_from_files(files)))
 
     def _check_manifest_issues(self, possibly_vulnerable_tag, tag, file_object):
         """
@@ -167,6 +251,8 @@ class ExportedTags(BasePlugin):
         except AttributeError:
             tag_name = None
 
+        info_enum = TAG_INFO[tag]
+
         if exported == "false":
             # activity is not exported
             return
@@ -181,13 +267,17 @@ class ExportedTags(BasePlugin):
                 self.issues.append(Issue(category="Manifest", name=self.name,
                                          severity=Severity.INFO,
                                          description=EXPORTED_AND_PERMISSION_TAG.format(tag=tag),
-                                         file_object=file_object))
+                                         file_object=file_object, apk_exploit_dict={"exported_enum": info_enum,
+                                                                                    "tag_name": tag_name,
+                                                                                    "package_name": self.package_name}))
             elif exported and not has_intent_filters:
                 # exported tag with no intent filters
                 self.issues.append(Issue(category="Manifest", name=self.name,
                                          severity=Severity.WARNING,
                                          description=EXPORTED.format(tag=tag, tag_name=tag_name),
-                                         file_object=file_object))
+                                         file_object=file_object, apk_exploit_dict={"exported_enum": info_enum,
+                                                                                    "tag_name": tag_name,
+                                                                                    "package_name": self.package_name}))
         for intent_filter in possibly_vulnerable_tag.getElementsByTagName("intent-filter"):
             for action in intent_filter.getElementsByTagName("action"):
                 try:
@@ -198,20 +288,83 @@ class ExportedTags(BasePlugin):
 
                 if protected:
                     # intent filter has protected actions
-                    self.issues.append(Issue(category="Manifest", name="Protected Exported Tags",
-                                             severity=Severity.INFO,
-                                             description=EXPORTED_IN_PROTECTED.format(tag=tag, tag_name=tag_name),
-                                             file_object=file_object))
+                    name = "Protected Exported Tags"
+                    description = EXPORTED_IN_PROTECTED.format(tag=tag, tag_name=tag_name)
+                    severity = Severity.INFO
+
                 elif has_permission and self.min_sdk < 20:
-                    self.issues.append(Issue(category="Manifest", name="Exported Tag With Permission",
-                                             severity=Severity.INFO,
-                                             description=EXPORTED_AND_PERMISSION_TAG.format(tag=tag, tag_name=tag_name),
-                                             file_object=file_object))
+                    name = "Exported Tag With Permission"
+                    description = EXPORTED_AND_PERMISSION_TAG.format(tag=tag, tag_name=tag_name)
+                    severity = Severity.INFO
+
                 else:
-                    self.issues.append(Issue(category="Manifest", name=self.name,
-                                             severity=Severity.WARNING,
-                                             description=EXPORTED.format(tag=tag, tag_name=tag_name),
-                                             file_object=file_object))
+                    name = self.name
+                    description = EXPORTED.format(tag=tag, tag_name=tag_name)
+                    severity = Severity.WARNING
+
+                self.issues.append(Issue(category="Manifest", name=name, severity=severity, description=description,
+                                         file_object=file_object, apk_exploit_dict={"exported_enum": info_enum,
+                                                                                    "tag_name": tag_name,
+                                                                                    "package_name": self.package_name}))
+
+    def _add_exported_tags_arguments_to_issue(self, java_files):
+        """
+        This helper method iterates over all the issues and searches for a corresponding java file for the tag.
+        Once the java file has been found, it finds the method declaration based on tag type and then finds a method
+        invocation in `EXTRAS_METHOD_NAMES` to pull arguments from.
+
+        Once found it updates the `issue` with its arguments.
+
+        :param List[str] java_files: list of java file paths
+        """
+        for issue in self.issues:
+            try:
+                file_name = issue.apk_exploit_dict["tag_name"].replace(".", os.sep)
+            except IndexError:
+                log.exception("Tag name %s does not have a period in it", issue.apk_exploit_dict["tag_name"])
+                return
+
+            self._get_arguments_for_method_from_file(java_files, issue, name_to_search_for=file_name)
+
+    def _get_arguments_for_method_from_file(self, java_files, issue, name_to_search_for):
+        added = False
+        for java_file in java_files:
+            if name_to_search_for not in java_file:
+                continue
+
+            try:
+                with open(java_file, "r") as java_file_to_read:
+                    file_contents = java_file_to_read.read()
+            except IOError:
+                log.debug("Error reading file %s", java_file)
+                continue
+
+            try:
+                parsed_tree = javalang.parse.parse(file_contents)
+            except (javalang.parser.JavaSyntaxError, IndexError):
+                log.debug("Error parsing file %s, continuing", java_file)
+                continue
+
+            issue.apk_exploit_dict["arguments"] = []
+            # find method declarations for the component type
+            for _, method_declaration in parsed_tree.filter(MethodDeclaration):
+                if method_declaration.name in COMPONENT_ENTRIES[issue.apk_exploit_dict["exported_enum"].type.value]:
+
+                    # find method invocations calling items that might have arguments we want to get
+                    for _, method_invocation in parsed_tree.filter(MethodInvocation):
+                        if method_invocation.member in EXTRAS_METHOD_NAMES:
+                            if not method_invocation.arguments:
+                                continue
+
+                            for argument in method_invocation.arguments:
+                                if not isinstance(argument, Literal):
+                                    continue
+
+                                if argument.value not in issue.apk_exploit_dict["arguments"]:
+                                    added = True
+                                    issue.apk_exploit_dict["arguments"].append(argument.value)
+            if added:
+                return
 
 
 plugin = ExportedTags()
