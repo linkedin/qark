@@ -45,7 +45,7 @@ class Decompiler(object):
                                 If directory does not exist it will be created, defaults to same directory as APK/qark
         """
         self.path_to_source = path_to_source
-        self.build_directory = os.path.join(build_directory, "qark") if build_directory else os.path.join(os.path.dirname(path_to_source), "qark")
+        self.build_directory = os.path.join(build_directory, "qark") if build_directory else os.path.join(os.path.dirname(os.path.abspath(path_to_source)), "qark")
         if os.path.exists(self.build_directory):
             shutil.rmtree(self.build_directory)
 
