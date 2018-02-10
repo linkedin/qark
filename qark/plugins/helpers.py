@@ -128,8 +128,8 @@ def valid_method_invocation(method_invocation, method_name, num_arguments):
     Determines if a `MethodInvocation` has the name `method_name` and the number of arguments `num_arguments`
 
     :param MethodInvocation method_invocation: the javalang MethodInvocation
-    :param method_name: the name of the method that should be called
-    :param num_arguments: the number of arguments the method should contain
+    :param str method_name: the name of the method that should be called
+    :param int num_arguments: the number of arguments the method should contain
     :return: Whether the method invocation matches the parameters
     :rtype: bool
     """

@@ -16,11 +16,11 @@ def valid_set_method_bool(method_invocation, str_bool, method_name="setAllowFile
     """
     Determines if the `method_invocation` has the same `method_name` and has an argument of value `str_bool`
 
-    :param MethodInvocation method_invocation:
-    :param str str_bool:
-    :param str method_name:
-    :param int num_arguments:
-    :return:
+    :param MethodInvocation method_invocation: The javalang MethodInvocation
+    :param str str_bool: The value of what should be in the argument
+    :param str method_name: The name of the method to be found
+    :return: Whether the MethodInvocation matches the method name and has the `str_bool` value as its first argument.
+    :rtype: bool
     """
     return (valid_method_invocation(method_invocation, method_name, num_arguments=1)
             and method_invocation.arguments[0].value == str_bool)

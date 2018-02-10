@@ -12,7 +12,7 @@ log = logging.getLogger(__name__)
 
 JAVASCRIPT_ENABLED_DESCRIPTION = (
     "While not a vulnerability by itself, it appears this app has JavaScript enabled in "
-    "this WebView: localWebView If this is not expressly necessary, you should disable "
+    "the WebView: If this is not expressly necessary, you should disable "
     "it, to prevent the possibility of XSS (cross-site scripting) attacks. More info: "
     "http://developer.android.com/guide/practices/security.html To validate this "
     "vulnerability, load the following local file in this "
