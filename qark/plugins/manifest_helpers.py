@@ -2,6 +2,8 @@ from xml.etree import ElementTree
 from xml.dom import minidom
 import logging
 
+from qark.xml_helpers import get_manifest_out_of_files
+
 log = logging.getLogger(__name__)
 
 

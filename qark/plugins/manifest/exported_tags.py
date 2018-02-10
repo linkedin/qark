@@ -1,5 +1,6 @@
 from qark.plugins.manifest_helpers import get_min_sdk, get_target_sdk, get_package_from_manifest
-from qark.plugins.helpers import get_manifest_out_of_files, java_files_from_files
+from qark.plugins.helpers import java_files_from_files
+from qark.xml_helpers import get_manifest_out_of_files
 from qark.scanner.plugin import BasePlugin
 from qark.issue import Severity, Issue
 

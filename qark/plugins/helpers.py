@@ -52,18 +52,6 @@ EXTRAS = (r'(getExtras\(\s*[0-9A-Za-z_\"\'.]+)',
 EXTRAS_REGEX = re.compile("|".join(EXTRAS))
 
 
-def get_manifest_out_of_files(files):
-    """
-    Parses `files` for a file that ends with `androidmanifest.xml`.
-    :param Set[str] files: list of paths to files as absolute paths
-    :return: manifest string if in `files`, else None
-    """
-    for file_name in files:
-        if file_name.lower().endswith("androidmanifest.xml"):
-            return file_name
-    return None
-
-
 def run_regex(filename, rex):
     """
     Read a file line by line, run a regular expression against the content and return list of things that require inspection

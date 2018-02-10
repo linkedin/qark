@@ -1,5 +1,5 @@
 from qark.plugins.manifest_helpers import get_min_sdk
-from qark.plugins.helpers import get_manifest_out_of_files
+from qark.xml_helpers import get_manifest_out_of_files
 from qark.scanner.plugin import BasePlugin
 from qark.issue import Severity, Issue
 
