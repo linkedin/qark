@@ -76,7 +76,7 @@ def test_unpack_apk(decompiler):
     shutil.rmtree(decompiler.build_directory)
     assert not os.path.isdir(decompiler.build_directory)
 
-    with pytest.raises(SystemExit):
+    with pytest.raises(ValueError):
         bad_decompiler = Decompiler("1")
         bad_decompiler._unpack_apk()
 

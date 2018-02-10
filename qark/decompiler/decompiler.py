@@ -44,6 +44,9 @@ class Decompiler(object):
         :param build_directory: directory to unpack and decompile APK to.
                                 If directory does not exist it will be created, defaults to same directory as APK/qark
         """
+        if not os.path.exists(path_to_source):
+            raise ValueError("Invalid path, path must be to an APK, directory, or a Java file")
+
         self.path_to_source = path_to_source
         self.build_directory = os.path.join(build_directory, "qark") if build_directory else os.path.join(os.path.dirname(os.path.abspath(path_to_source)), "qark")
         if os.path.exists(self.build_directory):
