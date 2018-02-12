@@ -1,12 +1,6 @@
-AxmlParserPY >= 0.01
-blessed >= 1.9.5
-blessings >= 1.6
-beautifulsoup4 >= 4.4.0
-colorama >= 0.3.3
-html5lib >= 0.999999
-progressbar >= 2.3
-argparse >= 1.3.0
-coloredlogs >= 1.0.1
-ply >= 3.9
-yapsy >= 1.11.223
-mock
+requests
+pluginbase
+jinja2
+enum34; python_version < '3.4'
+javalang
+click

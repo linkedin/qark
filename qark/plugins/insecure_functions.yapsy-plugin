@@ -1,9 +1,0 @@
-[Core]
-Name = Check logging Issues
-Module = insecure_functions
-
-[Documentation]
-Author = Sarvesh Kapre
-Version = 0.1
-Website = https://github.com/linkedin/qark/
-Description =   1. Checks for use of call method
