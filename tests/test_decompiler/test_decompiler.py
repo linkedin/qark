@@ -4,6 +4,7 @@ import shutil
 import pytest
 
 from qark.decompiler import decompiler
+from qark.decompiler.decompiler import Decompiler
 from qark.decompiler.external_decompiler import JDCore, CFR, Procyon
 
 
@@ -67,28 +68,39 @@ def test_get_java_version():
     assert not java_version.endswith('"')
 
 
-def test_ran_unpack_apk(decompiler):
+def test_unpack_apk(decompiler):
     classes_dex_path = os.path.join(decompiler.build_directory, "classes.dex")
-    assert classes_dex_path == decompiler.dex_path
+    assert classes_dex_path == decompiler._unpack_apk()
     assert os.path.isfile(classes_dex_path)
 
     shutil.rmtree(decompiler.build_directory)
     assert not os.path.isdir(decompiler.build_directory)
 
+    with pytest.raises(ValueError):
+        bad_decompiler = Decompiler("1")
+        bad_decompiler._unpack_apk()
 
-def test_ran_apktool(decompiler):
+
+def test_run_apktool(decompiler):
+    if os.path.exists(decompiler.build_directory):
+        shutil.rmtree(decompiler.build_directory)
+
+    decompiler.run_apktool()
+    assert os.path.isdir(decompiler.build_directory)
     assert os.path.isfile(os.path.join(decompiler.build_directory, "AndroidManifest.xml"))
 
     shutil.rmtree(decompiler.build_directory)
     assert not os.path.isdir(decompiler.build_directory)
 
 
-def test_ran_dex2jar(decompiler):
-    assert os.path.isfile(decompiler.jar_path)
-    assert decompiler.jar_path.endswith(".jar")
+def test_run_dex2jar(decompiler):
+    if os.path.exists(decompiler.build_directory):
+        shutil.rmtree(decompiler.build_directory)
 
-    shutil.rmtree(decompiler.build_directory)
-    assert not os.path.isdir(decompiler.build_directory)
+    decompiler.dex_path = decompiler._unpack_apk()
+    jar_file = decompiler._run_dex2jar()
+    assert os.path.isfile(jar_file)
+    assert jar_file.endswith(".jar")
 
 
 def test_decompile(decompiler):

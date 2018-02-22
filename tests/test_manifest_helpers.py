@@ -1,4 +1,4 @@
-from qark.plugins.helpers import get_min_sdk, get_target_sdk
+from qark.plugins.manifest_helpers import get_min_sdk, get_target_sdk
 
 from xml.dom import minidom
 

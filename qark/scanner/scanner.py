@@ -1,10 +1,12 @@
+from __future__ import absolute_import
+
 import logging
 from os import (
     walk,
     path
 )
 
-from qark.plugins.helpers import get_min_sdk, get_target_sdk
+from qark.plugins.manifest_helpers import get_min_sdk, get_target_sdk
 from qark.scanner.plugin import get_plugin_source, get_plugins
 
 log = logging.getLogger(__name__)
@@ -14,23 +16,20 @@ PLUGIN_CATEGORIES = ("manifest", "broadcast", "file", "crypto", "intent", "cert"
 
 
 class Scanner(object):
-    __instance = None
 
-    def __new__(cls, decompiler):
-        if Scanner.__instance is None:
-            Scanner.__instance = object.__new__(cls)
-            Scanner.__instance.files = set()
-            Scanner.__instance.issues = []
-
-        Scanner.__instance.decompiler = decompiler
-        return Scanner.__instance
-
-    def __init__(self, decompiler):
+    def __init__(self, manifest_path, path_to_source, build_directory):
         """
         Creates the scanner.
-        :param Decompiler decompiler: the decompiler class that contains decompiled path information
+
+        :param str manifest_path: the path to the manifest file
+        :param str path_to_source: the path to the source code
+        :param str build_directory: the path to the build directory
         """
-        self.decompiler = decompiler
+        self.files = set()
+        self.issues = []
+        self.manifest_path = manifest_path
+        self.path_to_source = path_to_source
+        self.build_directory = build_directory
 
     def run(self):
         """
@@ -46,8 +45,8 @@ class Scanner(object):
         """
         plugin_source = get_plugin_source(category=category)
         try:
-            min_sdk = get_min_sdk(self.decompiler.manifest_path, files=self.files)
-            target_sdk = get_target_sdk(self.decompiler.manifest_path, files=self.files)
+            min_sdk = get_min_sdk(self.manifest_path, files=self.files)
+            target_sdk = get_target_sdk(self.manifest_path, files=self.files)
         except AttributeError:
             # manifest path is not set, assume min_sdk and target_sdk
             min_sdk = target_sdk = 1
@@ -60,7 +59,7 @@ class Scanner(object):
                 continue
 
             try:
-                plugin.run(files=self.files, apk_constants={"min_sdk": min_sdk,
+                plugin.run(files=self.files, apk_constants={"minimum_sdk": min_sdk,
                                                             "target_sdk": target_sdk})
             except Exception:
                 log.exception("Error running plugin %s... continuing with next plugin", plugin_name)
@@ -73,11 +72,11 @@ class Scanner(object):
         Walks the `Decompiler.build_directory` and updates the `self.files` set with new files.
         :return:
         """
-        if path.splitext(self.decompiler.path_to_source.lower())[1] == ".java":
-            self.files.add(self.decompiler.path_to_source)
+        if path.splitext(self.path_to_source.lower())[1] == ".java":
+            self.files.add(self.path_to_source)
             return
 
-        walk_directory = self.decompiler.build_directory
+        walk_directory = self.build_directory
         try:
             for (dir_path, _, file_names) in walk(walk_directory):
                 for file_name in file_names:

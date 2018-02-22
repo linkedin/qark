@@ -1,4 +1,5 @@
-from qark.plugins.helpers import get_min_sdk, get_manifest_out_of_files
+from qark.plugins.manifest_helpers import get_min_sdk
+from qark.xml_helpers import get_manifest_out_of_files
 from qark.scanner.plugin import BasePlugin
 from qark.issue import Severity, Issue
 
@@ -32,7 +33,7 @@ class CustomPermissions(BasePlugin):
         for permission in permission_sections:
             try:
                 if permission.attributes["android:protectionLevel"].value in ("signature", "signatureOrSystem"):
-                    if apk_constants.get("min_sdk", get_min_sdk(manifest_xml)) < 21:
+                    if apk_constants.get("minimum_sdk", get_min_sdk(manifest_xml)) < 21:
                         self.issues.append(Issue(category=self.category, severity=self.severity,
                                                  name=self.name, description=self.description,
                                                  file_object=manifest_path))

@@ -4,6 +4,7 @@ import shutil
 import pytest
 
 from qark.issue import Severity
+from qark.scanner.scanner import Scanner
 from qark.plugins.manifest.allow_backup import ManifestBackupAllowed
 from qark.plugins.manifest.custom_permissions import CustomPermissions
 from qark.plugins.manifest.debuggable import DebuggableManifest
@@ -69,9 +70,13 @@ def test_debuggable(decompiler, build_directory, vulnerable_manifest_path):
         shutil.rmtree(build_directory)
 
 
-def test_exported_tags(vulnerable_manifest_path):
+def test_exported_tags(vulnerable_manifest_path, vulnerable_receiver_path):
     plugin = ExportedTags()
-    plugin.run([vulnerable_manifest_path], apk_constants={})
+    scanner = Scanner(manifest_path=vulnerable_manifest_path,
+                      path_to_source="/Users/nwalsh/IdeaProjects/qark/build/qark",
+                      build_directory="/Users/nwalsh/IdeaProjects/qark/build/qark")
+    scanner.run()
+    plugin.run([vulnerable_manifest_path, vulnerable_receiver_path], apk_constants={})
     assert len(plugin.issues) == 6
     for issue in plugin.issues:
         assert Severity.WARNING == issue.severity

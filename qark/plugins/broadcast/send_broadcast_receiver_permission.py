@@ -1,4 +1,5 @@
-from qark.plugins.helpers import get_min_sdk, java_files_from_files
+from qark.plugins.helpers import java_files_from_files
+from qark.plugins.manifest_helpers import get_min_sdk
 from qark.scanner.plugin import BasePlugin
 from qark.issue import Severity, Issue
 

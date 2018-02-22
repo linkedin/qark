@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">QARK</string>
+    <string name="nav_title_file_browser">File browser</string>
+    <string name="nav_title_intent_sniffer">Intent Sniffer</string>
+    <string name="nav_title_exported_components">Exported Components</string>
+    <string name="nav_title_tap_jacking">Tap Jacking</string>
+    <string name="nav_title_custom_intent">Send Custom Intent</string>
+    <string name="nav_title_web_view_tests">Webview Tests</string>
+    <string name="drawer_open">Open navigation drawer</string>
+    <string name="drawer_close">Close navigation drawer</string>
+    <string name="action_settings">Settings</string>
+    <string name="button_submit">Submit</string>
+    <string name="action_new_intent">Add a new intent</string>
+    <string name="title_activity_exploit_exported_result">Exploit Result</string>
+    <string name="title_activity_broadcast_intent_sniffer">Intent Sniffer</string>
+    <string name="title_activity_intent_sender">Intent Sender</string>
+    <string name="noIntent">No intents to exploit</string>
+    <string name="noExportedActivity">No exported activities to exploit</string>
+    <string name="noExportedComponents">No exported components found.</string>
+    <string name="tap_jacking_text">This application demonstrates TapJacking.</string>
+    <string name="title_activity_choose_intent_use_case">ChooseIntentUseCaseActivity</string>
+
+    <!--Create new intent-->
+    <string name="action_new_custom_intent">Create new custom intent</string>
+
+    <string name="activity_create_custom_intent_title">Create a custom intent.</string>
+    <string name="send_intent_button">Send Intent</string>
+
+    <string name="activity_create_new_intent_use_case">Create intent to:</string>
+    <string name="activity_create_new_intent_action">Intent Action:</string>
+    <string name="activity_create_new_intent_data">Intent Data:</string>
+    <string name="activity_create_new_intent_data_ex">Ex: http://www.example.com/image.png or content://contacts/people/1</string>
+    <string name="activity_create_new_intent_type">Intent Type:</string>
+    <string name="activity_create_new_intent_category">Intent Category:</string>
+    <string name="activity_create_new_intent_component">Component name:</string>
+    <string name="activity_create_new_intent_component_ex">Ex: com.example.ExampleActivity</string>
+    <string name="activity_create_new_intent_component_package_name">Package name of the app under test</string>
+    <string name="activity_create_new_intent_extras">Intent Extras:</string>
+    <string name="activity_create_new_intent_flags">Intent Flags:</string>
+    <string name="activity_create_custom_intent_next_button">Next</string>
+    <string name="intent_extras_key">Key:</string>
+    <string name="intent_extras_value">Value:</string>
+    <string name="title_activity_create_custom_intent">CreateCustomIntent</string>
+    <string-array name="intent_actions_array">
+        <item>"Nothing selected"</item>
+        <item>ACTION_MAIN</item>
+        <item>ACTION_VIEW</item>
+        <item>ACTION_ATTACH_DATA</item>
+        <item>ACTION_EDIT</item>
+        <item>ACTION_PICK</item>
+        <item>ACTION_CHOOSER</item>
+        <item>ACTION_GET_CONTENT</item>
+        <item>ACTION_DIAL</item>
+        <item>ACTION_CALL</item>
+        <item>ACTION_CALL_BUTTON</item>
+        <item>ACTION_SEND</item>
+        <item>ACTION_SENDTO</item>
+        <item>ACTION_ANSWER</item>
+        <item>ACTION_INSERT</item>
+        <item>ACTION_DELETE</item>
+        <item>ACTION_RUN</item>
+        <item>ACTION_SYNC</item>
+        <item>ACTION_PICK_ACTIVITY</item>
+        <item>ACTION_SEARCH</item>
+        <item>ACTION_WEB_SEARCH</item>
+        <item>ACTION_FACTORY_TEST</item>
+        <item>ACTION_ALL_APPS</item>
+        <item>ACTION_APP_ERROR</item>
+        <item>ACTION_ASSIST</item>
+        <item>ACTION_BUG_REPORT</item>
+        <item>ACTION_CAMERA_BUTTON</item>
+        <item>ACTION_CREATE_DOCUMENT</item>
+        <item>ACTION_CREATE_SHORTCUT</item>
+        <item>ACTION_DATE_CHANGED</item>
+        <item>ACTION_DEFAULT</item>
+
+        <item>ACTION_TIME_TICK</item>
+        <item>ACTION_TIME_CHANGED</item>
+        <item>ACTION_TIMEZONE_CHANGED</item>
+        <item>ACTION_BOOT_COMPLETED</item>
+        <item>ACTION_PACKAGE_ADDED</item>
+        <item>ACTION_PACKAGE_CHANGED</item>
+        <item>ACTION_PACKAGE_REMOVED</item>
+        <item>ACTION_PACKAGE_RESTARTED</item>
+        <item>ACTION_PACKAGE_DATA_CLEARED</item>
+        <item>ACTION_UID_REMOVED</item>
+        <item>ACTION_BATTERY_CHANGED</item>
+        <item>ACTION_BATTERY_LOW</item>
+        <item>ACTION_BATTERY_OKAY</item>
+        <item>ACTION_POWER_CONNECTED</item>
+        <item>ACTION_POWER_DISCONNECTED</item>
+        <item>ACTION_SHUTDOWN</item>
+        <item>ACTION_AIRPLANE_MODE_CHANGED</item>
+        <item>ACTION_APPLICATION_RESTRICTIONS_CHANGED</item>
+        <item>ACTION_CLOSE_SYSTEM_DIALOGS</item>
+        <item>ACTION_CONFIGURATION_CHANGED</item>
+        <item>ACTION_DEVICE_STORAGE_LOW</item>
+        <item>ACTION_DEVICE_STORAGE_OK</item>
+        <item>ACTION_DOCK_EVENT</item>
+        <item>ACTION_DREAMING_STARTED</item>
+        <item>ACTION_DREAMING_STOPPED</item>
+        <item>ACTION_EXTERNAL_APPLICATIONS_AVAILABLE</item>
+        <item>ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE</item>
+    </string-array>
+
+    <string-array name="intent_category_array">
+        <item>"Nothing selected"</item>
+        <item>CATEGORY_DEFAULT</item>
+        <item>CATEGORY_BROWSABLE</item>
+        <item>CATEGORY_TAB</item>
+        <item>CATEGORY_ALTERNATIVE</item>
+        <item>CATEGORY_SELECTED_ALTERNATIVE</item>
+        <item>CATEGORY_LAUNCHER</item>
+        <item>CATEGORY_INFO</item>
+        <item>CATEGORY_HOME</item>
+        <item>CATEGORY_PREFERENCE</item>
+        <item>CATEGORY_TEST</item>
+        <item>CATEGORY_CAR_DOCK</item>
+        <item>CATEGORY_DESK_DOCK</item>
+        <item>CATEGORY_LE_DESK_DOCK</item>
+        <item>CATEGORY_HE_DESK_DOCK</item>
+        <item>CATEGORY_CAR_MODE</item>
+        <item>CATEGORY_APP_MARKET</item>
+    </string-array>
+
+    <string-array name="intent_extras_array">
+        <item>"Nothing selected"</item>
+        <item>EXTRA_ALARM_COUNT</item>
+        <item>EXTRA_BCC</item>
+        <item>EXTRA_CC</item>
+        <item>EXTRA_CHANGED_COMPONENT_NAME</item>
+        <item>EXTRA_DATA_REMOVED</item>
+        <item>EXTRA_DOCK_STATE</item>
+        <item>EXTRA_DOCK_STATE_HE_DESK</item>
+        <item>EXTRA_DOCK_STATE_LE_DESK</item>
+        <item>EXTRA_DOCK_STATE_CAR</item>
+        <item>EXTRA_DOCK_STATE_DESK</item>
+        <item>EXTRA_DOCK_STATE_UNDOCKED</item>
+        <item>EXTRA_DONT_KILL_APP</item>
+        <item>EXTRA_EMAIL</item>
+        <item>EXTRA_INITIAL_INTENTS</item>
+        <item>EXTRA_INTENT</item>
+        <item>EXTRA_KEY_EVENT</item>
+        <item>EXTRA_ORIGINATING_URI</item>
+        <item>EXTRA_PHONE_NUMBER</item>
+        <item>EXTRA_REFERRER</item>
+        <item>EXTRA_REMOTE_INTENT_TOKEN</item>
+        <item>EXTRA_REPLACING</item>
+        <item>EXTRA_SHORTCUT_ICON</item>
+        <item>EXTRA_SHORTCUT_ICON_RESOURCE</item>
+        <item>EXTRA_SHORTCUT_INTENT</item>
+        <item>EXTRA_STREAM</item>
+        <item>EXTRA_SHORTCUT_NAME</item>
+        <item>EXTRA_SUBJECT</item>
+        <item>EXTRA_TEMPLATE</item>
+        <item>EXTRA_TEXT</item>
+        <item>EXTRA_TITLE</item>
+        <item>EXTRA_UID</item>
+    </string-array>
+
+    <string-array name="intent_flags_array">
+        <item>"Nothing selected"</item>
+        <item>FLAG_GRANT_READ_URI_PERMISSION</item>
+        <item>FLAG_GRANT_WRITE_URI_PERMISSION</item>
+        <item>FLAG_GRANT_PERSISTABLE_URI_PERMISSION</item>
+        <item>FLAG_GRANT_PREFIX_URI_PERMISSION</item>
+        <item>FLAG_DEBUG_LOG_RESOLUTION</item>
+        <item>FLAG_FROM_BACKGROUND</item>
+        <item>FLAG_ACTIVITY_BROUGHT_TO_FRONT</item>
+        <item>FLAG_ACTIVITY_CLEAR_TASK</item>
+        <item>FLAG_ACTIVITY_CLEAR_TOP</item>
+        <item>FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET</item>
+        <item>FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS</item>
+        <item>FLAG_ACTIVITY_FORWARD_RESULT</item>
+        <item>FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY</item>
+        <item>FLAG_ACTIVITY_MULTIPLE_TASK</item>
+        <item>FLAG_ACTIVITY_NEW_DOCUMENT</item>
+        <item>FLAG_ACTIVITY_NEW_TASK</item>
+        <item>FLAG_ACTIVITY_NO_ANIMATION</item>
+        <item>FLAG_ACTIVITY_NO_HISTORY</item>
+        <item>FLAG_ACTIVITY_NO_USER_ACTION</item>
+        <item>FLAG_ACTIVITY_PREVIOUS_IS_TOP</item>
+        <item>FLAG_ACTIVITY_RESET_TASK_IF_NEEDED</item>
+        <item>FLAG_ACTIVITY_REORDER_TO_FRONT</item>
+        <item>FLAG_ACTIVITY_SINGLE_TOP</item>
+        <item>FLAG_ACTIVITY_TASK_ON_HOME</item>
+        <item>FLAG_RECEIVER_REGISTERED_ONLY</item>
+    </string-array>
+
+    <string-array name="intent_use_case">
+        <item>startActivity</item>
+        <item>startActivityForResult</item>
+        <item>startService</item>
+        <item>bindService</item>
+        <item>sendBroadcast</item>
+        <item>sendOrderedBroadcast</item>
+        <item>sendStickyBroadcast</item>
+    </string-array>
+
+    <!-- Test Data. Uncomment to compile. This data is added dynamically later when the app is installed through the tool. -->
+    <!--<string name="packageName">com.mypackage</string>-->
+
+</resources>

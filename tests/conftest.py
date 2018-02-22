@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 import pytest
 
 import os
@@ -23,7 +25,7 @@ def decompiler(path_to_source, build_directory):
 
 @pytest.fixture()
 def scanner(decompiler):
-    return Scanner(decompiler=decompiler)
+    return Scanner(decompiler.manifest_path, decompiler.path_to_source, decompiler.build_directory)
 
 
 @pytest.fixture(scope="session")
@@ -45,10 +47,17 @@ def procyon_path():
 
 @pytest.fixture(scope="session")
 def vulnerable_manifest_path():
-    return os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_androidmanifest.xml")
+    return os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_xml_files",
+                        "test_androidmanifest.xml")
 
 
 @pytest.fixture(scope="session")
 def vulnerable_broadcast_path():
     return os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_java_files",
                         "send_broadcast_receiver_permission.java")
+
+
+@pytest.fixture(scope="session")
+def vulnerable_receiver_path():
+    return os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_plugins", "test_manifest_plugins",
+                        "broadcastreceivers", "SendSMSNowReceiver.java")

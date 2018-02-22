@@ -7,6 +7,7 @@ import click
 from qark.decompiler.decompiler import Decompiler
 from qark.scanner.scanner import Scanner
 from qark.report import Report
+from qark.apk_builder import APKBuilder
 
 log = logging.getLogger(__name__)
 
@@ -30,12 +31,17 @@ log = logging.getLogger(__name__)
               help="Create an exploit APK targetting a few vulnerabilities", show_default=True)
 @click.version_option()
 def cli(sdk_path, build_path, debug, source, report_type, exploit_apk):
+    if exploit_apk and not sdk_path:
+        click.secho("Please provide path to android SDK if building exploit APK.")
+        return
+
     click.secho("Decompiling...")
     decompiler = Decompiler(path_to_source=source, build_directory=build_path)
     decompiler.decompile()
 
     click.secho("Running scans...")
-    scanner = Scanner(decompiler=decompiler)
+    scanner = Scanner(manifest_path=decompiler.manifest_path, path_to_source=decompiler.path_to_source,
+                      build_directory=decompiler.build_directory)
     scanner.run()
     click.secho("Finish scans...")
 
@@ -43,6 +49,13 @@ def cli(sdk_path, build_path, debug, source, report_type, exploit_apk):
     report = Report(issues=scanner.issues)
     report.generate_report_file(file_type=report_type)
     click.secho("Finish writing report...")
+
+    if exploit_apk:
+        click.secho("Building exploit APK...")
+        exploit_builder = APKBuilder(exploit_apk_path=build_path, issues=scanner.issues, apk_name=decompiler.apk_name,
+                                     manifest_path=decompiler.manifest_path, sdk_path=sdk_path)
+        exploit_builder.build()
+        click.secho("Finish building exploit APK...")
 
 
 # @cli.command()
