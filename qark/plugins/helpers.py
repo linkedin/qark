@@ -2,10 +2,9 @@ import logging
 import os
 import re
 import shutil
-import os
-from xml.dom import minidom
 
 from javalang.tree import MethodInvocation
+from qark.plugins.manifest_helpers import get_min_sdk
 
 log = logging.getLogger(__name__)
 
@@ -16,40 +15,6 @@ EXCLUDE_REGEXES = (r'^\s*(//|/\*)',
                    r'(.*)(public|private)\s(String|List)')
 
 EXCLUSION_REGEX = re.compile("|".join(EXCLUDE_REGEXES))
-
-EXTRAS = (r'(getExtras\(\s*[0-9A-Za-z_\"\'.]+)',
-          r'(getStringExtra\(\s*[0-9A-Za-z_\"\'.]+)',
-          r'(getIntExtra\s*[0-9A-Za-z_\"\'.]+)',
-          r'(getIntArrayExtra\(\s*[0-9A-Za-z_\"\'.]+)',
-          r'(getFloatExtra\(\s*[0-9A-Za-z_\"\'.]+)',
-          r'(getFloatArrayExtra\(\s*[0-9A-Za-z_\"\'.]+)',
-          r'(getDoubleExtra\(\s*[0-9A-Za-z_\"\'.]+)',
-          r'(getDoubleArrayExtra\(\s*[0-9A-Za-z_\"\'.]+)',
-          r'(getCharExtra\(\s*[0-9A-Za-z_\"\'.]+)',
-          r'(getCharArrayExtra\(\s*[0-9A-Za-z_\"\'.]+)',
-          r'(getByteExtra\(\s*[0-9A-Za-z_\"\'.]+)',
-          r'(getByteArrayExtra\(\s*[0-9A-Za-z_\"\'.]+)',
-          r'(getBundleExtra\(\s*[0-9A-Za-z_\"\'.]+)',
-          r'(getBooleanExtra\(\s*[0-9A-Za-z_\"\'.]+)',
-          r'(getBooleanArrayExtra\(\s*[0-9A-Za-z_\"\'.]+)',
-          r'(getCharSequenceArrayExtra\(\s*[0-9A-Za-z_\"\'.]+)',
-          r'(getCharSequenceArrayListExtra\(\s*[0-9A-Za-z_\"\'.]+)',
-          r'(getCharSequenceExtra\(\s*[0-9A-Za-z_\"\'.]+)',
-          r'(getInterArrayListExtra\(\s*[0-9A-Za-z_\"\'.]+)',
-          r'(getLongArrayExtra\(\s*[0-9A-Za-z_\"\'.]+)',
-          r'(getLongExtra\(\s*[0-9A-Za-z_\"\'.]+)',
-          r'(getParcelableArrayExtra\(\s*[0-9A-Za-z_\"\'.]+)',
-          r'(getParcelableArrayListExtra\(\s*[0-9A-Za-z_\"\'.]+)',
-          r'(getParcelableExtra\(\s*[0-9A-Za-z_\"\'.]+)',
-          r'(getSeriablizableExtra\(\s*[0-9A-Za-z_\"\'.]+)',
-          r'(getShortArrayExtra\(\s*[0-9A-Za-z_\"\'.]+)',
-          r'(getShortExtra\(\s*[0-9A-Za-z_\"\'.]+)',
-          r'(getStringArrayExtra\(\s*[0-9A-Za-z_\"\'.]+)',
-          r'(getStringArrayListExtra\(\s*[0-9A-Za-z_\"\'.]+)',
-          # These are not necessarily Intent extras, but may contain them
-          r'(getString\(\s*[0-9A-Za-z_\"\'.]+)')
-
-EXTRAS_REGEX = re.compile("|".join(EXTRAS))
 
 
 def run_regex(filename, rex):
@@ -64,7 +29,7 @@ def run_regex(filename, rex):
         with open(filename) as f:
             for curr_line in f:
                 if re.search(rex, curr_line):
-                    # exclude everythingin EXCLUDE_REGEXES
+                    # exclude everything in EXCLUDE_REGEXES
                     if not re.match(EXCLUSION_REGEX, curr_line):
                         things_to_inspect.append(curr_line)
     except IOError:
@@ -87,6 +52,7 @@ def java_files_from_files(files):
 
 
 def remove_dict_entry_by_value(dictionary, value):
+    """Helper to remove an entry in a dictionary by its value instead of its key."""
     return {k: v for k, v in dictionary.items() if v != dictionary.get(value)}
 
 
@@ -110,8 +76,10 @@ def get_min_sdk_from_files(files, apk_constants=None):
     Get the min_sdk from either the `apk_constants` if it exists, or the manifest file in `files` if it exists. If
     neither exists, return 1 as the default minimum SDK
 
-    :param files:
-    :return:
+    :param Iterable files: file names that should be iterated over
+    :param Dict apk_constants: dictionary that can have constants throughout the apk
+    :return: min_sdk if it exists or 1
+    :rtype: int
     """
     try:
         # int conversion to change it if it is a NoneType, which will throw TypeError
@@ -128,53 +96,3 @@ def copy_directory_to_location(directory_to_copy, destination):
         shutil.copytree(src=directory_to_copy, dst=destination)
     except Exception:
         raise
-
-
-def java_files_from_files(files):
-    """
-    Returns a generator of everything in `files` that ends with the `.java` extension.
-
-    :param list files:
-    :return: generator of file paths
-    """
-    return (file_path for file_path in files if os.path.splitext(file_path.lower())[1] == '.java')
-
-
-def copy_directory_to_location(directory_to_copy, destination):
-    try:
-        shutil.copytree(src=directory_to_copy, dst=destination)
-    except Exception:
-        raise
-
-
-def find_extras(path):
-    """
-    Runs the regexes in `EXTRAS` against the file contents at `filepath`.
-
-    :param str path: path to file to find extras
-    :return: list of extras in use at path
-    :rtype: list
-    """
-    extras = []
-    for regex in EXTRAS:
-        list_of_usages = run_regex(path, regex)
-        for extra in list_of_usages:
-            # remove extraneous information
-            extra = re.sub(r'^get', '', extra)
-            extra = re.sub(r'\\.*', '', extra)
-            extra = re.sub(r'Extra.*', '', extra)
-
-            extras.append(extra)
-
-    extras = list(set(extras))
-    return extras
-
-
-def find_file(path, regex):
-    regex = re.compile(regex)
-    res = []
-    for root, _, fnames in os.walk(path):
-        for fname in fnames:
-            if regex.match(fname):
-                res.append(os.path.join(root, fname))
-    return res
