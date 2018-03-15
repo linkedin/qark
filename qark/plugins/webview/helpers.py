@@ -61,6 +61,9 @@ def webview_default_vulnerable(tree, method_name, issue_name, description, file_
                 webview_name = method_invocation.qualifier
 
                 # selectors are the .operators after the function, in this case `setAllowFileAccess`
+                if method_invocation.selectors is None:
+                    continue
+
                 for selector in method_invocation.selectors:
                     if valid_set_method_bool(method_invocation=selector, str_bool="false", method_name=method_name):
 
