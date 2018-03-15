@@ -33,7 +33,7 @@ class JavaAPIKeys(BasePlugin):
                             category=self.category, severity=self.severity, name=self.name,
                             description=self.description,
                             file_object=java_file_path,
-                            line_number=line_number)
+                            line_number=(line_number, 0))
                         )
 
 
