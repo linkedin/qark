@@ -8,6 +8,7 @@ log = logging.getLogger(__name__)
 
 
 plugin_base = PluginBase(package="qark.custom_plugins")
+BLACKLISTED_PLUGIN_MODULES = ["helpers"]
 
 
 def get_plugin_source(category=None):
@@ -29,13 +30,15 @@ def get_plugin_source(category=None):
 
 def get_plugins(category=None):
     """
-    Returns all plugins defined by a `category`. TODO: implement blacklisting in this method
+    Returns all plugins defined by a `category` and removes plugins defined in ``BLACKLISTED_PLUGIN_MODULES``.
+
     :param category: plugin category, subdirectory under `plugins/`
     :return: modules for that category
     :rtype: list
     """
-    return get_plugin_source(category=category).list_plugins()
+    plugins = get_plugin_source(category=category).list_plugins()
 
+    return [plugin for plugin in plugins if plugin not in BLACKLISTED_PLUGIN_MODULES]
 
 class BasePlugin(object):
     __metaclass__ = abc.ABCMeta
