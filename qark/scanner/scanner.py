@@ -11,8 +11,7 @@ from qark.scanner.plugin import get_plugin_source, get_plugins
 
 log = logging.getLogger(__name__)
 
-
-PLUGIN_CATEGORIES = ("manifest", "broadcast", "file", "crypto", "intent", "cert", "webview")
+PLUGIN_CATEGORIES = ("manifest", "broadcast", "file", "crypto", "intent", "cert", "webview", "generic")
 
 
 class Scanner(object):
