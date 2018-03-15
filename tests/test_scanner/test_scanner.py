@@ -1,3 +1,6 @@
+SCANNER_ISSUES = 10
+
+
 def test_run(scanner, decompiler):
     decompiler.decompile()
 
@@ -8,13 +11,13 @@ def test_run(scanner, decompiler):
 
     scanner.issues = []
     scanner._run_checks("manifest")
-    assert 7 == len(scanner.issues)
+    assert SCANNER_ISSUES == len(scanner.issues)
 
     # this should hit the other code path where
     #   manifest_path is already set
     scanner.issues = []
     scanner._run_checks("manifest")
-    assert 10 == len(scanner.issues)
+    assert SCANNER_ISSUES == len(scanner.issues)
 
     scanner.issues = []
     scanner._run_checks("broadcast")
