@@ -8,6 +8,7 @@ from qark.decompiler.decompiler import Decompiler
 from qark.decompiler.external_decompiler import JDCore, CFR, Procyon
 
 
+@pytest.mark.integration
 def test_download_apktool():
     if os.path.exists(decompiler.APK_TOOL_PATH):
         shutil.rmtree(decompiler.APK_TOOL_PATH)
@@ -19,6 +20,7 @@ def test_download_apktool():
     assert not os.path.exists(decompiler.APK_TOOL_PATH)
 
 
+@pytest.mark.integration
 def test_download_dex2jar():
     if os.path.exists(decompiler.DEX2JAR_PATH):
         shutil.rmtree(decompiler.DEX2JAR_PATH)
@@ -30,6 +32,7 @@ def test_download_dex2jar():
     assert not os.path.exists(decompiler.DEX2JAR_PATH)
 
 
+@pytest.mark.integration
 def test_download_cfr(cfr_path):
     if os.path.isfile(cfr_path):
         os.remove(cfr_path)
@@ -41,6 +44,7 @@ def test_download_cfr(cfr_path):
     assert not os.path.isfile(cfr_path)
 
 
+@pytest.mark.integration
 def test_download_procyon(procyon_path):
     if os.path.isfile(procyon_path):
         os.remove(procyon_path)
@@ -126,6 +130,7 @@ def test_decompile(decompiler):
     assert not os.path.isdir(decompiler.build_directory)
 
 
+@pytest.mark.long
 @pytest.mark.parametrize("external_decompiler", [
     (JDCore()),
     (CFR()),
