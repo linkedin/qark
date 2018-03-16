@@ -11,3 +11,4 @@ def test_run(scanner, decompiler):
 
     scanner.issues = []
     scanner._run_checks("manifest")
+    assert SCANNER_ISSUES == len(scanner.issues)
