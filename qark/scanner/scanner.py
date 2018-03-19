@@ -8,6 +8,7 @@ from os import (
 
 from qark.plugins.manifest_helpers import get_min_sdk, get_target_sdk
 from qark.scanner.plugin import get_plugin_source, get_plugins
+from qark.scanner.plugin import ManifestPlugin
 
 log = logging.getLogger(__name__)
 
@@ -28,6 +29,10 @@ class Scanner(object):
         self.files = set()
         self.issues = []
         self.manifest_path = manifest_path
+
+        # Manifest plugins should be able to retrieve the manifest xml directly
+        ManifestPlugin.update_manifest(manifest_path)
+
         self.path_to_source = path_to_source
         self.build_directory = build_directory
 

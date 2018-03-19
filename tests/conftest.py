@@ -23,6 +23,12 @@ def decompiler(path_to_source, build_directory):
     return Decompiler(path_to_source=path_to_source, build_directory=build_directory)
 
 
+@pytest.fixture(scope="module")
+def module_decompiler(path_to_source, build_directory):
+    return Decompiler(path_to_source=path_to_source, build_directory=build_directory)
+
+
+
 @pytest.fixture()
 def scanner(decompiler):
     return Scanner(decompiler.manifest_path, decompiler.path_to_source, decompiler.build_directory)

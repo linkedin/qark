@@ -1,12 +1,10 @@
 from qark.plugins.manifest_helpers import get_min_sdk, get_target_sdk, get_package_from_manifest
 from qark.plugins.helpers import java_files_from_files
-from qark.xml_helpers import get_manifest_out_of_files
-from qark.scanner.plugin import BasePlugin
+from qark.scanner.plugin import ManifestPlugin
 from qark.issue import Severity, Issue
 
 import os
 import logging
-from xml.dom import minidom
 
 from enum import Enum
 import javalang
@@ -203,34 +201,26 @@ TAG_INFO = {"receiver": Receiver, "provider": Provider, "activity": Activity,
             "activity-alias": Activity, "service": Service}
 
 
-class ExportedTags(BasePlugin):
-    def __init__(self):
-        BasePlugin.__init__(self, category="manifest", name=EXPORTED_TAGS_ISSUE_NAME)
+class ExportedTags(ManifestPlugin):
+    def __init__(self, **kwargs):
+        kwargs.update(dict(category="manifest", name=EXPORTED_TAGS_ISSUE_NAME))
+
+        super(ExportedTags, self).__init__(**kwargs)
+
         self.bad_exported_tags = ("activity", "activity-alias", "service", "receiver", "provider")
-        self.manifest_xml = None
         self.min_sdk = None
         self.target_sdk = None
         self.package_name = None
 
     def run(self, files, apk_constants=None):
-        manifest_file = get_manifest_out_of_files(files)
-        if not manifest_file:
-            return
-
-        try:
-            self.manifest_xml = minidom.parse(manifest_file)
-        except Exception:
-            log.exception("Failed to parse manifest file, is it valid syntax?")
-            return  # do not raise a SystemExit because other checks can still be ran
-
-        self.min_sdk = apk_constants.get("min_sdk", get_min_sdk(self.manifest_xml))
-        self.target_sdk = apk_constants.get("target_sdk", get_target_sdk(self.manifest_xml))
-        self.package_name = apk_constants.get("package_name", get_package_from_manifest(manifest_file))
+        self.min_sdk = apk_constants["min_sdk"] if "min_sdk" in apk_constants else get_min_sdk(self.manifest_xml)
+        self.target_sdk = apk_constants["target_sdk"] if "target_sdk" in apk_constants else get_target_sdk(self.manifest_xml)
+        self.package_name = apk_constants["package_name"] if "package_name" in apk_constants else get_package_from_manifest(self.manifest_path)
 
         for tag in self.bad_exported_tags:
             all_tags_of_type_tag = self.manifest_xml.getElementsByTagName(tag)
             for possibly_vulnerable_tag in all_tags_of_type_tag:
-                self._check_manifest_issues(possibly_vulnerable_tag, tag, manifest_file)
+                self._check_manifest_issues(possibly_vulnerable_tag, tag, self.manifest_path)
 
         self._add_exported_tags_arguments_to_issue(list(java_files_from_files(files)))
 
