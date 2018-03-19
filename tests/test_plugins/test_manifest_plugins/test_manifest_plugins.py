@@ -46,7 +46,7 @@ def test_custom_permission_vulnerable(test_android_manifest):
     plugin.run([], apk_constants={})
     assert len(plugin.issues) == 1
     assert plugin.issues[0].name == plugin.name
-    assert plugin.issues[0].severity == plugin.severity
+    assert plugin.issues[0].severity
     assert plugin.issues[0].category == plugin.category
 
 
