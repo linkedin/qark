@@ -41,12 +41,6 @@ class CustomPermissions(ManifestPlugin):
         permission_sections = self.manifest_xml.getElementsByTagName("permission")
         for permission in permission_sections:
             try:
-                if permission.attributes["android:protectionLevel"].value in ("signature", "signatureOrSystem"):
-                    if apk_constants.get("min_sdk", get_min_sdk(self.manifest_xml)) < 21:
-                        self.issues.append(Issue(category=self.category, severity=self.severity,
-                                                 name=self.name, description=self.description,
-                                                 file_object=self.manifest_path))
-
                 protection_level = permission.attributes["android:protectionLevel"].value
             except KeyError:
                 continue
