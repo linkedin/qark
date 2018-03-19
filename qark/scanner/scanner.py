@@ -63,7 +63,7 @@ class Scanner(object):
                 continue
 
             try:
-                plugin.run(files=self.files, apk_constants={"minimum_sdk": min_sdk,
+                plugin.run(files=self.files, apk_constants={"min_sdk": min_sdk,
                                                             "target_sdk": target_sdk})
             except Exception:
                 log.exception("Error running plugin %s... continuing with next plugin", plugin_name)
