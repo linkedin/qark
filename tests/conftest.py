@@ -52,8 +52,13 @@ def vulnerable_manifest_path():
 
 
 @pytest.fixture(scope="session")
-def vulnerable_broadcast_path():
-    return os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_java_files",
+def test_java_files():
+    return os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_java_files")
+
+
+@pytest.fixture(scope="session")
+def vulnerable_broadcast_path(test_java_files):
+    return os.path.join(test_java_files,
                         "send_broadcast_receiver_permission.java")
 
 
