@@ -1,4 +1,5 @@
 from qark.plugins.file.file_permissions import FilePermissions, WORLD_READABLE_DESCRIPTION, WORLD_WRITEABLE_DESCRIPTION
+from qark.plugins.file.http_url_hardcoded import HardcodedHTTP
 from qark.issue import Severity
 
 import os
@@ -15,4 +16,13 @@ def test_file_permissions():
     assert "World writeable file" == plugin.issues[1].name
     assert Severity.WARNING == plugin.issues[1].severity
     assert WORLD_WRITEABLE_DESCRIPTION == plugin.issues[1].description
+
+
+def test_http_url_hardcoded(test_java_files):
+    plugin = HardcodedHTTP()
+    plugin.run([os.path.join(test_java_files,
+                             "http_url_hardcoded.java")])
+
+    assert 1 == len(plugin.issues)
+
 
