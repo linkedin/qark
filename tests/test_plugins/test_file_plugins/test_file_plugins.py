@@ -1,4 +1,5 @@
 from qark.plugins.file.file_permissions import FilePermissions, WORLD_READABLE_DESCRIPTION, WORLD_WRITEABLE_DESCRIPTION
+from qark.plugins.file.insecure_functions import InsecureFunctions
 from qark.issue import Severity
 
 import os
@@ -16,3 +17,9 @@ def test_file_permissions():
     assert Severity.WARNING == plugin.issues[1].severity
     assert WORLD_WRITEABLE_DESCRIPTION == plugin.issues[1].description
 
+
+def test_insecure_functions(test_java_files):
+    plugin = InsecureFunctions()
+    plugin.run([os.path.join(test_java_files,
+                             "insecure_functions.java")])
+    assert 1 == len(plugin.issues)
