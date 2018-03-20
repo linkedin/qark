@@ -1,3 +1,13 @@
+"""
+This plugin determines if the following methods are called:
+
+1. getExternalFilesDir
+2. getExternalFilesDirs
+3. getExternalMediaDirs
+4. getExternalStoragePublicDirectory
+
+"""
+
 import logging
 
 import javalang
@@ -17,6 +27,7 @@ EXTERNAL_STORAGE_DESCRIPTION = (
 )
 
 EXTERNAL_FILES_DIR_METHOD = 'getExternalFilesDir'
+EXTERNAL_FILES_DIRS_METHOD = 'getExternalFilesDirs'
 EXTERNAL_MEDIA_DIR_METHOD = 'getExternalMediaDirs'
 EXTERNAL_STORAGE_PUBLIC_DIR_METHOD = 'getExternalStoragePublicDirectory'
 
@@ -47,23 +58,23 @@ class ExternalStorage(BasePlugin):
             log.debug("Error parsing file %s, continuing", java_file)
             return
 
-        if any(["File" in imp for imp in tree.imports]):
-            for _, method_invocation in tree.filter(MethodInvocation):
-                storage_location = None
-                if method_invocation.member == EXTERNAL_FILES_DIR_METHOD:
-                    storage_location = "External Storage"
-                elif method_invocation.member == EXTERNAL_MEDIA_DIR_METHOD:
-                    storage_location = "External Media Directory"
-                elif method_invocation.member == EXTERNAL_STORAGE_PUBLIC_DIR_METHOD:
-                    storage_location = "External Storage Public Directory"
+        for _, method_invocation in tree.filter(MethodInvocation):
+            storage_location = None
+            if (method_invocation.member == EXTERNAL_FILES_DIR_METHOD
+                    or method_invocation.member == EXTERNAL_FILES_DIRS_METHOD):
+                storage_location = "External Storage"
+            elif method_invocation.member == EXTERNAL_MEDIA_DIR_METHOD:
+                storage_location = "External Media Directory"
+            elif method_invocation.member == EXTERNAL_STORAGE_PUBLIC_DIR_METHOD:
+                storage_location = "External Storage Public Directory"
 
-                if storage_location:
-                    self.issues.append(Issue(
-                        category=self.category, severity=self.severity, name=self.name,
-                        description=self.description,
-                        file_object=java_file,
-                        line_number=method_invocation.pos)
-                    )
+            if storage_location:
+                self.issues.append(Issue(
+                    category=self.category, severity=self.severity, name=self.name,
+                    description=self.description,
+                    file_object=java_file,
+                    line_number=method_invocation.position)
+                )
 
 
 plugin = ExternalStorage()

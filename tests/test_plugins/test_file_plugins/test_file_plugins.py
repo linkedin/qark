@@ -1,4 +1,5 @@
 from qark.plugins.file.file_permissions import FilePermissions, WORLD_READABLE_DESCRIPTION, WORLD_WRITEABLE_DESCRIPTION
+from qark.plugins.file.external_storage import ExternalStorage
 from qark.issue import Severity
 
 import os
@@ -16,3 +17,9 @@ def test_file_permissions():
     assert Severity.WARNING == plugin.issues[1].severity
     assert WORLD_WRITEABLE_DESCRIPTION == plugin.issues[1].description
 
+
+def test_external_storage(test_java_files):
+    plugin = ExternalStorage()
+    plugin.run([os.path.join(test_java_files,
+                             "external_storage.java")])
+    assert 4 == len(plugin.issues)
