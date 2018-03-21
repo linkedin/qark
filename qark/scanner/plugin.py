@@ -41,10 +41,12 @@ def get_plugins(category=None):
 class BasePlugin(object):
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, category=None, name=None, description=None):
+    def __init__(self, category=None, name=None, description=None, **kwargs):
         self.category = category
         self.name = name
         self.description = description
+
+        super(BasePlugin, self).__init__(**kwargs)
 
         self.issues = []
 
