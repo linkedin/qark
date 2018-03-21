@@ -30,7 +30,13 @@ log = logging.getLogger(__name__)
 @click.option("--exploit-apk/--no-exploit-apk", default=False,
               help="Create an exploit APK targetting a few vulnerabilities", show_default=True)
 @click.version_option()
-def cli(sdk_path, build_path, debug, source, report_type, exploit_apk):
+@click.pass_context
+def cli(ctx, sdk_path, build_path, debug, source, report_type, exploit_apk):
+    if not source:
+        click.secho("Please pass a source for scanning through either --java or --apk")
+        click.secho(ctx.get_help())
+        return
+
     if exploit_apk and not sdk_path:
         click.secho("Please provide path to android SDK if building exploit APK.")
         return
