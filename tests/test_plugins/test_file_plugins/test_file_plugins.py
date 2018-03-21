@@ -1,8 +1,10 @@
 from qark.plugins.file.file_permissions import FilePermissions, WORLD_READABLE_DESCRIPTION, WORLD_WRITEABLE_DESCRIPTION
 from qark.plugins.file.insecure_functions import InsecureFunctions
+from qark.plugins.file.api_keys import JavaAPIKeys
 from qark.issue import Severity
 
 import os
+import tempfile
 
 
 def test_file_permissions():
@@ -23,3 +25,17 @@ def test_insecure_functions(test_java_files):
     plugin.run([os.path.join(test_java_files,
                              "insecure_functions.java")])
     assert 1 == len(plugin.issues)
+    
+    
+def test_api_keys():
+    plugin = JavaAPIKeys()
+    with tempfile.NamedTemporaryFile(mode="w", prefix="vuln1", suffix=".java") as vulnerable_file:
+        with tempfile.NamedTemporaryFile(mode="w", prefix="vuln2", suffix=".java") as nonvulnerable_file:
+            nonvulnerable_file.write("""public static final String API_TOKEN = "1234thisisaninvalidapitoken937235""")
+            vulnerable_file.write("""public static final String API_TOKEN = "Nti4kWY-qRHTYq3dsbeip0P1tbGCzs2BAY163ManCAb""")
+            nonvulnerable_file.seek(0)
+            vulnerable_file.seek(0)
+
+            plugin.run([nonvulnerable_file.name,
+                        vulnerable_file.name])
+            assert 1 == len(plugin.issues)
