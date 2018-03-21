@@ -38,22 +38,15 @@ def get_plugins(category=None):
     return get_plugin_source(category=category).list_plugins()
 
 
-class Base(object):
-    def __init__(self, **kwargs):
-        pass
-
-
-class BasePlugin(Base):
+class BasePlugin(object):
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, **kwargs):
-        self.category = kwargs.get('category')
-        self.name = kwargs.get('name')
-        self.description = kwargs.get('description')
+    def __init__(self, category=None, name=None, description=None):
+        self.category = category
+        self.name = name
+        self.description = description
 
         self.issues = []
-
-        super(BasePlugin, self).__init__(**kwargs)
 
     @abc.abstractmethod
     def run(self, files, apk_constants=None):
@@ -71,14 +64,14 @@ class ManifestPlugin(BasePlugin):
     manifest_xml = None
     manifest_path = None
 
-    def __init__(self, **kwargs):
+    def __init__(self, manifest_path=None, manifest_xml=None, **kwargs):
         if self.manifest_path is None:
-            self.manifest_path = kwargs.get("manifest_path")
+            self.manifest_path = manifest_path
 
         if self.manifest_xml is None:
             try:
                 # If the user passed the parsed minidom XML content then we don't have to parse anything
-                self.manifest_xml = kwargs["manifest_xml"]
+                self.manifest_xml = manifest_xml
 
             except KeyError:
 
