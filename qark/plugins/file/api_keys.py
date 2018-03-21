@@ -1,3 +1,6 @@
+"""This plugin checks if there are any lines in the file that match the regex ``API_KEY_REGEX`` while
+also not matching ``SPECIAL_CHARACTER_REGEX``."""
+
 import logging
 import re
 
@@ -26,7 +29,7 @@ class JavaAPIKeys(BasePlugin):
 
     def _process(self, java_file_path):
         with open(java_file_path, "r") as java_file:
-            for line_number, line in enumerate(java_file):
+            for line_number, line in enumerate(java_file, 1):
                 for word in line.split():
                     if re.search(API_KEY_REGEX, word) and not re.search(SPECIAL_CHARACTER_REGEX, word):
                         self.issues.append(Issue(
