@@ -1,7 +1,13 @@
 """
-Checks if either a method with name "d" or "v" is invoked. For instance:
+Checks if either a method within ``ANDROID_LOGGING_METHODS`` is invoked with `Log.` before it.
 
-Log.d("test") would trigger, as would d("test").
+For instance:
+Log.d("test")
+Log.e("test")
+
+Both trigger but the following does not:
+d("test")
+e("test")
 """
 
 import logging
@@ -21,8 +27,7 @@ ANDROID_LOGGING_DESCRIPTION = (
     "https://developer.android.com/reference/android/util/Log.html"
 )
 
-VERBOSE_LOG_METHOD_NAME = "v"
-DEBUG_LOG_METHOD_NAME = "d"
+ANDROID_LOGGING_METHODS = ("v", "d", "i", "w", "e")
 
 
 class AndroidLogging(BasePlugin):
@@ -52,12 +57,12 @@ class AndroidLogging(BasePlugin):
             return
 
         for _, method_invocation in tree.filter(MethodInvocation):
-            if method_invocation.member in (VERBOSE_LOG_METHOD_NAME, DEBUG_LOG_METHOD_NAME):
+            if method_invocation.qualifier == "Log" and method_invocation.member in ANDROID_LOGGING_METHODS:
                 self.issues.append(Issue(
                     category=self.category, severity=self.severity, name=self.name,
                     description=self.description,
                     file_object=java_file,
-                    line_number=method_invocation.pos)
+                    line_number=method_invocation.position)
                 )
 
 
