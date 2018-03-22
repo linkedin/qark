@@ -1,5 +1,6 @@
 from qark.plugins.file.file_permissions import FilePermissions, WORLD_READABLE_DESCRIPTION, WORLD_WRITEABLE_DESCRIPTION
 from qark.plugins.file.android_logging import AndroidLogging
+from qark.plugins.file.external_storage import ExternalStorage
 from qark.plugins.file.api_keys import JavaAPIKeys
 from qark.issue import Severity
 
@@ -29,6 +30,13 @@ def test_android_logging(test_java_files):
     assert plugin.issues[0].severity == plugin.severity
     assert plugin.issues[0].category == plugin.category
     
+    
+def test_external_storage(test_java_files):
+    plugin = ExternalStorage()
+    plugin.run([os.path.join(test_java_files,
+                             "external_storage.java")])
+    assert 4 == len(plugin.issues)
+
     
 def test_api_keys():
     plugin = JavaAPIKeys()
