@@ -1,8 +1,8 @@
 from setuptools import setup, find_packages
 
 with open('requirements.txt') as f:
-    required = f.read().splitlines()
-    required = [''.join(requirement.split()[:-1]) for requirement in required]
+    all_lines = f.read().splitlines()
+    required = [requirement.split(' ')[0] for requirement in all_lines if not requirement.startswith(' ')]
 
 setup(
     name="qark",
