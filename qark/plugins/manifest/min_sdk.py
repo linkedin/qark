@@ -1,10 +1,8 @@
 import logging
-from xml.dom import minidom
 
 from qark.issue import Issue, Severity
 from qark.plugins.manifest_helpers import get_min_sdk
-from qark.xml_helpers import get_manifest_out_of_files
-from qark.scanner.plugin import BasePlugin
+from qark.scanner.plugin import ManifestPlugin
 
 log = logging.getLogger(__name__)
 
@@ -19,27 +17,20 @@ TAP_JACKING = ("Since the minSdkVersion is less that 9, it is likely this applic
                "https://media.blackhat.com/ad-12/Niemietz/bh-ad-12-androidmarcus_niemietz-WP.pdf")
 
 
-class MinSDK(BasePlugin):
+class MinSDK(ManifestPlugin):
     """This plugin will create issues depending on the manifest's minimum SDK. For instance
     tapjacking is only protected when min_sdk > 9 (or custom code is used)."""
-    def __init__(self):
-        BasePlugin.__init__(self, category="manifest")
+    def __init__(self, **kwargs):
+        kwargs.update(dict(category="manifest"))
+        super(MinSDK, self).__init__(**kwargs)
+
         self.severity = Severity.WARNING
 
     def run(self, files, apk_constants=None):
         try:
             min_sdk = apk_constants["min_sdk"]
         except (KeyError, TypeError):
-            manifest_path = get_manifest_out_of_files(files)
-            if not manifest_path:
-                return
-
-            try:
-                manifest_xml = minidom.parse(manifest_path)
-            except Exception:
-                log.exception("Failed to parse manifest file, is it valid syntax?")
-                return  # do not raise a SystemExit because other checks can still be ran
-            min_sdk = get_min_sdk(manifest_xml)
+            min_sdk = get_min_sdk(self.manifest_xml)
 
         if min_sdk < 9:
             self.issues.append(Issue(category=self.category, name="Tap Jacking possible",

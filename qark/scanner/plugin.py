@@ -1,6 +1,7 @@
 import abc
 import os
 import logging
+from xml.dom import minidom
 
 from pluginbase import PluginBase
 
@@ -46,11 +47,14 @@ def get_plugins(category=None):
 class BasePlugin(object):
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, category=None, name=None, description=None):
+    def __init__(self, category=None, name=None, description=None, **kwargs):
         self.category = category
-        self.issues = []
         self.name = name
         self.description = description
+
+        super(BasePlugin, self).__init__(**kwargs)
+
+        self.issues = []
 
     @abc.abstractmethod
     def run(self, files, apk_constants=None):
@@ -62,3 +66,39 @@ class BasePlugin(object):
                                     that some plugins can use (min_sdk, target_sdk)
         """
         pass
+
+
+class ManifestPlugin(BasePlugin):
+    manifest_xml = None
+    manifest_path = None
+
+    def __init__(self, manifest_path=None, manifest_xml=None, **kwargs):
+        if self.manifest_path is None:
+            self.manifest_path = manifest_path
+
+        if self.manifest_xml is None:
+            try:
+                # If the user passed the parsed minidom XML content then we don't have to parse anything
+                self.manifest_xml = manifest_xml
+
+            except KeyError:
+
+                # Otherwise we have to get the manifest path and parse it
+                try:
+                    self.manifest_xml = minidom.parse(self.manifest_path)
+
+                except Exception:
+                    log.debug("Failed to parse the XML file, resetting manifest_path")
+                    self.manifest_path = None
+
+        super(ManifestPlugin, self).__init__(**kwargs)
+
+    @classmethod
+    def update_manifest(cls, path_to_manifest):
+        """Users of this class should call this method instead of changing class attributes directly"""
+        cls.manifest_path = path_to_manifest
+        cls.manifest_xml = minidom.parse(path_to_manifest)
+
+    @abc.abstractmethod
+    def run(self, files, apk_constants=None):
+        """User should define how their plugin runs"""
