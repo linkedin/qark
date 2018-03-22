@@ -47,14 +47,14 @@ class CheckPermissions(BasePlugin):
             log.debug("Error parsing file %s, continuing", java_file)
             return
 
-        if any(["Service" in imp for imp in tree.imports]):
+        if any(["Context" in imp.path for imp in tree.imports]):
             if re.search(CHECK_PERMISSION_REGEX, file_contents):
                 self.issues.append(Issue(
                     category=self.category, severity=self.severity, name=self.name,
                     description=self.description.format(used_permission="Check", recommended_permission="check"),
                     file_object=java_file)
                 )
-            elif re.search(ENFORCE_PERMISSION_REGEX, file_contents):
+            if re.search(ENFORCE_PERMISSION_REGEX, file_contents):
                 self.issues.append(Issue(
                     category=self.category, severity=self.severity, name=self.name,
                     description=self.description.format(used_permission="Enforce", recommended_permission="enforce"),
