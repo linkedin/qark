@@ -1,4 +1,5 @@
 from qark.plugins.file.file_permissions import FilePermissions, WORLD_READABLE_DESCRIPTION, WORLD_WRITEABLE_DESCRIPTION
+from qark.plugins.file.phone_identifier import PhoneIdentifier
 from qark.plugins.file.insecure_functions import InsecureFunctions
 from qark.plugins.file.http_url_hardcoded import HardcodedHTTP
 from qark.plugins.file.android_logging import AndroidLogging
@@ -23,6 +24,13 @@ def test_file_permissions():
     assert WORLD_WRITEABLE_DESCRIPTION == plugin.issues[1].description
 
 
+def test_phone_identifier(test_java_files):
+    plugin = PhoneIdentifier()
+    plugin.run([os.path.join(test_java_files,
+                             "phone_identifier.java")])
+    assert 1 == len(plugin.issues)
+    
+    
 def test_insecure_functions(test_java_files):
     plugin = InsecureFunctions()
     plugin.run([os.path.join(test_java_files,
