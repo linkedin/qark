@@ -37,22 +37,15 @@ class HardcodedHTTP(BasePlugin):
             log.debug("File does not exist %s, continuing", java_file)
             return
 
-        try:
-            tree = javalang.parse.parse(file_contents)
-        except (javalang.parser.JavaSyntaxError, IndexError):
-            log.debug("Error parsing file %s, continuing", java_file)
-            return
-
-        if any(["URL" in imp for imp in tree.imports]):
-            for line_number, line in enumerate(file_contents.split('\n')):
-                http_url_match = re.search(HTTP_URL_REGEX, line)
-                if http_url_match:
-                    self.issues.append(Issue(
-                        category=self.category, severity=self.severity, name=self.name,
-                        description=self.description.format(http_url=http_url_match.group(0)),
-                        file_object=java_file,
-                        line_number=(line_number, 0))
-                    )
+        for line_number, line in enumerate(file_contents.split('\n')):
+            http_url_match = re.search(HTTP_URL_REGEX, line)
+            if http_url_match:
+                self.issues.append(Issue(
+                    category=self.category, severity=self.severity, name=self.name,
+                    description=self.description.format(http_url=http_url_match.group(0)),
+                    file_object=java_file,
+                    line_number=(line_number, 0))
+                )
 
 
 plugin = HardcodedHTTP()

@@ -1,5 +1,8 @@
 from qark.plugins.file.file_permissions import FilePermissions, WORLD_READABLE_DESCRIPTION, WORLD_WRITEABLE_DESCRIPTION
 from qark.plugins.file.insecure_functions import InsecureFunctions
+from qark.plugins.file.http_url_hardcoded import HardcodedHTTP
+from qark.plugins.file.android_logging import AndroidLogging
+from qark.plugins.file.external_storage import ExternalStorage
 from qark.plugins.file.api_keys import JavaAPIKeys
 from qark.issue import Severity
 
@@ -26,6 +29,31 @@ def test_insecure_functions(test_java_files):
                              "insecure_functions.java")])
     assert 1 == len(plugin.issues)
     
+    
+def test_http_url_hardcoded(test_java_files):
+    plugin = HardcodedHTTP()
+    plugin.run([os.path.join(test_java_files,
+                             "http_url_hardcoded.java")])
+
+    assert 1 == len(plugin.issues)
+
+
+def test_android_logging(test_java_files):
+    plugin = AndroidLogging()
+    plugin.run([os.path.join(test_java_files,
+                             "test_android_logging.java")])
+    assert 2 == len(plugin.issues)
+    assert plugin.issues[0].name == plugin.name
+    assert plugin.issues[0].severity == plugin.severity
+    assert plugin.issues[0].category == plugin.category
+    
+    
+def test_external_storage(test_java_files):
+    plugin = ExternalStorage()
+    plugin.run([os.path.join(test_java_files,
+                             "external_storage.java")])
+    assert 4 == len(plugin.issues)
+
     
 def test_api_keys():
     plugin = JavaAPIKeys()
