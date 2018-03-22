@@ -1,4 +1,5 @@
 from qark.plugins.file.file_permissions import FilePermissions, WORLD_READABLE_DESCRIPTION, WORLD_WRITEABLE_DESCRIPTION
+from qark.plugins.file.http_url_hardcoded import HardcodedHTTP
 from qark.plugins.file.android_logging import AndroidLogging
 from qark.plugins.file.external_storage import ExternalStorage
 from qark.plugins.file.api_keys import JavaAPIKeys
@@ -19,6 +20,14 @@ def test_file_permissions():
     assert "World writeable file" == plugin.issues[1].name
     assert Severity.WARNING == plugin.issues[1].severity
     assert WORLD_WRITEABLE_DESCRIPTION == plugin.issues[1].description
+
+
+def test_http_url_hardcoded(test_java_files):
+    plugin = HardcodedHTTP()
+    plugin.run([os.path.join(test_java_files,
+                             "http_url_hardcoded.java")])
+
+    assert 1 == len(plugin.issues)
 
 
 def test_android_logging(test_java_files):
