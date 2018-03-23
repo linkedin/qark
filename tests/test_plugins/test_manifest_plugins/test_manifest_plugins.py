@@ -10,6 +10,10 @@ from qark.plugins.manifest.custom_permissions import CustomPermissions
 from qark.plugins.manifest.debuggable import DebuggableManifest
 from qark.plugins.manifest.exported_tags import ExportedTags
 from qark.plugins.manifest.min_sdk import MinSDK, TAP_JACKING
+from qark.plugins.manifest.android_path import AndroidPath
+from qark.plugins.manifest.api_keys import APIKeys
+from qark.plugins.manifest.single_task_launch_mode import SingleTaskLaunchMode
+from qark.plugins.manifest.task_reparenting import TaskReparenting
 from qark.scanner.plugin import ManifestPlugin
 
 
@@ -44,7 +48,7 @@ def test_nonvulnerable_allow_backup(goatdroid_manifest):
 def test_custom_permission_vulnerable(test_android_manifest):
     plugin = CustomPermissions(manifest_xml=test_android_manifest)
     plugin.run([], apk_constants={})
-    assert len(plugin.issues) == 1
+    assert len(plugin.issues) == 2
     assert plugin.issues[0].name == plugin.name
     assert plugin.issues[0].severity
     assert plugin.issues[0].category == plugin.category
@@ -98,3 +102,31 @@ def test_vulnerable_min_sdk(apk_constants):
         assert "Tap Jacking possible" == issue.name
         assert TAP_JACKING == issue.description
         assert plugin.category == issue.category
+
+
+def test_android_path(vulnerable_manifest_path):
+    ManifestPlugin.update_manifest(vulnerable_manifest_path)
+    plugin = AndroidPath()
+    plugin.run([])
+    assert 1 == len(plugin.issues)
+
+
+def test_api_keys(vulnerable_manifest_path):
+    ManifestPlugin.update_manifest(vulnerable_manifest_path)
+    plugin = APIKeys()
+    plugin.run([])
+    assert 1 == len(plugin.issues)
+
+
+def test_single_task_launch_mode(vulnerable_manifest_path):
+    ManifestPlugin.update_manifest(vulnerable_manifest_path)
+    plugin = SingleTaskLaunchMode()
+    plugin.run([])
+    assert 1 == len(plugin.issues)
+
+
+def test_task_reparenting(vulnerable_manifest_path):
+    ManifestPlugin.update_manifest(vulnerable_manifest_path)
+    plugin = TaskReparenting()
+    plugin.run([])
+    assert 1 == len(plugin.issues)
