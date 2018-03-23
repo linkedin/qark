@@ -1,17 +1,17 @@
 import logging
-from multiprocessing.pool import ThreadPool
 import os
 import platform
+import re
 import shlex
 import shutil
 import stat
 import subprocess
-import re
 import zipfile
-
-from qark.decompiler.external_decompiler import DECOMPILERS
+from multiprocessing.pool import ThreadPool
 
 import requests
+
+from qark.decompiler.external_decompiler import DECOMPILERS
 
 log = logging.getLogger(__name__)
 
@@ -292,7 +292,11 @@ def download_file(url, download_path):
         raise
 
     # ensure output directory exists
-    os.makedirs(os.path.dirname(download_path), exist_ok=True)
+    try:
+        os.makedirs(os.path.dirname(download_path))
+    except IOError:
+        # Directory already exists, continue
+        pass
 
     with open(download_path, "wb") as download_path_file:
         download_path_file.write(response.content)
