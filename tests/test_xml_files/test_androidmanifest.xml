@@ -7,10 +7,11 @@
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />
         <category android:name="android.intent.category.LAUNCHER" />
+        <data android:path="test"/>
       </intent-filter>
     </activity>
-    <activity android:label="@string/login" android:name=".activities.Login" />
-    <activity android:label="@string/register" android:name=".activities.Register" />
+    <activity android:label="@string/login" android:name=".activities.Login" android:launchMode="singleTask"/>
+    <activity android:label="@string/register" android:name=".activities.Register" android:allowTaskReparenting="true"/>
     <activity android:label="@string/home" android:name=".activities.Home" />
     <activity android:label="@string/checkin" android:name=".fragments.DoCheckin" />
     <activity android:label="@string/checkins" android:name=".activities.Checkins" />
@@ -66,5 +67,5 @@
               android:label="@string/permlab_deadlyActivity"
               android:description="@string/permdesc_deadlyActivity"
               android:permissionGroup="android.permission-group.COST_MONEY"
-              android:protectionLevel="test" />
+              android:protectionLevel="dangerous" />
 </manifest>
