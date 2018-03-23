@@ -288,8 +288,11 @@ def download_file(url, download_path):
     try:
         response = requests.get(url)
     except Exception:
-        log.exception("Unable to download APKTool jar file")
+        log.exception("Unable to download file")
         raise
+
+    # ensure output directory exists
+    os.makedirs(os.path.dirname(download_path), exist_ok=True)
 
     with open(download_path, "wb") as download_path_file:
         download_path_file.write(response.content)
@@ -339,6 +342,7 @@ def download_dex2jar():
     try:
         download_file(DEX2JAR_URL, os.path.join(LIB_PATH, "temp_dex2jar.zip"))
     except Exception:
+        log.exception("Failed to download dex2jar jar")
         raise SystemExit("Failed to download dex2jar jar")
 
     unzip_file(os.path.join(LIB_PATH, "temp_dex2jar.zip"), destination_to_unzip=LIB_PATH)

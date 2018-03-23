@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 
-from os import path
+from os import path, makedirs
 
 from jinja2 import Environment, PackageLoader, select_autoescape, Template
 
@@ -51,6 +51,8 @@ class Report(object):
         :param str file_type:     The type of file for the report. Defaults to 'html'.
         :param str template_file: The path to an optional template file to override the default.
         """
+        # ensure report path exists
+        makedirs(self.report_path, exist_ok=True)
 
         with open(path.join(self.report_path, 'report.{file_type}'.format(file_type=file_type)),
                   mode='w') as report_file:
