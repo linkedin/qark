@@ -22,11 +22,11 @@ DEBUG_LOG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
               help="Path to place decompiled files and exploit APK", default="build", show_default=True)
 @click.option("--debug/--no-debug", default=False, help="Show debugging statements (helpful for issues)",
               show_default=True)
-@click.option("--apk", "source", help="APK to run and run static analysis. If passed, "
+@click.option("--apk", "source", help="APK to decompile and run static analysis. If passed, "
                                       "the --java option is not used",
               type=click.Path(exists=True, resolve_path=True, file_okay=True, dir_okay=True))
 @click.option("--java", "source", type=click.Path(exists=True, resolve_path=True, file_okay=True, dir_okay=True),
-              help="A directory containing Java code, or a Java file, to run and run static analysis. If passed,"
+              help="A directory containing Java code, or a Java file, to run static analysis. If passed,"
                    "the --apk option is not used")
 @click.option("--report-type", type=click.Choice(["html", "xml", "json", "csv"]),
               help="Type of report to generate along with terminal output", default="html", show_default=True)
@@ -78,7 +78,7 @@ def cli(ctx, sdk_path, build_path, debug, source, report_type, exploit_apk):
 # @cli.command()
 @click.option("--apk", required=True, type=click.Path(exists=True, resolve_path=True, file_okay=True,
                                                            dir_okay=False),
-              help="Path to APK to run")
+              help="Path to APK to decompile")
 @click.option("--build-path", type=click.Path(resolve_path=True, file_okay=False),
               help="Path to place decompiled files and exploit APK", default="build", show_default=True)
 def decompile(apk, build_path):

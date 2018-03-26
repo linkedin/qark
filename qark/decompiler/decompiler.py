@@ -42,7 +42,7 @@ class Decompiler(object):
     def __init__(self, path_to_source, build_directory=None):
         """
         :param path_to_source: Path to directory, APK, or a .java file
-        :param build_directory: directory to unpack and run APK to.
+        :param build_directory: directory to unpack and decompile APK to.
                                 If directory does not exist it will be created, defaults to same directory as APK/qark
         """
         if not os.path.exists(path_to_source):
@@ -121,7 +121,7 @@ class Decompiler(object):
 
     def run_apktool(self):
         """
-        Runs `APK_TOOL_COMMAND` with the users path to APK to run the APK.
+        Runs `APK_TOOL_COMMAND` with the users path to APK to decompile the APK.
         Sets `self.manifest_path` to its correct location.
         """
         # check that java is version 1.7 or higher
