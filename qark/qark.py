@@ -6,10 +6,10 @@ from sys import stderr
 
 import click
 
-from qark.decompiler.decompiler import Decompiler
-from qark.scanner.scanner import Scanner
-from qark.report import Report
 from qark.apk_builder import APKBuilder
+from qark.decompiler.decompiler import Decompiler
+from qark.report import Report
+from qark.scanner.scanner import Scanner
 
 DEBUG_LOG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                               "qark_debug.log")

@@ -1,18 +1,18 @@
 import logging
-from multiprocessing.pool import ThreadPool
 import os
 import platform
+import re
 import shlex
 import shutil
 import stat
 import subprocess
-import re
 import zipfile
+from multiprocessing.pool import ThreadPool
+
+import requests
 
 from qark.decompiler.external_decompiler import DECOMPILERS
 from qark.utils import create_directories_to_path
-
-import requests
 
 log = logging.getLogger(__name__)
 
