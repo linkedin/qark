@@ -1,6 +1,8 @@
 from __future__ import absolute_import
 
+import os
 import logging
+from sys import stderr
 
 import click
 
@@ -9,7 +11,8 @@ from qark.scanner.scanner import Scanner
 from qark.report import Report
 from qark.apk_builder import APKBuilder
 
-log = logging.getLogger(__name__)
+DEBUG_LOG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                              "qark_debug.log")
 
 
 @click.command()
@@ -19,11 +22,11 @@ log = logging.getLogger(__name__)
               help="Path to place decompiled files and exploit APK", default="build", show_default=True)
 @click.option("--debug/--no-debug", default=False, help="Show debugging statements (helpful for issues)",
               show_default=True)
-@click.option("--apk", "source", help="APK to decompile and run static analysis. If passed, "
+@click.option("--apk", "source", help="APK to run and run static analysis. If passed, "
                                       "the --java option is not used",
               type=click.Path(exists=True, resolve_path=True, file_okay=True, dir_okay=True))
 @click.option("--java", "source", type=click.Path(exists=True, resolve_path=True, file_okay=True, dir_okay=True),
-              help="A directory containing Java code, or a Java file, to decompile and run static analysis. If passed,"
+              help="A directory containing Java code, or a Java file, to run and run static analysis. If passed,"
                    "the --apk option is not used")
 @click.option("--report-type", type=click.Choice(["html", "xml", "json", "csv"]),
               help="Type of report to generate along with terminal output", default="html", show_default=True)
@@ -41,9 +44,17 @@ def cli(ctx, sdk_path, build_path, debug, source, report_type, exploit_apk):
         click.secho("Please provide path to android SDK if building exploit APK.")
         return
 
+    # Debug controls the output to stderr, debug logs are ALWAYS stored in `qark_debug.log`
+    if debug:
+        level = logging.DEBUG
+    else:
+        level = logging.INFO
+
+    initialize_logging(level)
+
     click.secho("Decompiling...")
     decompiler = Decompiler(path_to_source=source, build_directory=build_path)
-    decompiler.decompile()
+    decompiler.run()
 
     click.secho("Running scans...")
     scanner = Scanner(manifest_path=decompiler.manifest_path, path_to_source=decompiler.path_to_source,
@@ -53,8 +64,8 @@ def cli(ctx, sdk_path, build_path, debug, source, report_type, exploit_apk):
 
     click.secho("Writing report...")
     report = Report(issues=scanner.issues)
-    report.generate_report_file(file_type=report_type)
-    click.secho("Finish writing report...")
+    report_path = report.generate(file_type=report_type)
+    click.secho("Finish writing report to %s...", report_path)
 
     if exploit_apk:
         click.secho("Building exploit APK...")
@@ -67,8 +78,21 @@ def cli(ctx, sdk_path, build_path, debug, source, report_type, exploit_apk):
 # @cli.command()
 @click.option("--apk", required=True, type=click.Path(exists=True, resolve_path=True, file_okay=True,
                                                            dir_okay=False),
-              help="Path to APK to decompile")
+              help="Path to APK to run")
 @click.option("--build-path", type=click.Path(resolve_path=True, file_okay=False),
               help="Path to place decompiled files and exploit APK", default="build", show_default=True)
 def decompile(apk, build_path):
     pass
+
+
+def initialize_logging(level):
+    """Creates two root handlers, one to file called `qark_debug.log` and one to stderr"""
+
+    debug_handler = logging.FileHandler(DEBUG_LOG_PATH, mode="w")
+    debug_handler.setLevel(logging.DEBUG)
+
+    stderr_handler = logging.StreamHandler(stream=stderr)
+    stderr_handler.setLevel(level)
+
+    logging.getLogger().addHandler(debug_handler)
+    logging.getLogger().addHandler(stderr_handler)

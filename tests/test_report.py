@@ -27,7 +27,7 @@ def test_report_html_defaults():
     report = Report()
     issue = Issue(category='Test', name='Test Issue', severity=Severity.VULNERABILITY, description='Test')
     report.issues.append(issue)
-    report.generate_report_file()
+    report.generate()
     # We remove the issue we added to clean up after ourselves.
     report.issues.remove(issue)
     assert os.path.exists(os.path.join(DEFAULT_REPORT_PATH, 'report.html'))
@@ -39,7 +39,7 @@ def test_report_xml_defaults():
     report = Report()
     issue = Issue(category='Test', name='Test Issue', severity=Severity.VULNERABILITY, description='Test')
     report.issues.append(issue)
-    report.generate_report_file(file_type='xml')
+    report.generate(file_type='xml')
     # We remove the issue we added to clean up after ourselves.
     report.issues.remove(issue)
     assert os.path.exists(os.path.join(DEFAULT_REPORT_PATH, 'report.xml'))
@@ -51,7 +51,7 @@ def test_report_csv_defaults():
     report = Report()
     issue = Issue(category='Test', name='Test Issue', severity=Severity.VULNERABILITY, description='Test')
     report.issues.append(issue)
-    report.generate_report_file(file_type='csv')
+    report.generate(file_type='csv')
     # We remove the issue we added to clean up after ourselves.
     report.issues.remove(issue)
     assert os.path.exists(os.path.join(DEFAULT_REPORT_PATH, 'report.csv'))
@@ -63,7 +63,7 @@ def test_report_json_defaults():
     report = Report()
     issue = Issue(category='Test', name='Test Issue', severity=Severity.VULNERABILITY, description='Test')
     report.issues.append(issue)
-    report.generate_report_file(file_type='json')
+    report.generate(file_type='json')
     # We remove the issue we added to clean up after ourselves.
     report.issues.remove(issue)
     assert os.path.exists(os.path.join(DEFAULT_REPORT_PATH, 'report.json'))
@@ -75,7 +75,7 @@ def test_report_html_custom_template():
     report = Report()
     issue = Issue(category='Test', name='Test Issue', severity=Severity.VULNERABILITY, description='Test')
     report.issues.append(issue)
-    report.generate_report_file(template_file=os.path.join('templates', 'html_report.jinja'))
+    report.generate(template_file=os.path.join('templates', 'html_report.jinja'))
     # We remove the issue we added to clean up after ourselves.
     report.issues.remove(issue)
     assert os.path.exists(os.path.join(DEFAULT_REPORT_PATH, 'report.html'))

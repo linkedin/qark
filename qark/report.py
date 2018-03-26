@@ -5,8 +5,9 @@ from os import path
 from jinja2 import Environment, PackageLoader, select_autoescape, Template
 
 from qark.issue import (Issue, Severity, issue_json)  # noqa:F401 These are expected to be used later.
+from qark.utils import create_directories_to_path
 
-DEFAULT_REPORT_PATH = path.join(path.dirname(path.realpath(__file__)), '..', 'report')
+DEFAULT_REPORT_PATH = path.join(path.dirname(path.realpath(__file__)), '..', 'report', '')
 
 
 jinja_env = Environment(
@@ -45,17 +46,23 @@ class Report(object):
         self.issues = issues if issues else []
         self.report_path = report_path or DEFAULT_REPORT_PATH
 
-    def generate_report_file(self, file_type='html', template_file=None):
+    def generate(self, file_type='html', template_file=None):
         """This method uses Jinja2 to generate a standalone HTML version of the report.
 
         :param str file_type:     The type of file for the report. Defaults to 'html'.
         :param str template_file: The path to an optional template file to override the default.
+        :return: Path to the written report
+        :rtype: str
         """
+        create_directories_to_path(self.report_path)
 
-        with open(path.join(self.report_path, 'report.{file_type}'.format(file_type=file_type)),
-                  mode='w') as report_file:
+        full_report_path = path.join(self.report_path, 'report.{file_type}'.format(file_type=file_type))
+
+        with open(full_report_path, mode='w') as report_file:
             if not template_file:
                 template = jinja_env.get_template('{file_type}_report.jinja'.format(file_type=file_type))
             else:
                 template = Template(template_file)
             report_file.write(template.render(issues=list(self.issues)))
+
+        return full_report_path
