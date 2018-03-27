@@ -113,7 +113,7 @@ def test_decompile(decompiler):
     cfr_decomp_path = os.path.join(decompiler.build_directory, "cfr")
     assert all([not os.path.exists(path) for path in (jdcore_decomp_path, procyon_decomp_path, cfr_decomp_path)])
 
-    decompiler.decompile()
+    decompiler.run()
 
     assert os.path.isdir(decompiler.build_directory)
 

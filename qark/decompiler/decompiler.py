@@ -1,17 +1,18 @@
 import logging
-from multiprocessing.pool import ThreadPool
 import os
 import platform
+import re
 import shlex
 import shutil
 import stat
 import subprocess
-import re
 import zipfile
-
-from qark.decompiler.external_decompiler import DECOMPILERS
+from multiprocessing.pool import ThreadPool
 
 import requests
+
+from qark.decompiler.external_decompiler import DECOMPILERS
+from qark.utils import create_directories_to_path
 
 log = logging.getLogger(__name__)
 
@@ -79,7 +80,7 @@ class Decompiler(object):
                 log.debug("Downloading %s...", decompiler.name)
                 download_cfr()
 
-    def decompile(self):
+    def run(self):
         """Top-level function which runs each decompiler and waits for them to finish decompilation."""
         if self.source_code:
             return
@@ -175,7 +176,7 @@ class Decompiler(object):
     def _run_dex2jar(self):
         """Runs dex2jar.sh in the lib on the dex file.
         If `self.dex_path` is None or empty it will run `_unpack_apk` to get a value for it."""
-        # dex_path should always be set if being called through decompile
+        # dex_path should always be set if being called through run
         if not self.dex_path:
             log.debug("Path to .dex file not found, unpacking APK")
             self.dex_path = self._unpack_apk()
@@ -288,8 +289,10 @@ def download_file(url, download_path):
     try:
         response = requests.get(url)
     except Exception:
-        log.exception("Unable to download APKTool jar file")
+        log.exception("Unable to download file from %s to %s", url, download_path)
         raise
+
+    create_directories_to_path(download_path)
 
     with open(download_path, "wb") as download_path_file:
         download_path_file.write(response.content)
@@ -339,6 +342,7 @@ def download_dex2jar():
     try:
         download_file(DEX2JAR_URL, os.path.join(LIB_PATH, "temp_dex2jar.zip"))
     except Exception:
+        log.exception("Failed to download dex2jar jar")
         raise SystemExit("Failed to download dex2jar jar")
 
     unzip_file(os.path.join(LIB_PATH, "temp_dex2jar.zip"), destination_to_unzip=LIB_PATH)

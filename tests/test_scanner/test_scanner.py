@@ -5,7 +5,7 @@ SCANNER_ISSUES = 10
 
 @pytest.mark.long
 def test_run(scanner, decompiler):
-    decompiler.decompile()
+    decompiler.run()
 
     scanner.issues = []
     scanner.decompiler = decompiler
