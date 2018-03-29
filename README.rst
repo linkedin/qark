@@ -1,3 +1,7 @@
+Downloading the v2 branch
+#########################
+`git clone -b v2 https://github.com/linkedin/qark`
+
 Installation
 ############
 
