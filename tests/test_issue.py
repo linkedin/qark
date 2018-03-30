@@ -1,7 +1,6 @@
 import json
 
-import pytest
-from qark.issue import Issue, Severity, IssueEncoder, issue_json
+from qark.issue import Issue, Severity, issue_json
 
 
 def test_convert_severity():
@@ -33,14 +32,3 @@ def test_issue_json_list():
     json_issue = json.loads(json_output)
     assert json_issue[0]['severity'] == issue.severity.name
     assert json_issue[0]['name'] == issue.name
-
-
-def test_IssueEncoder_not_an_issue():
-    issue = Severity(Severity.INFO)
-    with pytest.raises(TypeError, match=r'Expecting an object of type Issue.*'):
-        json.dumps(issue, cls=IssueEncoder)
-
-
-def test_issue_json_dump_error():
-        issue = Severity(Severity.INFO)
-        assert issue_json(issue) == '"Error encoding to JSON"'
