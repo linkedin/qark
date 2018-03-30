@@ -1,8 +1,7 @@
 import logging
+from copy import deepcopy
 from enum import Enum
 from json import JSONEncoder, dumps
-from copy import deepcopy
-
 
 log = logging.getLogger(__name__)
 
@@ -45,6 +44,12 @@ class Issue(object):
         self.file_object = file_object
         self.apk_exploit_dict = apk_exploit_dict
 
+    def __repr__(self):
+        return ("Issue(category={}, name={}, severity={}, description={}, line_number={}, "
+                "file_object={}, apk_exploit_dict={}".format(self.category, self.name, self.severity,
+                                                             self.description, self.line_number, self.file_object,
+                                                             self.apk_exploit_dict))
+
 
 class Severity(Enum):
     INFO = 0
@@ -60,7 +65,8 @@ class IssueEncoder(JSONEncoder):
             working_dict['severity'] = working_dict['severity'].name
             return working_dict
         else:
-            raise TypeError('Expecting an object of type Issue. Got object of type {}'.format(type(issue)))
+            log.error('Error converting issue %r to JSON %s', issue, type(issue))
+            return
 
 
 def issue_json(value):
