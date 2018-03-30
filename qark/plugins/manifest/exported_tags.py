@@ -213,6 +213,9 @@ class ExportedTags(ManifestPlugin):
         self.package_name = None
 
     def run(self, files, apk_constants=None):
+        if not self.manifest_xml:
+            return
+
         self.min_sdk = apk_constants["min_sdk"] if "min_sdk" in apk_constants else get_min_sdk(self.manifest_xml)
         self.target_sdk = apk_constants["target_sdk"] if "target_sdk" in apk_constants else get_target_sdk(self.manifest_xml)
         self.package_name = apk_constants["package_name"] if "package_name" in apk_constants else get_package_from_manifest(self.manifest_path)

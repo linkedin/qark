@@ -38,6 +38,9 @@ class CustomPermissions(ManifestPlugin):
         self.severity = Severity.WARNING
 
     def run(self, files, apk_constants=None):
+        if not self.manifest_xml:
+            return
+
         permission_sections = self.manifest_xml.getElementsByTagName("permission")
         for permission in permission_sections:
             try:

@@ -60,11 +60,12 @@ class IssueEncoder(JSONEncoder):
             working_dict['severity'] = working_dict['severity'].name
             return working_dict
         else:
-            raise TypeError('Expecting an object of type Issue. Got object of type {}'.format(type(Issue)))
+            raise TypeError('Expecting an object of type Issue. Got object of type {}'.format(type(issue)))
 
 
 def issue_json(value):
     try:
         return dumps(value, cls=IssueEncoder)
     except TypeError:
+        log.exception('Error encoding to JSON')
         return dumps('Error encoding to JSON')
