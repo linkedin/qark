@@ -97,7 +97,11 @@ class ManifestPlugin(BasePlugin):
     def update_manifest(cls, path_to_manifest):
         """Users of this class should call this method instead of changing class attributes directly"""
         cls.manifest_path = path_to_manifest
-        cls.manifest_xml = minidom.parse(path_to_manifest)
+        try:
+            cls.manifest_xml = minidom.parse(path_to_manifest)
+        except Exception:
+            # path_to_manifest is None or has bad XML
+            cls.manifest_xml = None
 
     @abc.abstractmethod
     def run(self, files, apk_constants=None):

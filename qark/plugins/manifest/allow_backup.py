@@ -20,6 +20,9 @@ class ManifestBackupAllowed(ManifestPlugin):
         self.severity = Severity.WARNING
 
     def run(self, files, apk_constants=None):
+        if not self.manifest_xml:
+            return
+
         application_sections = self.manifest_xml.getElementsByTagName("application")
 
         for application in application_sections:
