@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest android:versionCode="1" android:versionName="1.0" package="org.owasp.goatdroid.fourgoats"
+          xmlns:android="http://schemas.android.com/apk/res/android">
+  <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="15" />
+  <application android:theme="@style/Theme.Sherlock" android:label="@string/app_name" android:icon="@drawable/icon" android:debuggable="false" android:allowBackup="true">
+    <activity android:label="@string/app_name" android:name=".activities.Main">
+      <intent-filter>
+        <action android:name="android.intent.action.MAIN" />
+        <category android:name="android.intent.category.LAUNCHER" />
+      </intent-filter>
+    </activity>
+    <activity android:label="@string/login" android:name=".activities.Login" />
+    <activity android:label="@string/register" android:name=".activities.Register" />
+    <activity android:label="@string/home" android:name=".activities.Home" />
+    <activity android:label="@string/checkin" android:name=".fragments.DoCheckin" />
+    <activity android:label="@string/checkins" android:name=".activities.Checkins" />
+    <activity android:label="@string/friends" android:name=".activities.Friends" />
+    <activity android:label="@string/history" android:name=".fragments.HistoryFragment" />
+    <activity android:label="@string/history" android:name=".activities.History" />
+    <activity android:label="@string/rewards" android:name=".activities.Rewards" />
+    <activity android:label="@string/add_venue" android:name=".activities.AddVenue" />
+    <activity android:label="@string/view_checkin" android:name=".activities.ViewCheckin" android:exported="true" />
+    <activity android:label="@string/my_friends" android:name=".fragments.MyFriends" />
+    <activity android:label="@string/search_for_friends" android:name=".fragments.SearchForFriends" />
+    <activity android:label="@string/profile" android:name=".activities.ViewProfile" android:exported="true" />
+    <activity android:label="@string/pending_friend_requests" android:name=".fragments.PendingFriendRequests" />
+    <activity android:label="@string/friend_request" android:name=".activities.ViewFriendRequest" />
+    <activity android:label="@string/my_rewards" android:name=".fragments.MyRewards" />
+    <activity android:label="@string/available_rewards" android:name=".fragments.AvailableRewards" />
+    <activity android:label="@string/preferences" android:name=".activities.Preferences" />
+    <activity android:label="@string/about" android:name=".activities.About" />
+    <activity android:label="@string/send_sms" android:name=".activities.SendSMS" />
+    <activity android:label="@string/comment" android:name=".activities.DoComment" />
+    <activity android:label="@string/history" android:name=".activities.UserHistory" />
+    <activity android:label="@string/destination_info" android:name=".activities.DestinationInfo" />
+    <activity android:label="@string/admin_home" android:name=".activities.AdminHome" />
+    <activity android:label="@string/admin_options" android:name=".activities.AdminOptions" />
+    <activity android:label="@string/reset_user_passwords" android:name=".fragments.ResetUserPasswords" />
+    <activity android:label="@string/delete_users" android:name=".fragments.DeleteUsers" />
+    <activity android:label="@string/reset_user_password" android:name=".activities.DoAdminPasswordReset" />
+    <activity android:label="@string/delete_users" android:name=".activities.DoAdminDeleteUser" />
+    <activity android:label="@string/authenticate" android:name=".activities.SocialAPIAuthentication" android:exported="true" />
+    <activity android:label="@string/app_name" android:name=".activities.GenericWebViewActivity" />
+    <service android:name=".services.LocationService">
+      <intent-filter>
+        <action android:name="org.owasp.goatdroid.fourgoats.services.LocationService" />
+      </intent-filter>
+    </service>
+    <receiver android:label="Send SMS" android:name=".broadcastreceivers.SendSMSNowReceiver">
+      <intent-filter>
+        <action android:name="org.owasp.goatdroid.fourgoats.SOCIAL_SMS" />
+      </intent-filter> >
+    </receiver>
+  </application>
+  <uses-permission android:name="android.permission.SEND_SMS" />
+  <uses-permission android:name="android.permission.CALL_PHONE" />
+  <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+  <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+  <uses-permission android:name="android.permission.INTERNET" />
+  <permission android:name="com.example.myapp.permission.DEADLY_ACTIVITY"
+              android:label="@string/permlab_deadlyActivity"
+              android:description="@string/permdesc_deadlyActivity"
+              android:permissionGroup="android.permission-group.COST_MONEY"
+              android:protectionLevel="signatureOrSystem" />
+  <permission android:name="com.example.myapp.permission.DEADLY_ACTIVITY"
+              android:label="@string/permlab_deadlyActivity"
+              android:description="@string/permdesc_deadlyActivity"
+              android:permissionGroup="android.permission-group.COST_MONEY"
+              android:protectionLevel="test" />
+</manifest>
