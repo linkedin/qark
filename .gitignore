@@ -2,7 +2,6 @@
 *.png
 *.jpg
 logs
-report
 android-sdk*
 settings.properties
 *.swp
@@ -18,3 +17,6 @@ lextab.py
 qark/test/testData/*
 .idea
 .DS_Store
+*.iml
+lib/
+.cache/

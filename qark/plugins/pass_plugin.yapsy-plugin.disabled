@@ -1,9 +1,0 @@
-[Core]
-Name = plugin1
-Module = pass_plugin
-
-[Documentation]
-Author = Nathan Walsh
-Version = 0.1
-Website = https://github.com/linkedin/qark/
-Description = My first plugin

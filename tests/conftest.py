@@ -1,0 +1,74 @@
+from __future__ import absolute_import
+
+import pytest
+
+import os
+
+from qark.decompiler.decompiler import Decompiler
+from qark.scanner.scanner import Scanner
+
+
+@pytest.fixture(scope="session")
+def path_to_source():
+    return os.path.join(os.path.dirname(os.path.abspath(__file__)), "goatdroid.apk")
+
+
+@pytest.fixture(scope="session")
+def build_directory():
+    return os.path.join(os.path.dirname(os.path.abspath(__file__)), "build_directory")
+
+
+@pytest.fixture()
+def decompiler(path_to_source, build_directory):
+    return Decompiler(path_to_source=path_to_source, build_directory=build_directory)
+
+
+@pytest.fixture(scope="module")
+def module_decompiler(path_to_source, build_directory):
+    return Decompiler(path_to_source=path_to_source, build_directory=build_directory)
+
+
+
+@pytest.fixture()
+def scanner(decompiler):
+    return Scanner(decompiler.manifest_path, decompiler.path_to_source, decompiler.build_directory)
+
+
+@pytest.fixture(scope="session")
+def cfr_path():
+    return os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "lib", "decompilers", "cfr_0_124.jar")
+
+
+@pytest.fixture(scope="session")
+def jdcore_path():
+    return os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "lib",
+                        "decompilers", "jd-core-java-1.2.jar")
+
+
+@pytest.fixture(scope="session")
+def procyon_path():
+    return os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "lib",
+                        "decompilers", "procyon-decompiler-0.5.30.jar")
+
+
+@pytest.fixture(scope="session")
+def vulnerable_manifest_path():
+    return os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_xml_files",
+                        "test_androidmanifest.xml")
+
+
+@pytest.fixture(scope="session")
+def test_java_files():
+    return os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_java_files")
+
+
+@pytest.fixture(scope="session")
+def vulnerable_broadcast_path(test_java_files):
+    return os.path.join(test_java_files,
+                        "send_broadcast_receiver_permission.java")
+
+
+@pytest.fixture(scope="session")
+def vulnerable_receiver_path():
+    return os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_plugins", "test_manifest_plugins",
+                        "broadcastreceivers", "SendSMSNowReceiver.java")

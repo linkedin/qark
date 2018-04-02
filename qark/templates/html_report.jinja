@@ -1,0 +1,11 @@
+<html>
+<head><title>Temporary Report Template</title></head>
+<body>
+<h1>Issues</h1>
+{% for issue in issues %}
+<h2>{{ issue.severity.name }} {{ issue.name }}</h2>
+{{ issue.description }} <br/><br/>
+File: <a href="file://{{ issue.file_object }}">{{ issue.file_object }}{% if issue.line_number %}:{{ issue.line_number[0] }}:{{ issue.line_number[1] }} {% endif %}</a><br/>
+{% endfor %}
+</body>
+</html>
