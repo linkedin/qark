@@ -56,11 +56,14 @@ def unpack():
             zf.extractall(dirname + "/", zf.namelist(), )
             logger.info('Extracted APK to %s', dirname + '/')
             common.pathToDEX = dirname + "/classes.dex"
+            if not os.path.exists(common.pathToDEX):    # Some default/system APKs from Google don't have this file
+                logger.error("The classes.dex file was not found for this APK! Please select a different APK.")
+                raise Exception
             common.pathToUnpackedAPK = dirname + '/'
             return True
     except Exception as e:
         if not common.interactive_mode:
-            logger.error(common.args.pathtoapk + common.config.get('qarkhelper', 'NOT_A_VALID_APK'))
+            logger.error(common.args.apkpath + common.config.get('qarkhelper', 'NOT_A_VALID_APK'))
             exit()
         logger.error(common.config.get('qarkhelper', 'NOT_A_VALID_APK_INTERACTIVE'))
         raise

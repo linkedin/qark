@@ -28,9 +28,9 @@ def start(queue, height):
     file_wr = r'MODE_WORLD_READABLE'
     for i in text_scan(common.java_files, file_wr):
         if len(i) > 0:
-            report.write(IssueType.FileSystem, IssueSeverity.High,
-                         common.config.get('qarkhelper', 'WR_FILE') + str(i[0])
-                         + "<br>" + str(i[1]))
+            #report.write(IssueType.FileSystem, IssueSeverity.High,
+            #             common.config.get('qarkhelper', 'WR_FILE') + str(i[0])
+            #             + "<br>" + str(i[1]))
             issue = ReportIssue()
             issue.setCategory(ExploitType.PERMISSION)
             issue.setDetails(common.config.get('qarkhelper', 'WR_FILE') + str(i[0]) + str(i[1]))
@@ -47,9 +47,9 @@ def start(queue, height):
     file_ww = r'MODE_WORLD_WRITEABLE'
     for i in text_scan(common.java_files, file_ww):
         if len(i) > 0:
-            report.write(IssueType.FileSystem, IssueSeverity.High,
-                         common.config.get('qarkhelper', 'WW_FILE') + str(i[0])
-                         + "<br>" + str(i[1]))
+            #report.write(IssueType.FileSystem, IssueSeverity.High,
+            #             common.config.get('qarkhelper', 'WW_FILE') + str(i[0])
+            #             + "<br>" + str(i[1]))
             issue = ReportIssue()
             issue.setCategory(ExploitType.PERMISSION)
             issue.setDetails(common.config.get('qarkhelper', 'WW_FILE') + str(i[0]) + " in file: " + str(i[1]))
