@@ -34,7 +34,6 @@ def test_dedup():
 
 
 def test_initialize_logger():
-    assert logging.WARNING == qark.modules.common.logger.level
     qark.modules.common.rootDir = "."
     qark.modules.common.initialize_logger()
     assert logging.INFO == qark.modules.common.logger.level
