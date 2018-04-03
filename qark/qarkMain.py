@@ -96,7 +96,9 @@ def apktool(pathToAPK):
     # Create /temp/foo/apktool
     # Run java -jar apktool_2.1.0.jar d /foo/bar/temp/myapp.apk --no-src --force -m --output /foo/bar/temp/apktool/
     # read AndroidManifest.xml and return the content
-    apktool = subprocess.call(['java', '-Djava.awt.headless=true','-jar', common.rootDir + '/lib/apktool_2.1.0.jar', 'd', pathToAPK, '--no-src', '--force', '-m','--output', str(pathToAPK.rsplit(".",1)[0]).rsplit("/",1)[0] + "/apktool"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    apktool = subprocess.Popen(['java', '-Djava.awt.headless=true', '-jar', common.rootDir + '/lib/apktool_2.1.0.jar', 'd', pathToAPK, '--no-src', '--force', '-m','--output',
+        str(pathToAPK.rsplit(".",1)[0]).rsplit("/",1)[0] + "/apktool"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    stdout, stderr = apktool.communicate()
     print str(pathToAPK.rsplit(".",1)[0]).rsplit("/",1)[0] + "/apktool" + "/AndroidManifest.xml"
     with open (str(pathToAPK.rsplit(".",1)[0]).rsplit("/",1)[0] + "/apktool" + "/AndroidManifest.xml", "r") as f:
         manifest = f.read()
@@ -242,11 +244,10 @@ def list_all_apk():
     p0 = Popen([adb, 'shell', 'pm', 'list', 'packages', '-f'], stdout=PIPE, stdin=PIPE, stderr=STDOUT)
     index = 0
     for line in p0.stdout:
-
-
         path = str(line).find('=')
-        result.append(str(line)[8:path])
-        index+=1
+        if (path > 0):  # Check that a '=' was actually found - Ignores linker warnings etc. that ride along with the output
+            result.append(str(line)[8:path])
+            index+=1
     return result
 
 
@@ -410,15 +411,15 @@ def setup_argparse():
     return parser
 
 
-def run_automated_defaults(pathToReport, pathToApk):
+def run_automated_defaults(pathToApk, pathToReport):
     common.args = argparse.Namespace()
     common.args.exploit = 0
     common.args.install = 0
     common.args.source = 1
     common.args.reportDir = pathToReport
-    common.args.reportdir = pathToReport
     common.args.apkpath = pathToApk
     common.args.debuglevel = None
+    common.args.decompile = 0
     common.args.acceptterms = None
     common.args.autodetect = None
     common.args.basesdk = None

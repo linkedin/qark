@@ -75,6 +75,9 @@ def determine_min_sdk():
                 determineSdk = 'm'
             else:
                 logger.info(common.config.get('qarkhelper', 'MIN_SDK_VERSION') + str(common.minSdkVersion))
+        elif not common.interactive_mode:   # Need to set a default if in automated mode, cannot ask the user
+            common.minSdkVersion = 7
+            return
         else:
             common.compare(common.sdk.length, 1, common.config.get('qarkhelper', 'USESDK_MISS'), 'false')
             print common.config.get('qarkhelper', 'GEN_OUTPUT_WARN')
