@@ -9,6 +9,7 @@ from os import (
 from qark.plugins.manifest_helpers import get_min_sdk, get_target_sdk
 from qark.scanner.plugin import get_plugin_source, get_plugins
 from qark.scanner.plugin import ManifestPlugin
+from qark.xml_helpers import get_manifest_out_of_files
 
 log = logging.getLogger(__name__)
 
@@ -80,10 +81,13 @@ class Scanner(object):
             self.files.add(self.path_to_source)
             return
 
-        walk_directory = self.build_directory
         try:
-            for (dir_path, _, file_names) in walk(walk_directory):
+            for (dir_path, _, file_names) in walk(self.build_directory):
                 for file_name in file_names:
                     self.files.add(path.join(dir_path, file_name))
         except AttributeError:
             log.debug("Decompiler does not have a build directory")
+
+        # Set the manifest path if it doesn't exist (we are walking a Java source code directory)
+        if not self.manifest_path:
+            self.manifest_path = get_manifest_out_of_files(self.files)
