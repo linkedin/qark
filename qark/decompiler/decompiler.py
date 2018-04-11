@@ -16,6 +16,7 @@ from qark.utils import create_directories_to_path
 
 log = logging.getLogger(__name__)
 
+OS = platform.system()
 JAVA_VERSION_REGEX = '"(\d+\.\d+\..+)\"'
 LIB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "lib")
 APK_TOOL_PATH = os.path.join(LIB_PATH, "apktool")
@@ -23,12 +24,25 @@ APK_TOOL_PATH = os.path.join(LIB_PATH, "apktool")
 DEX2JAR_URL = "https://downloads.sourceforge.net/project/dex2jar/dex2jar-2.0.zip"
 DEX2JAR_NAME = DEX2JAR_URL.replace("/download", "").split("/")[-1].rsplit(".zip")[0]
 DEX2JAR_PATH = os.path.join(LIB_PATH, DEX2JAR_NAME)
+DEX2JAR_EXTENSION = "sh" if OS != "Windows" else "bat"
+DEX2JAR_EXECUTABLE = "d2j-dex2jar.{extension}".format(extension=DEX2JAR_EXTENSION)
+DEX2JAR_INVOKE = "d2j-invoke.{extension}".format(extension=DEX2JAR_EXTENSION)
 
 DECOMPILERS_PATH = os.path.join(LIB_PATH, "decompilers")
 
 APK_TOOL_COMMAND = ("java -Djava.awt.headless=true -jar {apktool_path}/apktool.jar "
                     "d {path_to_source} --no-src --force -m --output {build_directory}")
-DEX2JAR_COMMAND = "{dex2jar_path} {path_to_dex} -o {build_directory}/{apk_name}.jar"
+DEX2JAR_COMMAND = "{dex2jar_path} {path_to_dex} -o {build_apk}.jar"
+
+
+def escape_windows_path(path):
+    if "\\" in path:
+        try:
+            path = path.encode('string-escape')
+        except Exception:
+            path = path.encode('unicode-escape')
+
+    return path
 
 
 class Decompiler(object):
@@ -107,12 +121,13 @@ class Decompiler(object):
             log.debug(".jar file path not found, trying to create dex file.")
             self.jar_path = self._run_dex2jar()
 
+        decompiler_command = escape_windows_path(
+            decompiler.command.format(path_to_decompiler=decompiler.path_to_decompiler,
+                                      jar=self.jar_path,
+                                      build_directory=self.build_directory))
+
         try:
-            retcode = subprocess.call(
-                shlex.split(decompiler.command.format(path_to_decompiler=decompiler.path_to_decompiler,
-                                                      jar=self.jar_path,
-                                                      build_directory=self.build_directory)),
-                )
+            retcode = subprocess.call(shlex.split(decompiler_command))
         except Exception:
             log.exception("%s failed to finish decompiling, continuing", decompiler)
         else:
@@ -138,6 +153,7 @@ class Decompiler(object):
             raise SystemExit("OS %s is not supported, please use Linux, Windows, or Mac OSX", user_os)
 
         download_apktool()
+        log.debug("APKTool downloaded")
 
         try:
             apktool_path = os.path.join(APK_TOOL_PATH, user_os)
@@ -145,21 +161,28 @@ class Decompiler(object):
             log.exception("Failed to create path to apktool, is the directory structure correct?")
             raise SystemExit("Failed to create path to apktool")
 
-        custom_apktool_command = APK_TOOL_COMMAND.format(apktool_path=apktool_path,
-                                                         path_to_source=self.path_to_source,
-                                                         build_directory=os.path.join(self.build_directory, "apktool"))
+        custom_apktool_command = escape_windows_path(APK_TOOL_COMMAND.format(apktool_path=apktool_path,
+                                                                             path_to_source=self.path_to_source,
+                                                                             build_directory=os.path.join(
+                                                                                 self.build_directory, "apktool")))
+        log.debug("Calling APKTool with following command")
+        log.debug(custom_apktool_command)
         try:
             subprocess.call(shlex.split(custom_apktool_command))
         except Exception:
             log.exception("Failed to run APKTool with command: %s", custom_apktool_command)
             raise SystemExit("Failed to run APKTool")
 
+        log.debug("APKTool finish executing, trying to move manifest into proper location")
         # copy valid XML file to correct location
         shutil.move(os.path.join(self.build_directory, "apktool", "AndroidManifest.xml"),
                     os.path.join(self.build_directory, "AndroidManifest.xml"))
+        log.debug("Manifest moved successfully")
 
+        log.debug("Removing apktool subdirectory of build")
         # remove the apktool generated files (only needed manifest file)
         shutil.rmtree(os.path.join(self.build_directory, "apktool"))
+        log.debug("Removed apktool directory")
 
         return os.path.join(self.build_directory, "AndroidManifest.xml")
 
@@ -169,12 +192,13 @@ class Decompiler(object):
         :return: location for `self.dex_path` to use
         :rtype: os.path object
         """
+        log.debug("Unpacking apk")
         unzip_file(self.path_to_source, destination_to_unzip=self.build_directory)
 
         return os.path.join(self.build_directory, "classes.dex")
 
     def _run_dex2jar(self):
-        """Runs dex2jar.sh in the lib on the dex file.
+        """Runs dex2jar in the lib on the dex file.
         If `self.dex_path` is None or empty it will run `_unpack_apk` to get a value for it."""
         # dex_path should always be set if being called through run
         if not self.dex_path:
@@ -183,15 +207,21 @@ class Decompiler(object):
 
         download_dex2jar()
 
-        dex2jar_command = DEX2JAR_COMMAND.format(dex2jar_path=os.path.join(DEX2JAR_PATH, "d2j-dex2jar.sh"),
-                                                 path_to_dex=self.dex_path,
-                                                 build_directory=self.build_directory, apk_name=self.apk_name)
+        dex2jar_command = escape_windows_path(DEX2JAR_COMMAND.format(dex2jar_path=os.path.join(DEX2JAR_PATH,
+                                                                                               "d2j-dex2jar.{extension}".format(
+                                                                                                   extension=DEX2JAR_EXTENSION)),
+                                                                     path_to_dex=self.dex_path,
+                                                                     build_apk=os.path.join(self.build_directory,
+                                                                                            self.apk_name)))
+
+        log.debug("Running dex2jar with command %s", dex2jar_command)
         try:
             ret_code = subprocess.call(shlex.split(dex2jar_command))
             if ret_code != 0:
                 log.critical("Error running dex2jar command: %s", dex2jar_command)
                 raise SystemExit("Error running dex2jar")
-        except Exception:
+        except Exception as e:
+            print(e)
             log.exception("Error running dex2jar command: %s", dex2jar_command)
             raise SystemExit("Error running dex2jar command")
 
@@ -222,11 +252,13 @@ def get_java_version():
     :rtype: str
     :raise: Exception if `java -version` fails to run properly
     """
+    log.debug("Getting java version")
     try:
         full_version = subprocess.check_output(["java", "-version"], stderr=subprocess.STDOUT).decode('utf-8')
     except Exception:
         raise SystemExit("Error getting java version, is Java installed?")
 
+    log.debug("Got full java version %s", full_version)
     # use regex to search for version like "1.6.0_38"
     version_regex = re.search(JAVA_VERSION_REGEX, full_version)
 
@@ -249,28 +281,36 @@ def download_apktool():
         raise SystemExit("OS %s is not supported, please use Linux, Windows, or Mac OSX", user_os)
 
     # create directory for operating system
+    log.debug("Creating directory to store apktool files")
     apktool_path = os.path.join(APK_TOOL_PATH, user_os)
     if not os.path.exists(apktool_path):
+        log.debug("Directory at %s does not exist, creating one")
         os.makedirs(apktool_path)
     else:
+        log.debug("Directory already exists")
         if (os.path.isfile(os.path.join(apktool_path, OS_TO_FILE_NAME[user_os]))
                 and os.path.isfile(os.path.join(apktool_path, "apktool.jar"))):
             # files for download already exist on file system, don't download them again
+            log.debug("Files already exist, not downloading APKTool")
             return
 
     # download the APKTool wrapper for operating system specific
+    log.debug("Starting download for APKTool wrapper")
     try:
         download_file(url=OS_TO_WRAPPER[user_os], download_path=os.path.join(apktool_path, OS_TO_FILE_NAME[user_os]))
     except Exception:
+        log.exception("Failed to download APKTool wrapper")
         raise SystemExit("Failed to download APKTool wrapper")
 
     # download the APKTool jar
+    log.debug("Starting download for APKTool jar")
     try:
         download_file(url=APK_TOOL_URL, download_path=os.path.join(apktool_path, "apktool.jar"))
     except Exception:
         raise SystemExit("Failed to download APKTool")
 
     # make downloaded files executable
+    log.debug("Attempting to make downloaded files executable")
     for downloaded_file_path in (os.path.join(apktool_path, "apktool.jar"),
                                  os.path.join(apktool_path, OS_TO_FILE_NAME[user_os])):
         try:
@@ -294,6 +334,13 @@ def download_file(url, download_path):
 
     create_directories_to_path(download_path)
 
+    # ensure output directory exists
+    try:
+        os.makedirs(os.path.dirname(download_path))
+    except Exception:
+        # Directory already exists, continue
+        pass
+
     with open(download_path, "wb") as download_path_file:
         download_path_file.write(response.content)
 
@@ -301,8 +348,11 @@ def download_file(url, download_path):
 def make_executable(file_path):
     """
     Make the file at `file_path` executable.
+
     :param file_path: path to file to make executable
     """
+    file_path = escape_windows_path(file_path)
+
     try:
         st = os.stat(file_path)
         os.chmod(file_path, st.st_mode | stat.S_IEXEC)
@@ -336,7 +386,7 @@ def download_procyon():
 
 
 def download_dex2jar():
-    if os.path.isfile(os.path.join(DEX2JAR_PATH, "d2j-dex2jar.sh")):
+    if os.path.isfile(os.path.join(DEX2JAR_PATH, "d2j-dex2jar.{extension}".format(extension=DEX2JAR_EXTENSION))):
         return
 
     try:
@@ -347,5 +397,5 @@ def download_dex2jar():
 
     unzip_file(os.path.join(LIB_PATH, "temp_dex2jar.zip"), destination_to_unzip=LIB_PATH)
     os.remove(os.path.join(LIB_PATH, "temp_dex2jar.zip"))
-    make_executable(os.path.join(DEX2JAR_PATH, "d2j-dex2jar.sh"))
-    make_executable(os.path.join(DEX2JAR_PATH, "d2j_invoke.sh"))
+    make_executable(os.path.join(DEX2JAR_PATH, DEX2JAR_EXECUTABLE))
+    make_executable(os.path.join(DEX2JAR_PATH, DEX2JAR_INVOKE))
