@@ -26,7 +26,7 @@ DEX2JAR_NAME = DEX2JAR_URL.replace("/download", "").split("/")[-1].rsplit(".zip"
 DEX2JAR_PATH = os.path.join(LIB_PATH, DEX2JAR_NAME)
 DEX2JAR_EXTENSION = "sh" if OS != "Windows" else "bat"
 DEX2JAR_EXECUTABLE = "d2j-dex2jar.{extension}".format(extension=DEX2JAR_EXTENSION)
-DEX2JAR_INVOKE = "d2j-invoke.{extension}".format(extension=DEX2JAR_EXTENSION)
+DEX2JAR_INVOKE = "d2j_invoke.{extension}".format(extension=DEX2JAR_EXTENSION)
 
 DECOMPILERS_PATH = os.path.join(LIB_PATH, "decompilers")
 
@@ -282,9 +282,11 @@ def download_apktool():
     # create directory for operating system
     log.debug("Creating directory to store apktool files")
     apktool_path = os.path.join(APK_TOOL_PATH, user_os)
+
     if not os.path.exists(apktool_path):
         log.debug("Directory at %s does not exist, creating one", apktool_path)
         os.makedirs(apktool_path)
+
     else:
         log.debug("Directory already exists")
         if (os.path.isfile(os.path.join(apktool_path, OS_TO_FILE_NAME[user_os]))
@@ -339,7 +341,6 @@ def download_file(url, download_path):
     except Exception:
         # Directory already exists, continue
         log.debug("Directory %s already exists for file download %s", download_path, url)
-        pass
 
     with open(download_path, "wb") as download_path_file:
         download_path_file.write(response.content)
@@ -386,7 +387,7 @@ def download_procyon():
 
 
 def download_dex2jar():
-    if os.path.isfile(os.path.join(DEX2JAR_PATH, "d2j-dex2jar.{extension}".format(extension=DEX2JAR_EXTENSION))):
+    if os.path.isfile(os.path.join(DEX2JAR_PATH, DEX2JAR_EXECUTABLE)):
         return
 
     try:
