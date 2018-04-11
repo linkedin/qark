@@ -36,7 +36,7 @@ DEX2JAR_COMMAND = "{dex2jar_path} {path_to_dex} -o {build_apk}.jar"
 
 
 def escape_windows_path(path):
-    if "\\" in path:
+    if "\\" in path and OS == "Windows":
         try:
             path = path.encode('string-escape')
         except Exception:
@@ -221,7 +221,6 @@ class Decompiler(object):
                 log.critical("Error running dex2jar command: %s", dex2jar_command)
                 raise SystemExit("Error running dex2jar")
         except Exception as e:
-            print(e)
             log.exception("Error running dex2jar command: %s", dex2jar_command)
             raise SystemExit("Error running dex2jar command")
 
@@ -284,7 +283,7 @@ def download_apktool():
     log.debug("Creating directory to store apktool files")
     apktool_path = os.path.join(APK_TOOL_PATH, user_os)
     if not os.path.exists(apktool_path):
-        log.debug("Directory at %s does not exist, creating one")
+        log.debug("Directory at %s does not exist, creating one", apktool_path)
         os.makedirs(apktool_path)
     else:
         log.debug("Directory already exists")
@@ -339,6 +338,7 @@ def download_file(url, download_path):
         os.makedirs(os.path.dirname(download_path))
     except Exception:
         # Directory already exists, continue
+        log.debug("Directory %s already exists for file download %s", download_path, url)
         pass
 
     with open(download_path, "wb") as download_path_file:
