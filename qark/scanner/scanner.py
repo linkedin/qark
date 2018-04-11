@@ -57,18 +57,22 @@ class Scanner(object):
             min_sdk = target_sdk = 1
 
         for plugin_name in get_plugins(category=category):
+            log.debug("Loading plugin %s", plugin_name)
             try:
                 plugin = plugin_source.load_plugin(plugin_name).plugin
             except Exception:
                 log.exception("Error loading plugin %s... continuing with next plugin", plugin_name)
                 continue
 
+            log.debug("Running plugin %s", plugin_name)
             try:
                 plugin.run(files=self.files, apk_constants={"min_sdk": min_sdk,
                                                             "target_sdk": target_sdk})
             except Exception:
                 log.exception("Error running plugin %s... continuing with next plugin", plugin_name)
                 continue
+
+            log.debug("%s finished execution", plugin_name)
 
             self.issues.extend(plugin.issues)
 
