@@ -220,7 +220,7 @@ class Decompiler(object):
             if ret_code != 0:
                 log.critical("Error running dex2jar command: %s", dex2jar_command)
                 raise SystemExit("Error running dex2jar")
-        except Exception as e:
+        except Exception:
             log.exception("Error running dex2jar command: %s", dex2jar_command)
             raise SystemExit("Error running dex2jar command")
 
