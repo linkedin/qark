@@ -1,18 +1,20 @@
 from __future__ import absolute_import
 
-import os
 import logging
-from sys import stderr
+import logging.config
 
 import click
+import os
 
 from qark.apk_builder import APKBuilder
 from qark.decompiler.decompiler import Decompiler
 from qark.report import Report
 from qark.scanner.scanner import Scanner
 
-DEBUG_LOG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+DEBUG_LOG_PATH = os.path.join(os.getcwd(),
                               "qark_debug.log")
+
+logger = logging.getLogger(__name__)
 
 
 @click.command()
@@ -46,9 +48,9 @@ def cli(ctx, sdk_path, build_path, debug, source, report_type, exploit_apk):
 
     # Debug controls the output to stderr, debug logs are ALWAYS stored in `qark_debug.log`
     if debug:
-        level = logging.DEBUG
+        level = "DEBUG"
     else:
-        level = logging.INFO
+        level = "INFO"
 
     initialize_logging(level)
 
@@ -75,24 +77,43 @@ def cli(ctx, sdk_path, build_path, debug, source, report_type, exploit_apk):
         click.secho("Finish building exploit APK...")
 
 
-# @cli.command()
-@click.option("--apk", required=True, type=click.Path(exists=True, resolve_path=True, file_okay=True,
-                                                           dir_okay=False),
-              help="Path to APK to decompile")
-@click.option("--build-path", type=click.Path(resolve_path=True, file_okay=False),
-              help="Path to place decompiled files and exploit APK", default="build", show_default=True)
-def decompile(apk, build_path):
-    pass
-
-
 def initialize_logging(level):
     """Creates two root handlers, one to file called `qark_debug.log` and one to stderr"""
+    handlers = {
+        "stderr_handler": {
+            "level": level,
+            "class": "logging.StreamHandler"
+        }
+    }
+    loggers = ["stderr_handler"]
 
-    debug_handler = logging.FileHandler(DEBUG_LOG_PATH, mode="w")
-    debug_handler.setLevel(logging.DEBUG)
+    if level == "DEBUG":
+        handlers["debug_handler"] = {
+            "level": "DEBUG",
+            "class": "logging.FileHandler",
+            "filename": DEBUG_LOG_PATH,
+            "mode": "w",
+            "formatter": "standard"
+        }
+        loggers.append("debug_handler")
 
-    stderr_handler = logging.StreamHandler(stream=stderr)
-    stderr_handler.setLevel(level)
+    logging.config.dictConfig({
+        "version": 1,
+        "disable_existing_loggers": False,
+        "formatters": {
+            "standard": {
+                'format': '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
+            }
+        },
+        "handlers": handlers,
+        "loggers": {
+            "": {
+                "handlers": handlers,
+                "level": "DEBUG",
+                "propagate": True
+            }
+        }
+    })
 
-    logging.getLogger().addHandler(debug_handler)
-    logging.getLogger().addHandler(stderr_handler)
+    if level == "DEBUG":
+        logger.debug("Debug logging enabled")
