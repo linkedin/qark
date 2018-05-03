@@ -19,7 +19,7 @@ class APIKeys(ManifestPlugin):
         super(APIKeys, self).__init__(**kwargs)
         self.severity = Severity.INFO
 
-    def run(self, files, apk_constants=None):
+    def run(self, files, apk_constants=None, **kwargs):
         if not self.manifest_path:
             return
 

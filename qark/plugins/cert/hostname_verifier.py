@@ -35,23 +35,12 @@ class HostnameVerifier(BasePlugin):
         BasePlugin.__init__(self, category="cert")
         self.severity = Severity.WARNING
 
-    def _process_file(self, filepath):
-        try:
-            with open(filepath, 'r') as f:
-                file_contents = f.read()
-        except IOError:
-            log.debug("Unable to read file")
+    def run(self, filepath, java_ast=None, **kwargs):
+        if not java_ast:
             return
 
-        try:
-            tree = javalang.parse.parse(file_contents)
-        except (javalang.parser.JavaSyntaxError, IndexError):
-            log.debug("Couldn't parse the java file: %s", filepath)
-            return
-
-        current_file = filepath
-        self._allow_all_hostname_verifier_created(tree, current_file)
-        self._set_hostname_verifier_allow_all(tree, current_file)
+        self._allow_all_hostname_verifier_created(java_ast, filepath)
+        self._set_hostname_verifier_allow_all(java_ast, filepath)
 
     def _allow_all_hostname_verifier_created(self, tree, current_file):
         """
@@ -80,11 +69,6 @@ class HostnameVerifier(BasePlugin):
             self.issues.append(Issue(category=self.category, name="setHostnameVerifier set to ALLOW_ALL",
                                      severity=Severity.WARNING, description=ALLOW_ALL_HOSTNAME_VERIFIER_DESC,
                                      file_object=current_file, line_number=set_hostname_verifier.position))
-
-    def run(self, files, apk_constants=None):
-        relevant_files = java_files_from_files(files)
-        for file_path in relevant_files:
-            self._process_file(file_path)
 
 
 plugin = HostnameVerifier()

@@ -37,7 +37,7 @@ class CustomPermissions(ManifestPlugin):
 
         self.severity = Severity.WARNING
 
-    def run(self, files, apk_constants=None):
+    def run(self, files, apk_constants=None, **kwargs):
         if not self.manifest_xml:
             return
 

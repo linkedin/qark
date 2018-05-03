@@ -212,7 +212,7 @@ class ExportedTags(ManifestPlugin):
         self.target_sdk = None
         self.package_name = None
 
-    def run(self, files, apk_constants=None):
+    def run(self, files, apk_constants=None, **kwargs):
         if not self.manifest_xml:
             return
 

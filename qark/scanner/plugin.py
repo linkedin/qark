@@ -57,7 +57,7 @@ class BasePlugin(object):
         self.issues = []
 
     @abc.abstractmethod
-    def run(self, files, apk_constants=None):
+    def run(self, file, **kwargs):
         """
         Method to be called for each plugin to add issues.
 

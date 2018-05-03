@@ -19,21 +19,11 @@ class ECBCipherCheck(BasePlugin):
 
         self.severity = Severity.VULNERABILITY
 
-    def _process_file(self, filepath):
-        try:
-            with open(filepath, 'r') as f:
-                body = f.read()
-        except Exception:
-            log.debug("Unable to read file")
+    def run(self, filepath, java_ast=None, **kwargs):
+        if not java_ast:
             return
 
-        try:
-            tree = javalang.parse.parse(body)
-        except (javalang.parser.JavaSyntaxError, IndexError):
-            log.debug("Couldn't parse the java file: %s", filepath)
-            return
-
-        method_invocations = tree.filter(javalang.tree.MethodInvocation)
+        method_invocations = java_ast.filter(javalang.tree.MethodInvocation)
         for _, method_invocation_node in method_invocations:
             try:
                 method_name = method_invocation_node.member
@@ -46,11 +36,6 @@ class ECBCipherCheck(BasePlugin):
                         Issue(self.category, self.name, self.severity, description, file_object=filepath))
             except Exception:
                 continue
-
-    def run(self, files, apk_constants=None):
-        relevant_files = java_files_from_files(files)
-        for file_path in relevant_files:
-            self._process_file(file_path)
 
 
 plugin = ECBCipherCheck()

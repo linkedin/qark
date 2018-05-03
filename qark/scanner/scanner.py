@@ -6,6 +6,7 @@ from os import (
     path
 )
 
+import javalang
 from qark.plugins.manifest_helpers import get_min_sdk, get_target_sdk
 from qark.scanner.plugin import get_plugin_source, get_plugins
 from qark.scanner.plugin import ManifestPlugin
@@ -41,8 +42,62 @@ class Scanner(object):
         Runs all the plugin checks by category.
         """
         self._gather_files()
+
+        plugins = []
+        self._run_checks2("manifest")
         for category in PLUGIN_CATEGORIES:
-            self._run_checks(category=category)
+            if category == "manifest":
+                continue
+
+            self._run_checks2(category)
+        #     plugin_source = get_plugin_source(category=category)
+        #
+        #     for plugin_name in get_plugins(category):
+        #         plugins.append(plugin_source.load_plugin(plugin_name).plugin)
+        #
+        # self._run_checks2(plugins)
+
+    def _run_checks2(self, category):
+        log.info(self.files)
+        plugins = []
+
+        plugin_source = get_plugin_source(category=category)
+        for plugin_name in get_plugins(category):
+            plugins.append(plugin_source.load_plugin(plugin_name).plugin)
+
+        try:
+            min_sdk = get_min_sdk(self.manifest_path, files=self.files)
+            target_sdk = get_target_sdk(self.manifest_path, files=self.files)
+        except AttributeError:
+            # manifest path is not set, assume min_sdk and target_sdk
+            min_sdk = target_sdk = 1
+
+        for filepath in self.files:
+            ast = None
+
+            try:
+                with open(filepath, 'r') as f:
+                    file_contents = f.read()
+            except Exception:
+                log.exception("Unable to read file %s", filepath)
+                file_contents = None
+
+            if file_contents and filepath.lower().endswith(".java"):
+                try:
+                    ast = javalang.parse.parse(file_contents)
+                except (javalang.parser.JavaSyntaxError, IndexError):
+                    log.debug("Unable to parse AST for file %s", filepath)
+
+            for plugin in plugins:
+                log.debug("Running plugin %s", plugin)
+                plugin.run(filepath, apk_constants={"min_sdk": min_sdk,
+                                                    "target_sdk": target_sdk},
+                           java_ast=ast,
+                           file_contents=file_contents,
+                           all_files=self.files)
+
+        for plugin in plugins:
+            self.issues.extend(plugin.issues)
 
     def _run_checks(self, category):
         """
@@ -65,9 +120,10 @@ class Scanner(object):
                 continue
 
             log.debug("Running plugin %s", plugin_name)
+
             try:
-                plugin.run(files=self.files, apk_constants={"min_sdk": min_sdk,
-                                                            "target_sdk": target_sdk})
+                plugin.run(filepath=self.files, apk_constants={"min_sdk": min_sdk,
+                                                            "target_sdk": target_sdk}, )
             except Exception:
                 log.exception("Error running plugin %s... continuing with next plugin", plugin_name)
                 continue

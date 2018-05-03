@@ -28,21 +28,9 @@ class DynamicBroadcastReceiver(BasePlugin):
         BasePlugin.__init__(self, category="broadcast", name="Dynamic broadcast receiver found",
                             description=DYNAMIC_BROADCAST_RECEIVER_DESCRIPTION)
         self.severity = Severity.VULNERABILITY
+        self.min_sdk = None
 
-    def _process(self, java_file):
-        try:
-            with open(java_file, "r") as java_file_to_read:
-                file_contents = java_file_to_read.read()
-        except IOError:
-            log.debug("File does not exist %s, continuing", java_file)
-            return
-
-        try:
-            tree = javalang.parse.parse(file_contents)
-        except (javalang.parser.JavaSyntaxError, IndexError):
-            log.debug("Error parsing file %s, continuing", java_file)
-            return
-
+    def _process(self, tree, java_file):
         for _, method_invocation in tree.filter(MethodInvocation):
                 if method_invocation.member == JAVA_DYNAMIC_BROADCAST_RECEIVER_METHOD and self.min_sdk < 14:
                     self.issues.append(Issue(
@@ -52,13 +40,12 @@ class DynamicBroadcastReceiver(BasePlugin):
                         line_number=method_invocation.position)
                     )
 
-    def run(self, files, apk_constants=None):
-        self.min_sdk = apk_constants["min_sdk"] if "min_sdk" in apk_constants else get_min_sdk_from_files(files,
-                                                                                                          apk_constants)
-        java_files = java_files_from_files(files)
+    def run(self, filepath, apk_constants=None, java_ast=None, **kwargs):
+        if not java_ast:
+            return
 
-        for java_file in java_files:
-            self._process(java_file)
+        self.min_sdk = apk_constants["min_sdk"]
+        self._process(tree=java_ast, java_file=filepath)
 
 
 plugin = DynamicBroadcastReceiver()

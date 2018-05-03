@@ -20,7 +20,7 @@ class DebuggableManifest(ManifestPlugin):
 
         self.severity = Severity.VULNERABILITY
 
-    def run(self, files, apk_constants=None):
+    def run(self, files, apk_constants=None, **kwargs):
         if not self.manifest_xml:
             return
 

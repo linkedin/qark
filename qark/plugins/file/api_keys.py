@@ -22,22 +22,19 @@ class JavaAPIKeys(BasePlugin):
                             description=API_KEY_DESCRIPTION)
         self.severity = Severity.INFO
 
-    def run(self, files, apk_constants=None):
-        java_files = java_files_from_files(files)
-        for java_file in java_files:
-            self._process(java_file)
+    def run(self, filepath, file_contents=None, **kwargs):
+        if not file_contents:
+            return
 
-    def _process(self, java_file_path):
-        with open(java_file_path, "r") as java_file:
-            for line_number, line in enumerate(java_file, 1):
-                for word in line.split():
-                    if re.search(API_KEY_REGEX, word) and not re.search(SPECIAL_CHARACTER_REGEX, word):
-                        self.issues.append(Issue(
-                            category=self.category, severity=self.severity, name=self.name,
-                            description=self.description,
-                            file_object=java_file_path,
-                            line_number=(line_number, 0))
-                        )
+        for line_number, line in enumerate(file_contents.split("\n")):
+            for word in line.split():
+                if re.search(API_KEY_REGEX, word) and not re.search(SPECIAL_CHARACTER_REGEX, word):
+                    self.issues.append(Issue(
+                        category=self.category, severity=self.severity, name=self.name,
+                        description=self.description,
+                        file_object=filepath,
+                        line_number=(line_number, 0))
+                    )
 
 
 plugin = JavaAPIKeys()

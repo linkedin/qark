@@ -38,33 +38,19 @@ class ExternalStorage(BasePlugin):
                             description=EXTERNAL_STORAGE_DESCRIPTION)
         self.severity = Severity.WARNING
 
-    def run(self, files, apk_constants=None):
-        java_files = java_files_from_files(files)
-
-        for java_file in java_files:
-            self._process(java_file)
-
-    def _process(self, java_file):
-        try:
-            with open(java_file, "r") as java_file_to_read:
-                file_contents = java_file_to_read.read()
-        except IOError:
-            log.debug("File does not exist %s, continuing", java_file)
+    def run(self, filepath, java_ast=None, **kwargs):
+        if not java_ast:
             return
 
-        try:
-            tree = javalang.parse.parse(file_contents)
-        except (javalang.parser.JavaSyntaxError, IndexError):
-            log.debug("Error parsing file %s, continuing", java_file)
-            return
-
-        for _, method_invocation in tree.filter(MethodInvocation):
+        for _, method_invocation in java_ast.filter(MethodInvocation):
             storage_location = None
             if (method_invocation.member == EXTERNAL_FILES_DIR_METHOD
                     or method_invocation.member == EXTERNAL_FILES_DIRS_METHOD):
                 storage_location = "External Storage"
+
             elif method_invocation.member == EXTERNAL_MEDIA_DIR_METHOD:
                 storage_location = "External Media Directory"
+
             elif method_invocation.member == EXTERNAL_STORAGE_PUBLIC_DIR_METHOD:
                 storage_location = "External Storage Public Directory"
 
@@ -72,7 +58,7 @@ class ExternalStorage(BasePlugin):
                 self.issues.append(Issue(
                     category=self.category, severity=self.severity, name=self.name,
                     description=self.description,
-                    file_object=java_file,
+                    file_object=filepath,
                     line_number=method_invocation.position)
                 )
 

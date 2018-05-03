@@ -37,34 +37,20 @@ class ImplicitIntentToPendingIntent(BasePlugin):
         self.severity = Severity.VULNERABILITY
         self.current_file = None
 
-    def run(self, files, apk_constants=None):
-        java_files = (decompiled_file for decompiled_file in files
-                      if os.path.splitext(decompiled_file.lower())[1] == ".java")
+    def run(self, filepath, apk_constants=None, file_contents=None, java_ast=None, **kwargs):
+        if not file_contents or not java_ast:
+            return
 
-        for java_file in java_files:
-            try:
-                with open(java_file, "r") as java_file_to_read:
-                    file_contents = java_file_to_read.read()
+        # simple search to avoid files that are not vulnerable
+        if re.search("new Intent", file_contents) is None or re.search(PENDING_INTENT_REGEX, file_contents) is None:
+            return
 
-                    # simple search to avoid files that are not vulnerable
-                    if (re.search("new Intent", file_contents) is None or
-                            re.search(PENDING_INTENT_REGEX, file_contents) is None):
-                        continue
-            except IOError:
-                log.debug("File does not exist %s, continuing", java_file)
-                continue
+        if not any(["PendingIntent" in imported_declaration.path for imported_declaration in java_ast.imports]):
+            # if PendingIntent is never imported the file is not vulnerable
+            return
 
-            try:
-                parsed_tree = javalang.parse.parse(file_contents)
-            except (javalang.parser.JavaSyntaxError, IndexError):
-                log.debug("Error parsing file %s, continuing", java_file)
-                continue
-
-            if not any(["PendingIntent" in imported_declaration.path for imported_declaration in parsed_tree.imports]):
-                # if PendingIntent is never imported the file is not vulnerable
-                continue
-            self.current_file = java_file
-            self._check_for_implicit_intents(parsed_tree)
+        self.current_file = filepath
+        self._check_for_implicit_intents(java_ast)
 
     def _check_for_implicit_intents(self, parsed_tree):
         """

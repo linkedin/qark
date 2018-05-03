@@ -27,27 +27,11 @@ class CheckPermissions(BasePlugin):
                             description=CHECK_PERMISSIONS_DESCRIPTION)
         self.severity = Severity.WARNING
 
-    def run(self, files, apk_constants=None):
-        java_files = java_files_from_files(files)
-
-        for java_file in java_files:
-            self._process(java_file)
-
-    def _process(self, java_file):
-        try:
-            with open(java_file, "r") as java_file_to_read:
-                file_contents = java_file_to_read.read()
-        except IOError:
-            log.debug("File does not exist %s, continuing", java_file)
+    def run(self, java_file, file_contents=None, java_ast=None, **kwargs):
+        if not file_contents or not java_ast:
             return
 
-        try:
-            tree = javalang.parse.parse(file_contents)
-        except (javalang.parser.JavaSyntaxError, IndexError):
-            log.debug("Error parsing file %s, continuing", java_file)
-            return
-
-        if any(["Context" in imp.path for imp in tree.imports]):
+        if any(["Context" in imp.path for imp in java_ast.imports]):
             if re.search(CHECK_PERMISSION_REGEX, file_contents):
                 self.issues.append(Issue(
                     category=self.category, severity=self.severity, name=self.name,

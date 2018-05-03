@@ -24,27 +24,11 @@ class TaskAffinity(BasePlugin):
                             description=TASK_AFFINITY_DESCRIPTION)
         self.severity = Severity.INFO
 
-    def run(self, files, apk_constants=None):
-        java_files = java_files_from_files(files)
-
-        for java_file in java_files:
-            self._process(java_file)
-
-    def _process(self, java_file):
-        try:
-            with open(java_file, "r") as java_file_to_read:
-                file_contents = java_file_to_read.read()
-        except IOError:
-            log.debug("Error parsing file %s, continuing", java_file)
+    def run(self, filepath, file_contents=None, java_ast=None, **kwargs):
+        if not java_ast:
             return
 
-        try:
-            tree = javalang.parse.parse(file_contents)
-        except (javalang.parser.JavaSyntaxError, IndexError):
-            log.debug("Error parsing file %s, continuing", java_file)
-            return
-
-        if any(["Intent" in import_decl.path for import_decl in tree.imports]):
+        if any(["Intent" in import_decl.path for import_decl in java_ast.imports]):
             description = None
 
             if re.search(NEW_TASK_REGEX, file_contents):
@@ -57,7 +41,7 @@ class TaskAffinity(BasePlugin):
                                          severity=self.severity,
                                          name=self.name,
                                          description=description,
-                                         file_object=java_file))
+                                         file_object=filepath))
 
 
 plugin = TaskAffinity()

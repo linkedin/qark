@@ -37,27 +37,18 @@ class CertValidation(BasePlugin):
         BasePlugin.__init__(self, category="cert")
         self.severity = Severity.WARNING
 
-    def _process_file(self, filepath):
-        try:
-            with open(filepath, 'r') as f:
-                file_contents = f.read()
-        except IOError:
-            log.debug("Unable to read file")
+    def run(self, filepath, java_ast=None, **kwargs):
+        if not java_ast:
             return
 
-        try:
-            tree = javalang.parse.parse(file_contents)
-        except (javalang.parser.JavaSyntaxError, IndexError):
-            log.debug("Couldn't parse the java file: %s", filepath)
-            return
-        current_file = filepath
-        cert_methods = (method_declaration for _, method_declaration in tree.filter(MethodDeclaration)
+        cert_methods = (method_declaration for _, method_declaration in java_ast.filter(MethodDeclaration)
                         if method_declaration.name in CERT_METHODS)
+
         for cert_method in cert_methods:
             if cert_method.name == "checkServerTrusted":
-                self._check_server_trusted(cert_method, current_file)
+                self._check_server_trusted(cert_method, filepath)
             elif cert_method.name == "onReceivedSslError":
-                self._on_received_ssl_error(cert_method, current_file)
+                self._on_received_ssl_error(cert_method, filepath)
 
     def _check_server_trusted(self, cert_method, current_file):
         """
@@ -90,11 +81,6 @@ class CertValidation(BasePlugin):
                                              description=ON_RECEIVED_SSL_DESC,
                                              file_object=current_file,
                                              line_number=method_invocation.position))
-
-    def run(self, files, apk_constants=None):
-        relevant_files = java_files_from_files(files)
-        for file_path in relevant_files:
-            self._process_file(file_path)
 
 
 plugin = CertValidation()

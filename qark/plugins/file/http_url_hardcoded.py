@@ -1,5 +1,6 @@
 import logging
 import re
+import os
 
 import javalang
 
@@ -23,18 +24,8 @@ class HardcodedHTTP(BasePlugin):
                             description=HARDCODED_HTTP_DESCRIPTION)
         self.severity = Severity.INFO
 
-    def run(self, files, apk_constants=None):
-        java_files = java_files_from_files(files)
-
-        for java_file in java_files:
-            self._process(java_file)
-
-    def _process(self, java_file):
-        try:
-            with open(java_file, "r") as java_file_to_read:
-                file_contents = java_file_to_read.read()
-        except IOError:
-            log.debug("File does not exist %s, continuing", java_file)
+    def run(self, filepath, file_contents=None, **kwargs):
+        if not file_contents or not os.path.splitext(filepath.lower())[1] == ".java":
             return
 
         for line_number, line in enumerate(file_contents.split('\n')):
@@ -43,7 +34,7 @@ class HardcodedHTTP(BasePlugin):
                 self.issues.append(Issue(
                     category=self.category, severity=self.severity, name=self.name,
                     description=self.description.format(http_url=http_url_match.group(0)),
-                    file_object=java_file,
+                    file_object=filepath,
                     line_number=(line_number, 0))
                 )
 

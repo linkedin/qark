@@ -26,7 +26,7 @@ class MinSDK(ManifestPlugin):
 
         self.severity = Severity.WARNING
 
-    def run(self, files, apk_constants=None):
+    def run(self, files, apk_constants=None, **kwargs):
         try:
             min_sdk = apk_constants["min_sdk"]
         except (KeyError, TypeError):

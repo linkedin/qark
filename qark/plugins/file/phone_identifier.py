@@ -23,23 +23,13 @@ class PhoneIdentifier(BasePlugin):
                             description=PHONE_IDENTIFIER_DESCRIPTION)
         self.severity = Severity.INFO
 
-    def run(self, files, apk_constants=None):
-        java_files = java_files_from_files(files)
-
-        for java_file in java_files:
-            self._process(java_file)
-
-    def _process(self, java_file):
-        try:
-            with open(java_file, "r") as java_file_to_read:
-                file_contents = java_file_to_read.read()
-        except IOError:
-            log.debug("File does not exist %s, continuing", java_file)
+    def run(self, filepath, file_contents=None, **kwargs):
+        if not file_contents:
             return
 
         if re.search(TELEPHONY_MANAGER_REGEX, file_contents):
             if re.search(TELEPHONY_INLINE_REGEX, file_contents):
-                self._add_issue(java_path=java_file)
+                self._add_issue(java_path=filepath)
 
             else:
 
@@ -49,7 +39,7 @@ class PhoneIdentifier(BasePlugin):
 
                         if re.search(r'{var_name}\.(getLine1Number|getDeviceId)\(.*?\)'.format(var_name=variable_name),
                                      file_contents):
-                            self._add_issue(java_path=java_file)
+                            self._add_issue(java_path=filepath)
 
     def _add_issue(self, java_path):
         self.issues.append(Issue(

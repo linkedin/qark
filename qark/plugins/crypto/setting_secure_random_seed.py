@@ -26,33 +26,18 @@ class SeedWithSecureRandom(BasePlugin):
         """Checks if a tree imports java.security.SecureRandom, and returns True if the import exists"""
         return any([imp.path == "java.security.SecureRandom" for imp in tree.imports])
 
-    def _process_file(self, filepath):
-        try:
-            with open(filepath, 'r') as f:
-                body = f.read()
-        except Exception:
-            log.exception("Unable to read file")
+    def run(self, filepath, java_ast=None, **kwargs):
+        if not java_ast:
             return
 
-        try:
-            tree = javalang.parse.parse(body)
-        except (javalang.parser.JavaSyntaxError, IndexError):
-            log.debug("Couldn't parse the java file: %s", filepath)
+        if not self._imports_secure_seed(java_ast):  # doesn't import the insecure function
             return
 
-        if not self._imports_secure_seed(tree):  # doesn't import the insecure function
-            return
-
-        method_invocations = tree.filter(javalang.tree.MethodInvocation)
+        method_invocations = java_ast.filter(javalang.tree.MethodInvocation)
         for _, method_invocation_node in method_invocations:
             if method_invocation_node.member in SeedWithSecureRandom.INSECURE_FUNCTIONS:
                 self.issues.append(Issue(self.category, self.name, self.severity, self.description,
                                          file_object=filepath))
-
-    def run(self, files, apk_constants=None):
-        relevant_files = java_files_from_files(files)
-        for file_path in relevant_files:
-            self._process_file(file_path)
 
 
 plugin = SeedWithSecureRandom()
