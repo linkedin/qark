@@ -2,9 +2,9 @@ from __future__ import absolute_import
 
 import logging
 import logging.config
-import os
 
 import click
+import os
 
 from qark.apk_builder import APKBuilder
 from qark.decompiler.decompiler import Decompiler
@@ -77,6 +77,24 @@ def cli(ctx, sdk_path, build_path, debug, source, report_type, exploit_apk):
 
 def initialize_logging(level):
     """Creates two root handlers, one to file called `qark_debug.log` and one to stderr"""
+    handlers = {
+        "stderr_handler": {
+            "level": level,
+            "class": "logging.StreamHandler"
+        }
+    }
+    loggers = ["stderr_handler"]
+
+    if level == logging.DEBUG:
+        handlers["debug_handler"] = {
+            "level": "DEBUG",
+            "class": "logging.FileHandler",
+            "filename": DEBUG_LOG_PATH,
+            "mode": "w",
+            "formatter": "standard"
+        }
+        loggers.append("debug_handler")
+
     logging.config.dictConfig({
         "version": 1,
         "disable_existing_loggers": False,
@@ -85,22 +103,10 @@ def initialize_logging(level):
                 'format': '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
             }
         },
-        "handlers": {
-            "debug_handler": {
-                "level": "DEBUG",
-                "class": "logging.FileHandler",
-                "filename": DEBUG_LOG_PATH,
-                "mode": "w",
-                "formatter": "standard"
-            },
-            "stderr_handler": {
-                "level": level,
-                "class": "logging.StreamHandler"
-            }
-        },
+        "handlers": handlers,
         "loggers": {
             "": {
-                "handlers": ["debug_handler", "stderr_handler"],
+                "handlers": handlers,
                 "level": "DEBUG",
                 "propagate": True
             }
