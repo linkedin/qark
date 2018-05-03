@@ -85,7 +85,7 @@ def initialize_logging(level):
     }
     loggers = ["stderr_handler"]
 
-    if level == logging.DEBUG:
+    if level == "DEBUG":
         handlers["debug_handler"] = {
             "level": "DEBUG",
             "class": "logging.FileHandler",
