@@ -14,6 +14,8 @@ from qark.scanner.scanner import Scanner
 DEBUG_LOG_PATH = os.path.join(os.getcwd(),
                               "qark_debug.log")
 
+logger = logging.getLogger(__name__)
+
 
 @click.command()
 @click.option("--sdk-path", type=click.Path(exists=True, file_okay=False, resolve_path=True),
@@ -112,3 +114,6 @@ def initialize_logging(level):
             }
         }
     })
+
+    if level == "DEBUG":
+        logger.debug("Debug logging enabled")
