@@ -14,9 +14,9 @@ $ python qarkMain.py
 
 To run in headless mode:
 ```
-$ python qarkMain.py --source 1 --pathtoapk /Users/foo/qark/sampleApps/goatdroid/goatdroid.apk --exploit 1 --install 1
+$ python qarkMain.py --source 1 --pathtoapk /Users/foo/qark/sampleApps/goatdroid/goatdroid.apk --exploit 1 --install
 or
-$ python qarkMain.py --source 2 -c /Users/foo/qark/sampleApps/goatdroid/goatdroid --manifest /Users/foo/qark/sampleApps/goatdroid/goatdroid/AndroidManifest.xml --exploit 1 --install 1
+$ python qarkMain.py --source 2 -c /Users/foo/qark/sampleApps/goatdroid/goatdroid --manifest /Users/foo/qark/sampleApps/goatdroid/goatdroid/AndroidManifest.xml --exploit 1 --install
 ```
 
 The sampleApps folder contains sample APKs that you can test against QARK
