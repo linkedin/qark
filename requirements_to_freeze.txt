@@ -4,3 +4,4 @@ jinja2
 enum34; python_version < '3.4'
 javalang
 click
+six
