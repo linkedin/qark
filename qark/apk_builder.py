@@ -5,16 +5,12 @@ import os
 import shlex
 import shutil
 import subprocess
-from qark.plugins.manifest_helpers import get_package_from_manifest
 
-try:
-    import ConfigParser as configparser
-    from StringIO import StringIO
-except ModuleNotFoundError:
-    import configparser
-    from io import StringIO
+from six import StringIO
+from six.moves import configparser
 
 from qark.plugins.helpers import copy_directory_to_location
+from qark.plugins.manifest_helpers import get_package_from_manifest
 from qark.xml_helpers import write_key_value_to_string_array_xml, write_key_value_to_xml
 
 log = logging.getLogger(__name__)
