@@ -19,7 +19,8 @@ logger = logging.getLogger(__name__)
 
 @click.command()
 @click.option("--sdk-path", type=click.Path(exists=True, file_okay=False, resolve_path=True),
-              help="Path to the downloaded SDK directory if already downloaded")
+              help="Path to the downloaded SDK directory if already downloaded. "
+                   "Only necessary if --exploit-apk is passed.")
 @click.option("--build-path", type=click.Path(resolve_path=True, file_okay=False),
               help="Path to place decompiled files and exploit APK", default="build", show_default=True)
 @click.option("--debug/--no-debug", default=False, help="Show debugging statements (helpful for issues)",
@@ -65,7 +66,7 @@ def cli(ctx, sdk_path, build_path, debug, source, report_type, exploit_apk):
     click.secho("Finish scans...")
 
     click.secho("Writing report...")
-    report = Report(issues=scanner.issues)
+    report = Report(issues=set(scanner.issues))
     report_path = report.generate(file_type=report_type)
     click.secho("Finish writing report to {report_path}...".format(report_path=report_path))
 

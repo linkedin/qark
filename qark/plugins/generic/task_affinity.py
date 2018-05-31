@@ -52,11 +52,12 @@ class TaskAffinity(BasePlugin):
             elif re.search(MULTIPLE_TASK_REGEX, file_contents):
                 description = TASK_AFFINITY_DESCRIPTION.format("MULTIPLE")
 
-            self.issues.append(Issue(category=self.category,
-                                     severity=self.severity,
-                                     name=self.name,
-                                     description=description,
-                                     file_object=java_file))
+            if description:
+                self.issues.append(Issue(category=self.category,
+                                         severity=self.severity,
+                                         name=self.name,
+                                         description=description,
+                                         file_object=java_file))
 
 
 plugin = TaskAffinity()
