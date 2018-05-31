@@ -25,7 +25,7 @@ def get_plugin_source(category=None):
         path = os.path.join(path, category)
 
     try:
-        return plugin_base.make_plugin_source(searchpath=[path])
+        return plugin_base.make_plugin_source(searchpath=[path], persist=True)
     except Exception:
         log.exception("Failed to get all plugins. Is the file path to plugins %s correct?", path)
         raise SystemExit("Failed to get all plugins. Is the file path correct?")

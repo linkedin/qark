@@ -44,27 +44,15 @@ class Scanner(object):
         self._gather_files()
 
         plugins = []
-        self._run_checks2("manifest")
         for category in PLUGIN_CATEGORIES:
-            if category == "manifest":
-                continue
+            plugin_source = get_plugin_source(category=category)
 
-            self._run_checks2(category)
-        #     plugin_source = get_plugin_source(category=category)
-        #
-        #     for plugin_name in get_plugins(category):
-        #         plugins.append(plugin_source.load_plugin(plugin_name).plugin)
-        #
-        # self._run_checks2(plugins)
+            for plugin_name in get_plugins(category):
+                plugins.append(plugin_source.load_plugin(plugin_name).plugin)
 
-    def _run_checks2(self, category):
-        log.info(self.files)
-        plugins = []
+        self._run_checks(plugins)
 
-        plugin_source = get_plugin_source(category=category)
-        for plugin_name in get_plugins(category):
-            plugins.append(plugin_source.load_plugin(plugin_name).plugin)
-
+    def _run_checks(self, plugins):
         try:
             min_sdk = get_min_sdk(self.manifest_path, files=self.files)
             target_sdk = get_target_sdk(self.manifest_path, files=self.files)
@@ -96,41 +84,7 @@ class Scanner(object):
                            file_contents=file_contents,
                            all_files=self.files)
 
-        for plugin in plugins:
-            self.issues.extend(plugin.issues)
-
-    def _run_checks(self, category):
-        """
-        Runs all plugins under `qark.plugins.category` and updates `self.issues` with their findings.
-        """
-        plugin_source = get_plugin_source(category=category)
-        try:
-            min_sdk = get_min_sdk(self.manifest_path, files=self.files)
-            target_sdk = get_target_sdk(self.manifest_path, files=self.files)
-        except AttributeError:
-            # manifest path is not set, assume min_sdk and target_sdk
-            min_sdk = target_sdk = 1
-
-        for plugin_name in get_plugins(category=category):
-            log.debug("Loading plugin %s", plugin_name)
-            try:
-                plugin = plugin_source.load_plugin(plugin_name).plugin
-            except Exception:
-                log.exception("Error loading plugin %s... continuing with next plugin", plugin_name)
-                continue
-
-            log.debug("Running plugin %s", plugin_name)
-
-            try:
-                plugin.run(filepath=self.files, apk_constants={"min_sdk": min_sdk,
-                                                            "target_sdk": target_sdk}, )
-            except Exception:
-                log.exception("Error running plugin %s... continuing with next plugin", plugin_name)
-                continue
-
-            log.debug("%s finished execution", plugin_name)
-
-            self.issues.extend(plugin.issues)
+                self.issues.extend(plugin.issues)
 
     def _gather_files(self):
         """
