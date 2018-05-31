@@ -64,8 +64,6 @@ class Decompiler(object):
 
         self.path_to_source = path_to_source
         self.build_directory = os.path.join(build_directory, "qark") if build_directory else os.path.join(os.path.dirname(os.path.abspath(path_to_source)), "qark")
-        if os.path.exists(self.build_directory):
-            shutil.rmtree(self.build_directory)
 
         # validate we are running on an APK, Directory, or Java source code
         if os.path.isfile(self.path_to_source) and os.path.splitext(self.path_to_source.lower())[1] not in (".java",

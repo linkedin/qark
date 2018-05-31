@@ -32,7 +32,7 @@ ANDROID_LOGGING_METHODS = ("v", "d", "i", "w", "e")
 
 class AndroidLogging(BasePlugin):
     def __init__(self):
-        BasePlugin.__init__(self, category="file", name="External storage used",
+        BasePlugin.__init__(self, category="file", name="Logging found",
                             description=ANDROID_LOGGING_DESCRIPTION)
         self.severity = Severity.WARNING
 
