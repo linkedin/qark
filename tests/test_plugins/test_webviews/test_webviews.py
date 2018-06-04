@@ -1,6 +1,7 @@
 import os
 
 import pytest
+import javalang
 
 from qark.issue import Severity
 from qark.plugins.webview.javascript_enabled import JavascriptEnabled, JAVASCRIPT_ENABLED_DESCRIPTION
@@ -30,7 +31,9 @@ VULNERABLE_DOM_STORAGE = os.path.join(os.path.dirname(os.path.abspath(__file__))
 
 def test_javascript_enabled():
     plugin = JavascriptEnabled()
-    plugin.run([VULNERABLE_WEBVIEW_PATH])
+    with open(VULNERABLE_WEBVIEW_PATH) as f:
+        ast = javalang.parse.parse(f.read())
+    plugin.run(VULNERABLE_WEBVIEW_PATH, java_ast=ast)
     assert 1 == len(plugin.issues)
     issue = plugin.issues[0]
     assert plugin.name == issue.name
@@ -41,7 +44,11 @@ def test_javascript_enabled():
 
 def test_load_data_with_base_url():
     plugin = LoadDataWithBaseURL()
-    plugin.run([VULNERABLE_WEBVIEW_PATH])
+
+    with open(VULNERABLE_WEBVIEW_PATH) as f:
+        ast = javalang.parse.parse(f.read())
+
+    plugin.run(VULNERABLE_WEBVIEW_PATH, java_ast=ast)
     assert 1 == len(plugin.issues)
     issue = plugin.issues[0]
     assert plugin.name == issue.name
@@ -52,7 +59,9 @@ def test_load_data_with_base_url():
 
 def test_set_allow_file_access():
     plugin = SetAllowFileAccess()
-    plugin.run([VULNERABLE_FILE_ACCESS])
+    with open(VULNERABLE_FILE_ACCESS) as f:
+        ast = javalang.parse.parse(f.read())
+    plugin.run(VULNERABLE_FILE_ACCESS, java_ast=ast)
     assert 2 == len(plugin.issues)
     for issue in plugin.issues:
         assert "webview" == issue.category
@@ -63,7 +72,10 @@ def test_set_allow_file_access():
 
 def test_set_allow_content_access():
     plugin = SetAllowContentAccess()
-    plugin.run([VULNERABLE_CONTENT_ACCESS])
+    with open(VULNERABLE_CONTENT_ACCESS) as f:
+        ast = javalang.parse.parse(f.read())
+
+    plugin.run(VULNERABLE_CONTENT_ACCESS, ast)
     assert 2 == len(plugin.issues)
     for issue in plugin.issues:
         assert "webview" == issue.category
@@ -73,7 +85,7 @@ def test_set_allow_content_access():
 
 
 @pytest.mark.parametrize("min_sdk, num_issues", [
-    (None, 2),
+    (None, 0),
     (1, 2),
     (14, 2),
     (15, 2),
@@ -82,7 +94,9 @@ def test_set_allow_content_access():
 ])
 def test_set_allow_universal_access_from_file_urls(min_sdk, num_issues):
     plugin = SetAllowUniversalAccessFromFileURLs()
-    plugin.run([VULNERABLE_UNIVERSAL_ACCESS], apk_constants={"min_sdk": min_sdk})
+    with open(VULNERABLE_UNIVERSAL_ACCESS) as f:
+        ast = javalang.parse.parse(f.read())
+    plugin.run(VULNERABLE_UNIVERSAL_ACCESS, java_ast=ast, apk_constants={"min_sdk": min_sdk})
     assert num_issues == len(plugin.issues)
     for issue in plugin.issues:
         assert "webview" == issue.category
@@ -92,7 +106,7 @@ def test_set_allow_universal_access_from_file_urls(min_sdk, num_issues):
 
 
 @pytest.mark.parametrize("min_sdk, num_issues", [
-    (None, 2),
+    (None, 0),
     (1, 2),
     (15, 2),
     (16, 2),
@@ -101,7 +115,10 @@ def test_set_allow_universal_access_from_file_urls(min_sdk, num_issues):
 ])
 def test_set_add_javascript_interface(min_sdk, num_issues):
     plugin = AddJavascriptInterface()
-    plugin.run([VULNERABLE_JAVASCRIPT_INTERFACE], apk_constants={"min_sdk": min_sdk})
+    with open(VULNERABLE_JAVASCRIPT_INTERFACE) as f:
+        ast = javalang.parse.parse(f.read())
+
+    plugin.run(VULNERABLE_JAVASCRIPT_INTERFACE, apk_constants={"min_sdk": min_sdk}, java_ast=ast)
     assert num_issues == len(plugin.issues)
     for issue in plugin.issues:
         assert "webview" == issue.category
@@ -112,7 +129,10 @@ def test_set_add_javascript_interface(min_sdk, num_issues):
 
 def test_set_dom_storage_enabled():
     plugin = SetDomStorageEnabled()
-    plugin.run([VULNERABLE_DOM_STORAGE])
+    with open(VULNERABLE_DOM_STORAGE) as f:
+        ast = javalang.parse.parse(f.read())
+
+    plugin.run(VULNERABLE_DOM_STORAGE, java_ast=ast)
     assert 2 == len(plugin.issues)
     for issue in plugin.issues:
         assert "webview" == issue.category

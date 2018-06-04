@@ -28,7 +28,7 @@ class TaskAffinity(BasePlugin):
         if not java_ast:
             return
 
-        if any(["Intent" in import_decl.path for import_decl in java_ast.imports]):
+        if any("Intent" in import_decl.path for import_decl in java_ast.imports):
             description = None
 
             if re.search(NEW_TASK_REGEX, file_contents):

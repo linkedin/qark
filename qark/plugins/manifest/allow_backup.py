@@ -19,7 +19,7 @@ class ManifestBackupAllowed(ManifestPlugin):
 
         self.severity = Severity.WARNING
 
-    def run(self, filepath, apk_constants=None, **kwargs):
+    def run(self, **kwargs):
         if not self.manifest_xml:
             return
 

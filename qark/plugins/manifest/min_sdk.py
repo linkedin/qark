@@ -21,12 +21,12 @@ class MinSDK(ManifestPlugin):
     """This plugin will create issues depending on the manifest's minimum SDK. For instance
     tapjacking is only protected when min_sdk > 9 (or custom code is used)."""
     def __init__(self, **kwargs):
-        kwargs.update(dict(category="manifest"))
+        kwargs.update(dict(name="MinSDK checks", category="manifest"))
         super(MinSDK, self).__init__(**kwargs)
 
         self.severity = Severity.WARNING
 
-    def run(self, files, apk_constants=None, **kwargs):
+    def run(self, apk_constants=None, **kwargs):
         try:
             min_sdk = apk_constants["min_sdk"]
         except (KeyError, TypeError):

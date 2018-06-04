@@ -19,7 +19,7 @@ class FilePermissions(BasePlugin):
     This module runs a regex search on every Java file looking for `WORLD_READABLE` and `WORLD_WRITEABLE` modes.
     """
     def __init__(self):
-        BasePlugin.__init__(self, category="file")
+        BasePlugin.__init__(self, category="file", name="File Permissions")
         self.severity = Severity.WARNING
 
     def run(self, filepath, file_contents=None, **kwargs):

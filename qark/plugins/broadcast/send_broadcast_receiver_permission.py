@@ -67,7 +67,7 @@ class SendBroadcastReceiverPermission(BasePlugin):
     based on number of arguments.
     """
     def __init__(self):
-        BasePlugin.__init__(self, category="broadcast")
+        BasePlugin.__init__(self, category="broadcast", name="Send Broadcast Receiver Permission")
         self.severity = Severity.WARNING
         self.current_file = None
         self.manifest_xml = None
@@ -176,7 +176,7 @@ def has_local_broadcast_imported(import_tree):
     :return: True if import tree has broadcast import, else False
     :rtype: bool
     """
-    return any([import_declaration.path in LOCAL_BROADCAST_IMPORTS for import_declaration in import_tree])
+    return any(import_declaration.path in LOCAL_BROADCAST_IMPORTS for import_declaration in import_tree)
 
 
 plugin = SendBroadcastReceiverPermission()

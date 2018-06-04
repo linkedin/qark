@@ -34,7 +34,7 @@ class CertValidation(BasePlugin):
     SSL connections.
     """
     def __init__(self):
-        BasePlugin.__init__(self, category="cert")
+        BasePlugin.__init__(self, category="cert", name="Certification Validation")
         self.severity = Severity.WARNING
 
     def run(self, filepath, java_ast=None, **kwargs):

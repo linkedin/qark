@@ -32,7 +32,7 @@ def goatdroid_manifest(module_decompiler, build_directory):
 
 def test_vulnerable_allow_backup(test_android_manifest):
     plugin = ManifestBackupAllowed(manifest_xml=test_android_manifest)
-    plugin.run([], apk_constants={})
+    plugin.run(apk_constants={})
     assert len(plugin.issues) == 1
     assert plugin.issues[0].name == plugin.name
     assert plugin.issues[0].severity == plugin.severity
@@ -41,13 +41,13 @@ def test_vulnerable_allow_backup(test_android_manifest):
 
 def test_nonvulnerable_allow_backup(goatdroid_manifest):
     plugin = ManifestBackupAllowed(manifest_xml=goatdroid_manifest)
-    plugin.run([], apk_constants={})
+    plugin.run(apk_constants={})
     assert len(plugin.issues) == 0  # non vulnerable manifest
 
 
 def test_custom_permission_vulnerable(test_android_manifest):
     plugin = CustomPermissions(manifest_xml=test_android_manifest)
-    plugin.run([], apk_constants={})
+    plugin.run(apk_constants={})
     assert len(plugin.issues) == 2
     assert plugin.issues[0].name == plugin.name
     assert plugin.issues[0].severity
@@ -56,19 +56,19 @@ def test_custom_permission_vulnerable(test_android_manifest):
 
 def test_custom_permission_nonvulnerable(goatdroid_manifest):
     plugin = CustomPermissions(manifest_xml=goatdroid_manifest)
-    plugin.run([], apk_constants={})
+    plugin.run(apk_constants={})
     assert len(plugin.issues) == 0
 
 
 def test_debuggable_nonvulnerable(test_android_manifest):
     plugin = DebuggableManifest(manifest_xml=test_android_manifest)
-    plugin.run([], apk_constants={})
+    plugin.run(apk_constants={})
     assert len(plugin.issues) == 0
 
 
 def test_debuggable_vulnerable(goatdroid_manifest):
     plugin = DebuggableManifest(manifest_xml=goatdroid_manifest)
-    plugin.run([], apk_constants={})
+    plugin.run(apk_constants={})
     assert len(plugin.issues) == 1  # vulnerable manifest
     assert plugin.issues[0].name == plugin.name
     assert plugin.issues[0].severity == plugin.severity
@@ -78,7 +78,7 @@ def test_debuggable_vulnerable(goatdroid_manifest):
 def test_vulnerable_exported_tags(vulnerable_manifest_path, vulnerable_receiver_path):
     ManifestPlugin.update_manifest(vulnerable_manifest_path)
     plugin = ExportedTags()
-    plugin.run([vulnerable_receiver_path], apk_constants={})
+    plugin.run(all_files=[vulnerable_receiver_path], apk_constants={})
     assert len(plugin.issues) == 6
     for issue in plugin.issues:
         assert Severity.WARNING == issue.severity
@@ -95,7 +95,7 @@ def test_vulnerable_min_sdk(apk_constants):
                                                 "test_min_sdk_tapjacking",
                                                 "androidmanifest.xml"))
     plugin = MinSDK()
-    plugin.run([], apk_constants=apk_constants)
+    plugin.run(apk_constants=apk_constants)
     assert 1 == len(plugin.issues)
     for issue in plugin.issues:
         assert Severity.VULNERABILITY == issue.severity
@@ -107,26 +107,26 @@ def test_vulnerable_min_sdk(apk_constants):
 def test_android_path(vulnerable_manifest_path):
     ManifestPlugin.update_manifest(vulnerable_manifest_path)
     plugin = AndroidPath()
-    plugin.run([])
+    plugin.run()
     assert 1 == len(plugin.issues)
 
 
 def test_api_keys(vulnerable_manifest_path):
     ManifestPlugin.update_manifest(vulnerable_manifest_path)
     plugin = APIKeys()
-    plugin.run([])
+    plugin.run()
     assert 1 == len(plugin.issues)
 
 
 def test_single_task_launch_mode(vulnerable_manifest_path):
     ManifestPlugin.update_manifest(vulnerable_manifest_path)
     plugin = SingleTaskLaunchMode()
-    plugin.run([])
+    plugin.run()
     assert 1 == len(plugin.issues)
 
 
 def test_task_reparenting(vulnerable_manifest_path):
     ManifestPlugin.update_manifest(vulnerable_manifest_path)
     plugin = TaskReparenting()
-    plugin.run([])
+    plugin.run()
     assert 1 == len(plugin.issues)

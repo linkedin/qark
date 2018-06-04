@@ -32,7 +32,7 @@ class HostnameVerifier(BasePlugin):
      2. `setHostnameVerifier` is called with a value of `.ALLOW_ALL_HOSTNAME_VERIFIERS`
     """
     def __init__(self):
-        BasePlugin.__init__(self, category="cert")
+        BasePlugin.__init__(self, category="cert", name="Hostname Verifier")
         self.severity = Severity.WARNING
 
     def run(self, filepath, java_ast=None, **kwargs):

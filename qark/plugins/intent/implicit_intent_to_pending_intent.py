@@ -37,7 +37,7 @@ class ImplicitIntentToPendingIntent(BasePlugin):
         self.severity = Severity.VULNERABILITY
         self.current_file = None
 
-    def run(self, filepath, apk_constants=None, file_contents=None, java_ast=None, **kwargs):
+    def run(self, filepath, file_contents=None, java_ast=None, **kwargs):
         if not file_contents or not java_ast:
             return
 
@@ -45,7 +45,7 @@ class ImplicitIntentToPendingIntent(BasePlugin):
         if re.search("new Intent", file_contents) is None or re.search(PENDING_INTENT_REGEX, file_contents) is None:
             return
 
-        if not any(["PendingIntent" in imported_declaration.path for imported_declaration in java_ast.imports]):
+        if not any("PendingIntent" in imported_declaration.path for imported_declaration in java_ast.imports):
             # if PendingIntent is never imported the file is not vulnerable
             return
 

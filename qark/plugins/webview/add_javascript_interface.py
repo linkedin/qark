@@ -28,9 +28,10 @@ class AddJavascriptInterface(BasePlugin):
         self.java_method_name = "addJavascriptInterface"
 
     def run(self, filepath, apk_constants=None, java_ast=None, **kwargs):
-        min_sdk = apk_constants["min_sdk"]
-        if not java_ast:
+        if not java_ast or not apk_constants or not apk_constants.get("min_sdk"):
             return
+
+        min_sdk = apk_constants["min_sdk"]
 
         if min_sdk <= 16:
             for _, method_invocation in java_ast.filter(MethodInvocation):

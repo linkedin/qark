@@ -24,7 +24,7 @@ class SeedWithSecureRandom(BasePlugin):
 
     def _imports_secure_seed(self, tree):
         """Checks if a tree imports java.security.SecureRandom, and returns True if the import exists"""
-        return any([imp.path == "java.security.SecureRandom" for imp in tree.imports])
+        return any(imp.path == "java.security.SecureRandom" for imp in tree.imports)
 
     def run(self, filepath, java_ast=None, **kwargs):
         if not java_ast:

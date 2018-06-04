@@ -15,7 +15,7 @@ class ECBCipherCheck(BasePlugin):
     def __init__(self):
 
         BasePlugin.__init__(self, category="crypto", name="ECB Cipher Usage",
-                            description=("ECB mode is an insecure encryption technique and prone to data leakage"))
+                            description="ECB mode is an insecure encryption technique and prone to data leakage")
 
         self.severity = Severity.VULNERABILITY
 

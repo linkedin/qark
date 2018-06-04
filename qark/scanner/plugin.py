@@ -47,7 +47,7 @@ def get_plugins(category=None):
 class BasePlugin(object):
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, category=None, name=None, description=None, **kwargs):
+    def __init__(self, name, category, description=None, **kwargs):
         self.category = category
         self.name = name
         self.description = description

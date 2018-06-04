@@ -28,7 +28,7 @@ class SetAllowUniversalAccessFromFileURLs(BasePlugin):
         self.java_method_name = "setAllowUniversalAccessFromFileURLs"
 
     def run(self, filepath, apk_constants=None, java_ast=None, **kwargs):
-        if not apk_constants.get("min_sdk") or not java_ast:
+        if not apk_constants or not apk_constants.get("min_sdk") or not java_ast:
             return
 
         min_sdk = apk_constants["min_sdk"]

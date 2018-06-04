@@ -31,7 +31,7 @@ class CheckPermissions(BasePlugin):
         if not file_contents or not java_ast:
             return
 
-        if any(["Context" in imp.path for imp in java_ast.imports]):
+        if any("Context" in imp.path for imp in java_ast.imports):
             if re.search(CHECK_PERMISSION_REGEX, file_contents):
                 self.issues.append(Issue(
                     category=self.category, severity=self.severity, name=self.name,

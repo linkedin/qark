@@ -19,7 +19,7 @@ class SingleTaskLaunchMode(ManifestPlugin):
         super(SingleTaskLaunchMode, self).__init__(**kwargs)
         self.severity = Severity.WARNING
 
-    def run(self, files, apk_constants=None, **kwargs):
+    def run(self, **kwargs):
         if not self.manifest_path:
             return
 
