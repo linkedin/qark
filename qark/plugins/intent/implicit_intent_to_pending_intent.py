@@ -1,11 +1,9 @@
-from qark.scanner.plugin import BasePlugin
+from qark.scanner.plugin import JavaASTPlugin
 from qark.issue import Severity, Issue
 
 import logging
-import os
 import re
 
-import javalang
 from javalang.tree import MethodInvocation, ClassCreator, ReferenceType
 
 log = logging.getLogger(__name__)
@@ -20,37 +18,34 @@ PENDING_INTENT_REGEX = re.compile(
     "({pending_intent_method})".format(pending_intent_method="|".join(PENDING_INTENT_METHODS)))
 
 
-class ImplicitIntentToPendingIntent(BasePlugin):
+class ImplicitIntentToPendingIntent(JavaASTPlugin):
     """
     This plugin checks if a `new Intent` is passed into any of the `PENDING_INTENT_METHODS`.
     If there is, a Vulnerability is created.
     """
     def __init__(self):
-        BasePlugin.__init__(self, category="intent", name="Empty pending intent found",
-                            description=("For security reasons, the Intent you supply here should almost always"
-                                         " be an explicit intent that is specify an explicit component to be delivered"
-                                         " to through Intent.setClass. A malicious application could potentially"
-                                         " intercept, redirect and/or modify this Intent. Pending Intents retain the"
-                                         " UID of your application and all related permissions, allowing another"
-                                         " application to act as yours. Reference: "
-                                         "https://developer.android.com/reference/android/app/PendingIntent.html"))
+        JavaASTPlugin.__init__(self, category="intent", name="Empty pending intent found",
+                               description=("For security reasons, the Intent you supply here should almost always"
+                                            " be an explicit intent that is specify an explicit component to be delivered"
+                                            " to through Intent.setClass. A malicious application could potentially"
+                                            " intercept, redirect and/or modify this Intent. Pending Intents retain the"
+                                            " UID of your application and all related permissions, allowing another"
+                                            " application to act as yours. Reference: "
+                                            "https://developer.android.com/reference/android/app/PendingIntent.html"))
         self.severity = Severity.VULNERABILITY
         self.current_file = None
 
-    def run(self, filepath, file_contents=None, java_ast=None, **kwargs):
-        if not file_contents or not java_ast:
-            return
-
+    def run(self):
         # simple search to avoid files that are not vulnerable
-        if re.search("new Intent", file_contents) is None or re.search(PENDING_INTENT_REGEX, file_contents) is None:
+        if re.search("new Intent", self.file_contents) is None or re.search(PENDING_INTENT_REGEX, self.file_contents) is None:
             return
 
-        if not any("PendingIntent" in imported_declaration.path for imported_declaration in java_ast.imports):
+        if not any("PendingIntent" in imported_declaration.path for imported_declaration in self.java_ast.imports):
             # if PendingIntent is never imported the file is not vulnerable
             return
 
-        self.current_file = filepath
-        self._check_for_implicit_intents(java_ast)
+        self.current_file = self.file_path
+        self._check_for_implicit_intents(self.java_ast)
 
     def _check_for_implicit_intents(self, parsed_tree):
         """

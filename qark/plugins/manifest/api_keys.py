@@ -14,15 +14,12 @@ API_KEY_DESCRIPTION = "Please confirm and investigate for potential API keys to 
 
 
 class APIKeys(ManifestPlugin):
-    def __init__(self, **kwargs):
-        kwargs.update(category="manifest", name="Potential API Key found", description=API_KEY_DESCRIPTION)
-        super(APIKeys, self).__init__(**kwargs)
+    def __init__(self):
+        super(APIKeys, self).__init__(category="manifest", name="Potential API Key found",
+                                      description=API_KEY_DESCRIPTION)
         self.severity = Severity.INFO
 
-    def run(self, **kwargs):
-        if not self.manifest_path:
-            return
-
+    def run(self):
         with open(self.manifest_path, "r") as manifest_file:
             for line_number, line in enumerate(manifest_file):
                 # TODO: Fix API_KEY_REGEX, there are too many false positives

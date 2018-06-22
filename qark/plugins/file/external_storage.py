@@ -15,7 +15,7 @@ from javalang.tree import MethodInvocation
 
 from qark.issue import Severity, Issue
 from qark.plugins.helpers import java_files_from_files
-from qark.scanner.plugin import BasePlugin
+from qark.scanner.plugin import JavaASTPlugin
 
 log = logging.getLogger(__name__)
 
@@ -32,17 +32,14 @@ EXTERNAL_MEDIA_DIR_METHOD = 'getExternalMediaDirs'
 EXTERNAL_STORAGE_PUBLIC_DIR_METHOD = 'getExternalStoragePublicDirectory'
 
 
-class ExternalStorage(BasePlugin):
+class ExternalStorage(JavaASTPlugin):
     def __init__(self):
-        BasePlugin.__init__(self, category="file", name="External storage used",
-                            description=EXTERNAL_STORAGE_DESCRIPTION)
+        JavaASTPlugin.__init__(self, category="file", name="External storage used",
+                               description=EXTERNAL_STORAGE_DESCRIPTION)
         self.severity = Severity.WARNING
 
-    def run(self, filepath, java_ast=None, **kwargs):
-        if not java_ast:
-            return
-
-        for _, method_invocation in java_ast.filter(MethodInvocation):
+    def run(self):
+        for _, method_invocation in self.java_ast.filter(MethodInvocation):
             storage_location = None
             if (method_invocation.member == EXTERNAL_FILES_DIR_METHOD
                     or method_invocation.member == EXTERNAL_FILES_DIRS_METHOD):
@@ -58,7 +55,7 @@ class ExternalStorage(BasePlugin):
                 self.issues.append(Issue(
                     category=self.category, severity=self.severity, name=self.name,
                     description=self.description,
-                    file_object=filepath,
+                    file_object=self.file_path,
                     line_number=method_invocation.position)
                 )
 

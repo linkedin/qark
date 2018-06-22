@@ -10,16 +10,14 @@ from qark.issue import Severity
 import javalang
 
 import os
-import tempfile
 
 
 def test_file_permissions():
     plugin = FilePermissions()
     path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_file_permissions.java")
-    with open(path) as f:
-        contents = f.read()
+    plugin.update(file_path=path)
 
-    plugin.run(path, file_contents=contents, apk_constants={})
+    plugin.run()
     assert len(plugin.issues) == 2
     assert "World readable file" == plugin.issues[0].name
     assert Severity.WARNING == plugin.issues[0].severity
@@ -33,10 +31,8 @@ def test_phone_identifier(test_java_files):
     plugin = PhoneIdentifier()
     path = os.path.join(test_java_files,
                         "phone_identifier.java")
-    with open(path) as f:
-        contents = f.read()
-
-    plugin.run(path, file_contents=contents)
+    plugin.update(file_path=path)
+    plugin.run()
     assert 1 == len(plugin.issues)
 
 
@@ -44,10 +40,9 @@ def test_insecure_functions(test_java_files):
     plugin = InsecureFunctions()
     path = os.path.join(test_java_files,
                         "insecure_functions.java")
-    with open(path) as f:
-        ast = javalang.parse.parse(f.read())
 
-    plugin.run(path, java_ast=ast)
+    plugin.update(file_path=path)
+    plugin.run()
     assert 1 == len(plugin.issues)
 
 
@@ -55,10 +50,8 @@ def test_http_url_hardcoded(test_java_files):
     plugin = HardcodedHTTP()
     path = os.path.join(test_java_files,
                         "http_url_hardcoded.java")
-    with open(path) as f:
-        contents = f.read()
-
-    plugin.run(path, file_contents=contents)
+    plugin.update(file_path=path)
+    plugin.run()
 
     assert 1 == len(plugin.issues)
 
@@ -67,10 +60,8 @@ def test_android_logging(test_java_files):
     plugin = AndroidLogging()
     path = os.path.join(test_java_files,
                         "test_android_logging.java")
-    with open(path) as f:
-        ast = javalang.parse.parse(f.read())
-
-    plugin.run(path, java_ast=ast)
+    plugin.update(file_path=path)
+    plugin.run()
     assert 2 == len(plugin.issues)
     assert plugin.issues[0].name == plugin.name
     assert plugin.issues[0].severity == plugin.severity
@@ -81,18 +72,20 @@ def test_external_storage(test_java_files):
     plugin = ExternalStorage()
     path = os.path.join(test_java_files,
                         "external_storage.java")
-    with open(path) as f:
-        ast = javalang.parse.parse(f.read())
+    plugin.update(file_path=path)
 
-    plugin.run(path, java_ast=ast)
+    plugin.run()
     assert 4 == len(plugin.issues)
 
 
 def test_api_keys():
     plugin = JavaAPIKeys()
-    plugin.run("path",
-               file_contents="""public static final String API_TOKEN = "1234thisisaninvalidapitoken937235""")
+    JavaAPIKeys.file_contents = """public static final String API_TOKEN = "1234thisisaninvalidapitoken937235"""
+    JavaAPIKeys.file_path = "path"
+    plugin.run()
     assert 0 == len(plugin.issues)
-    plugin.run("path",
-               file_contents="""public static final String API_TOKEN = "Nti4kWY-qRHTYq3dsbeip0P1tbGCzs2BAY163ManCAb""")
+    plugin.reset()
+    JavaAPIKeys.file_contents = """public static final String API_TOKEN = "Nti4kWY-qRHTYq3dsbeip0P1tbGCzs2BAY163ManCAb"""
+    JavaAPIKeys.file_path = "path"
+    plugin.run()
     assert 1 == len(plugin.issues)

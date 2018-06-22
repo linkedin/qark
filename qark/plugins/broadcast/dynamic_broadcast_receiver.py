@@ -4,11 +4,9 @@ ICE_CREAM_SANDWICH properly registers receivers so anything >= API level 14 is n
 
 import logging
 
-import javalang
-from javalang.tree import ClassDeclaration, MethodInvocation
+from javalang.tree import MethodInvocation
 from qark.issue import Issue, Severity
-from qark.plugins.helpers import java_files_from_files, get_min_sdk_from_files
-from qark.scanner.plugin import BasePlugin
+from qark.scanner.plugin import JavaASTPlugin, ManifestPlugin
 
 log = logging.getLogger(__name__)
 
@@ -22,13 +20,12 @@ DYNAMIC_BROADCAST_RECEIVER_DESCRIPTION = (
 JAVA_DYNAMIC_BROADCAST_RECEIVER_METHOD = 'registerReceiver'
 
 
-class DynamicBroadcastReceiver(BasePlugin):
+class DynamicBroadcastReceiver(JavaASTPlugin, ManifestPlugin):
 
     def __init__(self):
-        BasePlugin.__init__(self, category="broadcast", name="Dynamic broadcast receiver found",
-                            description=DYNAMIC_BROADCAST_RECEIVER_DESCRIPTION)
+        super(DynamicBroadcastReceiver, self).__init__(category="broadcast", name="Dynamic broadcast receiver found",
+                                                       description=DYNAMIC_BROADCAST_RECEIVER_DESCRIPTION)
         self.severity = Severity.VULNERABILITY
-        self.min_sdk = None
 
     def _process(self, tree, java_file):
         for _, method_invocation in tree.filter(MethodInvocation):
@@ -40,12 +37,8 @@ class DynamicBroadcastReceiver(BasePlugin):
                         line_number=method_invocation.position)
                     )
 
-    def run(self, filepath, apk_constants=None, java_ast=None, **kwargs):
-        if not java_ast:
-            return
-
-        self.min_sdk = apk_constants["min_sdk"]
-        self._process(tree=java_ast, java_file=filepath)
+    def run(self):
+        self._process(tree=self.java_ast, java_file=self.file_path)
 
 
 plugin = DynamicBroadcastReceiver()

@@ -2,7 +2,6 @@ import logging
 
 from qark.issue import Severity, Issue
 from qark.scanner.plugin import ManifestPlugin
-from qark.xml_helpers import get_manifest_out_of_files
 
 log = logging.getLogger(__name__)
 
@@ -14,15 +13,11 @@ TASK_LAUNCH_MODE_DESCRIPTION = (
 
 
 class SingleTaskLaunchMode(ManifestPlugin):
-    def __init__(self, **kwargs):
-        kwargs.update(category="manifest", name="launchMode=singleTask found", description=TASK_LAUNCH_MODE_DESCRIPTION)
-        super(SingleTaskLaunchMode, self).__init__(**kwargs)
+    def __init__(self):
+        super(ManifestPlugin, self).__init__(category="manifest", name="launchMode=singleTask found", description=TASK_LAUNCH_MODE_DESCRIPTION)
         self.severity = Severity.WARNING
 
-    def run(self, **kwargs):
-        if not self.manifest_path:
-            return
-
+    def run(self):
         with open(self.manifest_path, "r") as manifest_file:
             for line_number, line in enumerate(manifest_file):
                 if 'android:launchMode="singleTask"' in line:

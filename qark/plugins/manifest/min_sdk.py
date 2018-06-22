@@ -20,19 +20,13 @@ TAP_JACKING = ("Since the minSdkVersion is less that 9, it is likely this applic
 class MinSDK(ManifestPlugin):
     """This plugin will create issues depending on the manifest's minimum SDK. For instance
     tapjacking is only protected when min_sdk > 9 (or custom code is used)."""
-    def __init__(self, **kwargs):
-        kwargs.update(dict(name="MinSDK checks", category="manifest"))
-        super(MinSDK, self).__init__(**kwargs)
+    def __init__(self):
+        super(MinSDK, self).__init__(name="MinSDK checks", category="manifest")
 
         self.severity = Severity.WARNING
 
-    def run(self, apk_constants=None, **kwargs):
-        try:
-            min_sdk = apk_constants["min_sdk"]
-        except (KeyError, TypeError):
-            min_sdk = get_min_sdk(self.manifest_xml)
-
-        if min_sdk < 9:
+    def run(self):
+        if self.min_sdk < 9:
             self.issues.append(Issue(category=self.category, name="Tap Jacking possible",
                                      severity=Severity.VULNERABILITY, description=TAP_JACKING))
 

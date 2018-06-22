@@ -4,8 +4,7 @@ import javalang
 from javalang.tree import ClassCreator, MemberReference, MethodInvocation
 
 from qark.issue import Issue, Severity
-from qark.scanner.plugin import BasePlugin
-from qark.plugins.helpers import java_files_from_files
+from qark.scanner.plugin import JavaASTPlugin
 
 log = logging.getLogger(__name__)
 
@@ -25,22 +24,19 @@ ALLOW_ALL_HOSTNAME_VERIFIER_DESC = ("This can allow for impromper x.509 certific
                                     "https://developer.android.com/training/articles/security-ssl.html")
 
 
-class HostnameVerifier(BasePlugin):
+class HostnameVerifier(JavaASTPlugin):
     """
     This plugin checks if:
      1. `AllowAllHostnameVerifier` is instantiated
      2. `setHostnameVerifier` is called with a value of `.ALLOW_ALL_HOSTNAME_VERIFIERS`
     """
     def __init__(self):
-        BasePlugin.__init__(self, category="cert", name="Hostname Verifier")
+        JavaASTPlugin.__init__(self, category="cert", name="Hostname Verifier")
         self.severity = Severity.WARNING
 
-    def run(self, filepath, java_ast=None, **kwargs):
-        if not java_ast:
-            return
-
-        self._allow_all_hostname_verifier_created(java_ast, filepath)
-        self._set_hostname_verifier_allow_all(java_ast, filepath)
+    def run(self):
+        self._allow_all_hostname_verifier_created(self.java_ast, self.file_path)
+        self._set_hostname_verifier_allow_all(self.java_ast, self.file_path)
 
     def _allow_all_hostname_verifier_created(self, tree, current_file):
         """

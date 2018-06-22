@@ -1,10 +1,8 @@
 import logging
 import re
 
-import javalang
 from qark.issue import Severity, Issue
-from qark.plugins.helpers import java_files_from_files
-from qark.scanner.plugin import BasePlugin
+from qark.scanner.plugin import JavaASTPlugin
 
 log = logging.getLogger(__name__)
 
@@ -21,28 +19,26 @@ ENFORCE_PERMISSION_REGEX = re.compile(
     'enforceCallingOrSelfPermission|enforceCallingOrSelfUriPermission|enforcePermission')
 
 
-class CheckPermissions(BasePlugin):
+class CheckPermissions(JavaASTPlugin):
     def __init__(self):
-        BasePlugin.__init__(self, category="manifest", name="Potientially vulnerable check permission function called",
-                            description=CHECK_PERMISSIONS_DESCRIPTION)
+        JavaASTPlugin.__init__(self, category="manifest",
+                               name="Potientially vulnerable check permission function called",
+                               description=CHECK_PERMISSIONS_DESCRIPTION)
         self.severity = Severity.WARNING
 
-    def run(self, java_file, file_contents=None, java_ast=None, **kwargs):
-        if not file_contents or not java_ast:
-            return
-
-        if any("Context" in imp.path for imp in java_ast.imports):
-            if re.search(CHECK_PERMISSION_REGEX, file_contents):
+    def run(self):
+        if any("Context" in imp.path for imp in self.java_ast.imports):
+            if re.search(CHECK_PERMISSION_REGEX, self.file_contents):
                 self.issues.append(Issue(
                     category=self.category, severity=self.severity, name=self.name,
                     description=self.description.format(used_permission="Check", recommended_permission="check"),
-                    file_object=java_file)
+                    file_object=self.file_path)
                 )
-            if re.search(ENFORCE_PERMISSION_REGEX, file_contents):
+            if re.search(ENFORCE_PERMISSION_REGEX, self.file_contents):
                 self.issues.append(Issue(
                     category=self.category, severity=self.severity, name=self.name,
                     description=self.description.format(used_permission="Enforce", recommended_permission="enforce"),
-                    file_object=java_file)
+                    file_object=self.file_path)
                 )
 
 

@@ -1,11 +1,9 @@
 import logging
 
-import javalang
 from javalang.tree import MethodInvocation
 
 from qark.issue import Severity, Issue
-from qark.plugins.helpers import java_files_from_files
-from qark.scanner.plugin import BasePlugin
+from qark.scanner.plugin import JavaASTPlugin
 
 log = logging.getLogger(__name__)
 
@@ -17,21 +15,18 @@ LOAD_DATA_WITH_BASE_URL_DESCRIPTION = (
 )
 
 
-class LoadDataWithBaseURL(BasePlugin):
+class LoadDataWithBaseURL(JavaASTPlugin):
     """This plugin checks if the `loadDataWithBaseURL` method is called."""
     def __init__(self):
-        BasePlugin.__init__(self, category="webview", name="BaseURL set for Webview",
-                            description=LOAD_DATA_WITH_BASE_URL_DESCRIPTION)
+        JavaASTPlugin.__init__(self, category="webview", name="BaseURL set for Webview",
+                               description=LOAD_DATA_WITH_BASE_URL_DESCRIPTION)
 
-    def run(self, filepath, java_ast=None, **kwargs):
-        if not java_ast:
-            return
-
-        for _, method_invocation in java_ast.filter(MethodInvocation):
+    def run(self):
+        for _, method_invocation in self.java_ast.filter(MethodInvocation):
             if method_invocation.member == "loadDataWithBaseURL" and len(method_invocation.arguments) == 5:
                 self.issues.append(Issue(category=self.category, name=self.name, severity=Severity.WARNING,
                                          description=self.description, line_number=method_invocation.position,
-                                         file_object=filepath))
+                                         file_object=self.file_path))
 
 
 plugin = LoadDataWithBaseURL()

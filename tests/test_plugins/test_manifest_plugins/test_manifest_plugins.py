@@ -17,22 +17,30 @@ from qark.plugins.manifest.task_reparenting import TaskReparenting
 from qark.scanner.plugin import ManifestPlugin
 
 
+@pytest.fixture(autouse=True)
+def reset_manifest_plugin():
+    ManifestPlugin.manifest_path = None
+    ManifestPlugin.manifest_xml = None
+    ManifestPlugin.min_sdk = -1
+    ManifestPlugin.target_sdk = -1
+    ManifestPlugin.package_name = "PACKAGE_NOT_FOUND"
+    ExportedTags.all_files = None
+
+
 @pytest.fixture(scope="module")
 def test_android_manifest(vulnerable_manifest_path):
     return minidom.parse(vulnerable_manifest_path)
 
 
 @pytest.fixture(scope="module")
-def goatdroid_manifest(module_decompiler, build_directory):
-    if os.path.isdir(build_directory):
-        shutil.rmtree(build_directory)
-
-    return minidom.parse(module_decompiler.run_apktool())
+def goatdroid_manifest(goatdroid_manifest_path):
+    return minidom.parse(goatdroid_manifest_path)
 
 
 def test_vulnerable_allow_backup(test_android_manifest):
-    plugin = ManifestBackupAllowed(manifest_xml=test_android_manifest)
-    plugin.run(apk_constants={})
+    ManifestPlugin.manifest_xml = test_android_manifest
+    plugin = ManifestBackupAllowed()
+    plugin.run()
     assert len(plugin.issues) == 1
     assert plugin.issues[0].name == plugin.name
     assert plugin.issues[0].severity == plugin.severity
@@ -40,36 +48,47 @@ def test_vulnerable_allow_backup(test_android_manifest):
 
 
 def test_nonvulnerable_allow_backup(goatdroid_manifest):
-    plugin = ManifestBackupAllowed(manifest_xml=goatdroid_manifest)
-    plugin.run(apk_constants={})
+    ManifestPlugin.manifest_xml = goatdroid_manifest
+    plugin = ManifestBackupAllowed()
+    plugin.run()
     assert len(plugin.issues) == 0  # non vulnerable manifest
 
 
 def test_custom_permission_vulnerable(test_android_manifest):
-    plugin = CustomPermissions(manifest_xml=test_android_manifest)
-    plugin.run(apk_constants={})
+    ManifestPlugin.manifest_xml = test_android_manifest
+    plugin = CustomPermissions()
+    plugin.run()
     assert len(plugin.issues) == 2
     assert plugin.issues[0].name == plugin.name
     assert plugin.issues[0].severity
     assert plugin.issues[0].category == plugin.category
 
+    ManifestPlugin.manifest_xml = test_android_manifest
+    ManifestPlugin.min_sdk = 21
+    plugin = CustomPermissions()
+    plugin.run()
+    assert len(plugin.issues) == 1
 
-def test_custom_permission_nonvulnerable(goatdroid_manifest):
-    plugin = CustomPermissions(manifest_xml=goatdroid_manifest)
-    plugin.run(apk_constants={})
+
+def test_custom_permission_nonvulnerable(goatdroid_manifest, test_android_manifest):
+    ManifestPlugin.manifest_xml = goatdroid_manifest
+    plugin = CustomPermissions()
+    plugin.run()
     assert len(plugin.issues) == 0
 
 
 def test_debuggable_nonvulnerable(test_android_manifest):
-    plugin = DebuggableManifest(manifest_xml=test_android_manifest)
-    plugin.run(apk_constants={})
+    ManifestPlugin.manifest_xml = test_android_manifest
+    plugin = DebuggableManifest()
+    plugin.run()
     assert len(plugin.issues) == 0
 
 
 def test_debuggable_vulnerable(goatdroid_manifest):
-    plugin = DebuggableManifest(manifest_xml=goatdroid_manifest)
-    plugin.run(apk_constants={})
-    assert len(plugin.issues) == 1  # vulnerable manifest
+    ManifestPlugin.manifest_xml = goatdroid_manifest
+    plugin = DebuggableManifest()
+    plugin.run()
+    assert len(plugin.issues) == 1
     assert plugin.issues[0].name == plugin.name
     assert plugin.issues[0].severity == plugin.severity
     assert plugin.issues[0].category == plugin.category
@@ -77,25 +96,26 @@ def test_debuggable_vulnerable(goatdroid_manifest):
 
 def test_vulnerable_exported_tags(vulnerable_manifest_path, vulnerable_receiver_path):
     ManifestPlugin.update_manifest(vulnerable_manifest_path)
+    ExportedTags.all_files = [vulnerable_receiver_path]
     plugin = ExportedTags()
-    plugin.run(all_files=[vulnerable_receiver_path], apk_constants={})
+    plugin.run()
     assert len(plugin.issues) == 6
     for issue in plugin.issues:
         assert Severity.WARNING == issue.severity
         assert "Manifest" == issue.category
 
 
-@pytest.mark.parametrize("apk_constants", [
-    None,
-    {"min_sdk": 8},
-    {},
+@pytest.mark.parametrize("min_sdk", [
+    -1,
+    8,
 ])
-def test_vulnerable_min_sdk(apk_constants):
+def test_vulnerable_min_sdk(min_sdk):
     ManifestPlugin.update_manifest(os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                                 "test_min_sdk_tapjacking",
                                                 "androidmanifest.xml"))
+    ManifestPlugin.min_sdk = min_sdk
     plugin = MinSDK()
-    plugin.run(apk_constants=apk_constants)
+    plugin.run()
     assert 1 == len(plugin.issues)
     for issue in plugin.issues:
         assert Severity.VULNERABILITY == issue.severity

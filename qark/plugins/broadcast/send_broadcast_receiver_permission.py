@@ -1,12 +1,8 @@
-from qark.plugins.helpers import java_files_from_files
-from qark.plugins.manifest_helpers import get_min_sdk
-from qark.scanner.plugin import BasePlugin
+from qark.scanner.plugin import JavaASTPlugin, ManifestPlugin
 from qark.issue import Severity, Issue
 
 import logging
-import os
 import re
-from xml.dom import minidom
 
 import javalang
 from javalang.tree import MethodInvocation
@@ -61,29 +57,27 @@ STICKY_BROADCAST = (
 )
 
 
-class SendBroadcastReceiverPermission(BasePlugin):
+class SendBroadcastReceiverPermission(JavaASTPlugin, ManifestPlugin):
     """
     This plugin checks certain broadcast methods to see if they are using an insecure version,
     based on number of arguments.
     """
     def __init__(self):
-        BasePlugin.__init__(self, category="broadcast", name="Send Broadcast Receiver Permission")
+        super(SendBroadcastReceiverPermission, self).__init__(category="broadcast",
+                                                              name="Send Broadcast Receiver Permission")
         self.severity = Severity.WARNING
         self.current_file = None
         self.manifest_xml = None
         self.below_min_sdk_21 = False
 
-    def run(self, filepath, apk_constants=None, file_contents=None, java_ast=None, **kwargs):
-        if not apk_constants or not file_contents or not java_ast:
+    def run(self):
+        self.below_min_sdk_21 = self.min_sdk < 21
+        self.current_file = self.file_path
+        if not re.search("({broadcasts})".format(broadcasts="|".join(BROADCAST_METHODS)), self.file_contents):
             return
 
-        self.below_min_sdk_21 = apk_constants["min_sdk"] < 21
-        self.current_file = filepath
-        if not re.search("({broadcasts})".format(broadcasts="|".join(BROADCAST_METHODS)), file_contents):
-            return
-
-        for _, method_invocation in java_ast.filter(MethodInvocation):
-            self._check_method_invocation(method_invocation, java_ast.imports)
+        for _, method_invocation in self.java_ast.filter(MethodInvocation):
+            self._check_method_invocation(method_invocation, self.java_ast.imports)
 
     def _check_method_invocation(self, method_invocation, imports):
         """

@@ -4,8 +4,7 @@ import javalang
 from javalang.tree import ClassDeclaration, MethodDeclaration
 
 from qark.issue import Severity, Issue
-from qark.plugins.helpers import java_files_from_files
-from qark.scanner.plugin import BasePlugin
+from qark.scanner.plugin import JavaASTPlugin
 
 log = logging.getLogger(__name__)
 
@@ -20,24 +19,21 @@ INSECURE_FUNCTIONS_DESCRIPTION = (
 INSECURE_FUNCTIONS_NAMES = ("call",)
 
 
-class InsecureFunctions(BasePlugin):
+class InsecureFunctions(JavaASTPlugin):
     def __init__(self):
-        BasePlugin.__init__(self, category="file", name="Insecure functions found",
-                            description=INSECURE_FUNCTIONS_DESCRIPTION)
+        JavaASTPlugin.__init__(self, category="file", name="Insecure functions found",
+                               description=INSECURE_FUNCTIONS_DESCRIPTION)
         self.severity = Severity.WARNING
 
-    def run(self, filepath, java_ast=None, **kwargs):
-        if not java_ast:
-            return
-
-        for _, class_declaration in java_ast.filter(ClassDeclaration):
+    def run(self):
+        for _, class_declaration in self.java_ast.filter(ClassDeclaration):
             for _, method_declaration_in_class in class_declaration.filter(MethodDeclaration):
 
                 if method_declaration_in_class.name in INSECURE_FUNCTIONS_NAMES:
                     self.issues.append(Issue(
                         category=self.category, severity=self.severity, name=self.name,
                         description=self.description,
-                        file_object=filepath,
+                        file_object=self.file_path,
                         line_number=method_declaration_in_class.position)
                     )
 

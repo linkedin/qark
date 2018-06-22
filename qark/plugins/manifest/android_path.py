@@ -10,15 +10,13 @@ PATH_USAGE_DESCRIPTION = ("android:path means that the permission applies to the
 
 
 class AndroidPath(ManifestPlugin):
-    def __init__(self, **kwargs):
-        kwargs.update(category="manifest", name="android:path tag used", description=PATH_USAGE_DESCRIPTION)
-        super(AndroidPath, self).__init__(**kwargs)
+    def __init__(self):
+        super(AndroidPath, self).__init__(category="manifest", name="android:path tag used",
+                                          description=PATH_USAGE_DESCRIPTION)
+
         self.severity = Severity.WARNING
 
-    def run(self, **kwargs):
-        if not self.manifest_path:
-            return
-
+    def run(self):
         with open(self.manifest_path, "r") as manifest_file:
             for line_number, line in enumerate(manifest_file):
                 if "android:path=" in line:

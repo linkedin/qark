@@ -5,8 +5,7 @@ import logging
 import re
 
 from qark.issue import Severity, Issue
-from qark.plugins.helpers import java_files_from_files
-from qark.scanner.plugin import BasePlugin
+from qark.scanner.plugin import FileContentsPlugin
 
 log = logging.getLogger(__name__)
 
@@ -16,23 +15,20 @@ SPECIAL_CHARACTER_REGEX = re.compile(r'(?=.+[!$%^&*()_+|~=`{}\[\]:<>?,./])')
 API_KEY_DESCRIPTION = "Please confirm and investigate the API key to determine its severity."
 
 
-class JavaAPIKeys(BasePlugin):
+class JavaAPIKeys(FileContentsPlugin):
     def __init__(self):
-        BasePlugin.__init__(self, category="file", name="Potential API Key found",
-                            description=API_KEY_DESCRIPTION)
+        FileContentsPlugin.__init__(self, category="file", name="Potential API Key found",
+                               description=API_KEY_DESCRIPTION)
         self.severity = Severity.INFO
 
-    def run(self, filepath, file_contents=None, **kwargs):
-        if not file_contents:
-            return
-
-        for line_number, line in enumerate(file_contents.split("\n")):
+    def run(self):
+        for line_number, line in enumerate(self.file_contents.split("\n")):
             for word in line.split():
                 if re.search(API_KEY_REGEX, word) and not re.search(SPECIAL_CHARACTER_REGEX, word):
                     self.issues.append(Issue(
                         category=self.category, severity=self.severity, name=self.name,
                         description=self.description,
-                        file_object=filepath,
+                        file_object=self.file_path,
                         line_number=(line_number, 0))
                     )
 

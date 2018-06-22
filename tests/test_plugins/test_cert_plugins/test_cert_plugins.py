@@ -9,22 +9,18 @@ import os
 
 
 def test_cert_validation_methods():
-    plugin = CertValidation()
     path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "testCertMethodsFile.java")
-    with open(path) as f:
-        ast = javalang.parse.parse(f.read())
 
-    plugin.run(path, java_ast=ast)
+    plugin = CertValidation()
+    plugin.update(path, call_run=True)
     assert 3 == len(plugin.issues)
 
 
 def test_hostname_verifier():
     plugin = HostnameVerifier()
     path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "testHostnameVerifier.java")
-    with open(path) as f:
-        ast = javalang.parse.parse(f.read())
 
-    plugin.run(path, java_ast=ast)
+    plugin.update(path, call_run=True)
     assert 2 == len(plugin.issues)
     assert "Allow all hostname verifier used" == plugin.issues[0].name
     assert "setHostnameVerifier set to ALLOW_ALL" == plugin.issues[1].name
