@@ -15,9 +15,11 @@ class SeedWithSecureRandom(JavaASTPlugin):
 
     def __init__(self):
 
-        JavaASTPlugin.__init__(self, category="crypto", name="Random number generator is seeded with SecureSeed",
-                               description=("Specifying a fixed seed will cause a predictable sequence of numbers. "
-                                            "This may be useful for testing, but not for secure use"))
+        super(SeedWithSecureRandom, self).__init__(category="crypto",
+                                                   name="Random number generator is seeded with SecureSeed",
+                                                   description=(
+                                                       "Specifying a fixed seed will cause a predictable sequence of numbers. "
+                                                       "This may be useful for testing, but not for secure use"))
 
         self.severity = Severity.WARNING
 

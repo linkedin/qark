@@ -23,8 +23,8 @@ JAVASCRIPT_ENABLED_DESCRIPTION = (
 class JavascriptEnabled(JavaASTPlugin):
     """This plugin checks if the `setJavaScriptEnabled` method is called with a value of `true`"""
     def __init__(self):
-        JavaASTPlugin.__init__(self, category="webview", name="Javascript enabled in Webview",
-                               description=JAVASCRIPT_ENABLED_DESCRIPTION)
+        super(JavascriptEnabled, self).__init__(category="webview", name="Javascript enabled in Webview",
+                                                description=JAVASCRIPT_ENABLED_DESCRIPTION)
 
     def run(self):
         for _, method_invocation in self.java_ast.filter(MethodInvocation):

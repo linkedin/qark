@@ -32,8 +32,8 @@ ANDROID_LOGGING_METHODS = ("v", "d", "i", "w", "e")
 
 class AndroidLogging(JavaASTPlugin):
     def __init__(self):
-        JavaASTPlugin.__init__(self, category="file", name="Logging found",
-                               description=ANDROID_LOGGING_DESCRIPTION)
+        super(AndroidLogging, self).__init__(category="file", name="Logging found",
+                                             description=ANDROID_LOGGING_DESCRIPTION)
         self.severity = Severity.WARNING
 
     def run(self):

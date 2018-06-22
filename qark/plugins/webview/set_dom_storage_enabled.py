@@ -16,8 +16,8 @@ SET_DOM_STORAGE_ENABLED_DESCRIPTION = (
 class SetDomStorageEnabled(JavaASTPlugin):
     """This plugin checks if the `setDomStorageEnabled` method is called with a value of `true`."""
     def __init__(self):
-        JavaASTPlugin.__init__(self, category="webview", name="Webview enables DOM Storage",
-                               description=SET_DOM_STORAGE_ENABLED_DESCRIPTION)
+        super(SetDomStorageEnabled, self).__init__(category="webview", name="Webview enables DOM Storage",
+                                                   description=SET_DOM_STORAGE_ENABLED_DESCRIPTION)
         self.severity = Severity.WARNING
         self.java_method_name = "setDomStorageEnabled"
 

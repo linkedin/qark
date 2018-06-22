@@ -18,8 +18,8 @@ TELEPHONY_INLINE_REGEX = re.compile(r'\({2,}(android.telephony.)?TelephonyManage
 
 class PhoneIdentifier(FileContentsPlugin):
     def __init__(self):
-        FileContentsPlugin.__init__(self, category="file", name="Phone number or IMEI detected",
-                                    description=PHONE_IDENTIFIER_DESCRIPTION)
+        super(PhoneIdentifier, self).__init__(category="file", name="Phone number or IMEI detected",
+                                              description=PHONE_IDENTIFIER_DESCRIPTION)
         self.severity = Severity.INFO
 
     def run(self):

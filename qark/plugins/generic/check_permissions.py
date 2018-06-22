@@ -21,9 +21,9 @@ ENFORCE_PERMISSION_REGEX = re.compile(
 
 class CheckPermissions(JavaASTPlugin):
     def __init__(self):
-        JavaASTPlugin.__init__(self, category="manifest",
-                               name="Potientially vulnerable check permission function called",
-                               description=CHECK_PERMISSIONS_DESCRIPTION)
+        super(CheckPermissions, self).__init__(category="manifest",
+                                               name="Potientially vulnerable check permission function called",
+                                               description=CHECK_PERMISSIONS_DESCRIPTION)
         self.severity = Severity.WARNING
 
     def run(self):

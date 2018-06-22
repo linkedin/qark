@@ -21,8 +21,8 @@ INSECURE_FUNCTIONS_NAMES = ("call",)
 
 class InsecureFunctions(JavaASTPlugin):
     def __init__(self):
-        JavaASTPlugin.__init__(self, category="file", name="Insecure functions found",
-                               description=INSECURE_FUNCTIONS_DESCRIPTION)
+        super(InsecureFunctions, self).__init__(category="file", name="Insecure functions found",
+                                                description=INSECURE_FUNCTIONS_DESCRIPTION)
         self.severity = Severity.WARNING
 
     def run(self):

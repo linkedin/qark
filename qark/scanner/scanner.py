@@ -51,11 +51,11 @@ class Scanner(object):
                 ManifestPlugin.update_manifest(self.manifest_path)
                 if ManifestPlugin.manifest_xml is not None:
 
-                    # Give more detail to the ExportedTags manifest plugin as it is important for building the exploit
-                    #   APK. Careful!
-                    ExportedTags.all_files = self.files
+                    for plugin in [plugin_source.load_plugin(plugin_name).plugin for plugin_name in manifest_plugins]:
+                        # Give more detail to the ExportedTags manifest plugin as it is important for building the exploit
+                        #   APK. Careful!
+                        plugin.all_files = self.files
 
-                    for plugin in (plugin_source.load_plugin(plugin_name).plugin for plugin_name in manifest_plugins):
                         plugin.run()
                         self.issues.extend(plugin.issues)
                     continue
@@ -106,8 +106,10 @@ class Scanner(object):
         """Walks the `Decompiler.build_directory` and updates the `self.files` set with new files."""
         if is_java_file(self.path_to_source):
             self.files.add(self.path_to_source)
+            log.debug("Added single java file to scanner")
             return
 
+        log.debug("Adding files to scanner...")
         try:
             for (dir_path, _, file_names) in walk(self.build_directory):
                 for file_name in file_names:

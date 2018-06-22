@@ -18,8 +18,8 @@ LOAD_DATA_WITH_BASE_URL_DESCRIPTION = (
 class LoadDataWithBaseURL(JavaASTPlugin):
     """This plugin checks if the `loadDataWithBaseURL` method is called."""
     def __init__(self):
-        JavaASTPlugin.__init__(self, category="webview", name="BaseURL set for Webview",
-                               description=LOAD_DATA_WITH_BASE_URL_DESCRIPTION)
+        super(LoadDataWithBaseURL, self).__init__(category="webview", name="BaseURL set for Webview",
+                                                  description=LOAD_DATA_WITH_BASE_URL_DESCRIPTION)
 
     def run(self):
         for _, method_invocation in self.java_ast.filter(MethodInvocation):

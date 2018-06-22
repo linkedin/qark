@@ -210,9 +210,6 @@ class ExportedTags(ManifestPlugin):
         super(ExportedTags, self).__init__(category="manifest", name=EXPORTED_TAGS_ISSUE_NAME)
 
         self.bad_exported_tags = ("activity", "activity-alias", "service", "receiver", "provider")
-        self.min_sdk = None
-        self.target_sdk = None
-        self.package_name = None
 
     def run(self):
         for tag in self.bad_exported_tags:

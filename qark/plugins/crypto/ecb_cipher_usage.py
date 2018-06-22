@@ -13,8 +13,8 @@ log = logging.getLogger(__name__)
 class ECBCipherCheck(JavaASTPlugin):
     def __init__(self):
 
-        JavaASTPlugin.__init__(self, category="crypto", name="ECB Cipher Usage",
-                               description="ECB mode is an insecure encryption technique and prone to data leakage")
+        super(ECBCipherCheck, self).__init__(category="crypto", name="ECB Cipher Usage",
+                                             description="ECB mode is an insecure encryption technique and prone to data leakage")
 
         self.severity = Severity.VULNERABILITY
 

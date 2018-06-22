@@ -24,14 +24,15 @@ class ImplicitIntentToPendingIntent(JavaASTPlugin):
     If there is, a Vulnerability is created.
     """
     def __init__(self):
-        JavaASTPlugin.__init__(self, category="intent", name="Empty pending intent found",
-                               description=("For security reasons, the Intent you supply here should almost always"
-                                            " be an explicit intent that is specify an explicit component to be delivered"
-                                            " to through Intent.setClass. A malicious application could potentially"
-                                            " intercept, redirect and/or modify this Intent. Pending Intents retain the"
-                                            " UID of your application and all related permissions, allowing another"
-                                            " application to act as yours. Reference: "
-                                            "https://developer.android.com/reference/android/app/PendingIntent.html"))
+        super(ImplicitIntentToPendingIntent, self).__init__(category="intent", name="Empty pending intent found",
+                                                            description=(
+                                                                "For security reasons, the Intent you supply here should almost always"
+                                                                " be an explicit intent that is specify an explicit component to be delivered"
+                                                                " to through Intent.setClass. A malicious application could potentially"
+                                                                " intercept, redirect and/or modify this Intent. Pending Intents retain the"
+                                                                " UID of your application and all related permissions, allowing another"
+                                                                " application to act as yours. Reference: "
+                                                                "https://developer.android.com/reference/android/app/PendingIntent.html"))
         self.severity = Severity.VULNERABILITY
         self.current_file = None
 

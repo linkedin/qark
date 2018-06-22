@@ -18,8 +18,8 @@ class SetAllowContentAccess(JavaASTPlugin):
     """This plugin checks if the webview calls setAllowContentAccess(false), otherwise the webview is vulnerable
     (defaults to true)."""
     def __init__(self):
-        JavaASTPlugin.__init__(self, category="webview", name="Webview enables content access",
-                               description=SET_ALLOW_CONTENT_ACCESS_DESCRIPTION)
+        super(SetAllowContentAccess, self).__init__(category="webview", name="Webview enables content access",
+                                                    description=SET_ALLOW_CONTENT_ACCESS_DESCRIPTION)
         self.severity = Severity.WARNING
 
     def run(self):

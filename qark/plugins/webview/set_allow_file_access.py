@@ -18,8 +18,8 @@ class SetAllowFileAccess(JavaASTPlugin):
     """This plugin checks if the webview calls setAllowFileAccess(false), otherwise the webview is vulnerable
     (defaults to true)."""
     def __init__(self):
-        JavaASTPlugin.__init__(self, category="webview", name="Webview enables file access",
-                               description=SET_ALLOW_FILE_ACCESS_DESCRIPTION)
+        super(SetAllowFileAccess, self).__init__(category="webview", name="Webview enables file access",
+                                                 description=SET_ALLOW_FILE_ACCESS_DESCRIPTION)
         self.severity = Severity.WARNING
 
     def run(self):

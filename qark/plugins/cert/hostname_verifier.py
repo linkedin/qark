@@ -31,7 +31,7 @@ class HostnameVerifier(JavaASTPlugin):
      2. `setHostnameVerifier` is called with a value of `.ALLOW_ALL_HOSTNAME_VERIFIERS`
     """
     def __init__(self):
-        JavaASTPlugin.__init__(self, category="cert", name="Hostname Verifier")
+        super(HostnameVerifier, self).__init__(category="cert", name="Hostname Verifier")
         self.severity = Severity.WARNING
 
     def run(self):

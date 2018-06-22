@@ -17,8 +17,8 @@ API_KEY_DESCRIPTION = "Please confirm and investigate the API key to determine i
 
 class JavaAPIKeys(FileContentsPlugin):
     def __init__(self):
-        FileContentsPlugin.__init__(self, category="file", name="Potential API Key found",
-                               description=API_KEY_DESCRIPTION)
+        super(JavaAPIKeys, self).__init__(category="file", name="Potential API Key found",
+                                          description=API_KEY_DESCRIPTION)
         self.severity = Severity.INFO
 
     def run(self):

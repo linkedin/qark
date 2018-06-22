@@ -17,8 +17,8 @@ MULTIPLE_TASK_REGEX = re.compile(r'FLAG_ACTIVITY_MULTIPLE_TASK')
 
 class TaskAffinity(JavaASTPlugin):
     def __init__(self):
-        JavaASTPlugin.__init__(self, category="generic", name="Potential task hijacking",
-                               description=TASK_AFFINITY_DESCRIPTION)
+        super(TaskAffinity, self).__init__(category="generic", name="Potential task hijacking",
+                                           description=TASK_AFFINITY_DESCRIPTION)
         self.severity = Severity.INFO
 
     def run(self):

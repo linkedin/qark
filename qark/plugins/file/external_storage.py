@@ -34,8 +34,8 @@ EXTERNAL_STORAGE_PUBLIC_DIR_METHOD = 'getExternalStoragePublicDirectory'
 
 class ExternalStorage(JavaASTPlugin):
     def __init__(self):
-        JavaASTPlugin.__init__(self, category="file", name="External storage used",
-                               description=EXTERNAL_STORAGE_DESCRIPTION)
+        super(ExternalStorage, self).__init__(category="file", name="External storage used",
+                                              description=EXTERNAL_STORAGE_DESCRIPTION)
         self.severity = Severity.WARNING
 
     def run(self):

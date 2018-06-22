@@ -95,7 +95,6 @@ class FilePathPlugin(PluginObserver):
         :param str file_path:
         :param bool call_run: Whether or not `self.run()` should be called. Prevents `run()` being called multiple times
         """
-        print("in file path update: ", file_path)
         if not file_path:
             FilePathPlugin.file_path = None
             return

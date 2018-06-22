@@ -11,7 +11,8 @@ class PackagedPrivateKeys(FileContentsPlugin):
     PRIVATE_KEY_REGEXES = (r'PRIVATE\sKEY',)
 
     def __init__(self):
-        FileContentsPlugin.__init__(self, category="crypto", name="Encryption keys are packaged with the application")
+        super(PackagedPrivateKeys, self).__init__(category="crypto",
+                                                  name="Encryption keys are packaged with the application")
 
         self.severity = Severity.VULNERABILITY
 
