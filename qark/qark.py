@@ -68,7 +68,7 @@ def cli(ctx, sdk_path, build_path, debug, source, report_type, exploit_apk):
     click.secho("Writing report...")
     report = Report(issues=set(scanner.issues))
     report_path = report.generate(file_type=report_type)
-    click.secho("Finish writing report to {report_path}...".format(report_path=report_path))
+    click.secho("Finish writing report to {report_path} ...".format(report_path=report_path))
 
     if exploit_apk:
         click.secho("Building exploit APK...")

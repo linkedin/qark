@@ -1,10 +1,8 @@
 import logging
 import re
 
-import javalang
 from qark.issue import Severity, Issue
-from qark.plugins.helpers import java_files_from_files
-from qark.scanner.plugin import BasePlugin
+from qark.scanner.plugin import JavaASTPlugin
 
 log = logging.getLogger(__name__)
 
@@ -21,44 +19,26 @@ ENFORCE_PERMISSION_REGEX = re.compile(
     'enforceCallingOrSelfPermission|enforceCallingOrSelfUriPermission|enforcePermission')
 
 
-class CheckPermissions(BasePlugin):
+class CheckPermissions(JavaASTPlugin):
     def __init__(self):
-        BasePlugin.__init__(self, category="manifest", name="Potientially vulnerable check permission function called",
-                            description=CHECK_PERMISSIONS_DESCRIPTION)
+        super(CheckPermissions, self).__init__(category="manifest",
+                                               name="Potientially vulnerable check permission function called",
+                                               description=CHECK_PERMISSIONS_DESCRIPTION)
         self.severity = Severity.WARNING
 
-    def run(self, files, apk_constants=None):
-        java_files = java_files_from_files(files)
-
-        for java_file in java_files:
-            self._process(java_file)
-
-    def _process(self, java_file):
-        try:
-            with open(java_file, "r") as java_file_to_read:
-                file_contents = java_file_to_read.read()
-        except IOError:
-            log.debug("File does not exist %s, continuing", java_file)
-            return
-
-        try:
-            tree = javalang.parse.parse(file_contents)
-        except (javalang.parser.JavaSyntaxError, IndexError):
-            log.debug("Error parsing file %s, continuing", java_file)
-            return
-
-        if any(["Context" in imp.path for imp in tree.imports]):
-            if re.search(CHECK_PERMISSION_REGEX, file_contents):
+    def run(self):
+        if any("Context" in imp.path for imp in self.java_ast.imports):
+            if re.search(CHECK_PERMISSION_REGEX, self.file_contents):
                 self.issues.append(Issue(
                     category=self.category, severity=self.severity, name=self.name,
                     description=self.description.format(used_permission="Check", recommended_permission="check"),
-                    file_object=java_file)
+                    file_object=self.file_path)
                 )
-            if re.search(ENFORCE_PERMISSION_REGEX, file_contents):
+            if re.search(ENFORCE_PERMISSION_REGEX, self.file_contents):
                 self.issues.append(Issue(
                     category=self.category, severity=self.severity, name=self.name,
                     description=self.description.format(used_permission="Enforce", recommended_permission="enforce"),
-                    file_object=java_file)
+                    file_object=self.file_path)
                 )
 
 

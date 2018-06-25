@@ -1,11 +1,9 @@
-from qark.scanner.plugin import BasePlugin
+from qark.scanner.plugin import JavaASTPlugin
 from qark.issue import Severity, Issue
 
 import logging
-import os
 import re
 
-import javalang
 from javalang.tree import MethodInvocation, ClassCreator, ReferenceType
 
 log = logging.getLogger(__name__)
@@ -20,51 +18,35 @@ PENDING_INTENT_REGEX = re.compile(
     "({pending_intent_method})".format(pending_intent_method="|".join(PENDING_INTENT_METHODS)))
 
 
-class ImplicitIntentToPendingIntent(BasePlugin):
+class ImplicitIntentToPendingIntent(JavaASTPlugin):
     """
     This plugin checks if a `new Intent` is passed into any of the `PENDING_INTENT_METHODS`.
     If there is, a Vulnerability is created.
     """
     def __init__(self):
-        BasePlugin.__init__(self, category="intent", name="Empty pending intent found",
-                            description=("For security reasons, the Intent you supply here should almost always"
-                                         " be an explicit intent that is specify an explicit component to be delivered"
-                                         " to through Intent.setClass. A malicious application could potentially"
-                                         " intercept, redirect and/or modify this Intent. Pending Intents retain the"
-                                         " UID of your application and all related permissions, allowing another"
-                                         " application to act as yours. Reference: "
-                                         "https://developer.android.com/reference/android/app/PendingIntent.html"))
+        super(ImplicitIntentToPendingIntent, self).__init__(category="intent", name="Empty pending intent found",
+                                                            description=(
+                                                                "For security reasons, the Intent you supply here should almost always"
+                                                                " be an explicit intent that is specify an explicit component to be delivered"
+                                                                " to through Intent.setClass. A malicious application could potentially"
+                                                                " intercept, redirect and/or modify this Intent. Pending Intents retain the"
+                                                                " UID of your application and all related permissions, allowing another"
+                                                                " application to act as yours. Reference: "
+                                                                "https://developer.android.com/reference/android/app/PendingIntent.html"))
         self.severity = Severity.VULNERABILITY
         self.current_file = None
 
-    def run(self, files, apk_constants=None):
-        java_files = (decompiled_file for decompiled_file in files
-                      if os.path.splitext(decompiled_file.lower())[1] == ".java")
+    def run(self):
+        # simple search to avoid files that are not vulnerable
+        if re.search("new Intent", self.file_contents) is None or re.search(PENDING_INTENT_REGEX, self.file_contents) is None:
+            return
 
-        for java_file in java_files:
-            try:
-                with open(java_file, "r") as java_file_to_read:
-                    file_contents = java_file_to_read.read()
+        if not any("PendingIntent" in imported_declaration.path for imported_declaration in self.java_ast.imports):
+            # if PendingIntent is never imported the file is not vulnerable
+            return
 
-                    # simple search to avoid files that are not vulnerable
-                    if (re.search("new Intent", file_contents) is None or
-                            re.search(PENDING_INTENT_REGEX, file_contents) is None):
-                        continue
-            except IOError:
-                log.debug("File does not exist %s, continuing", java_file)
-                continue
-
-            try:
-                parsed_tree = javalang.parse.parse(file_contents)
-            except (javalang.parser.JavaSyntaxError, IndexError):
-                log.debug("Error parsing file %s, continuing", java_file)
-                continue
-
-            if not any(["PendingIntent" in imported_declaration.path for imported_declaration in parsed_tree.imports]):
-                # if PendingIntent is never imported the file is not vulnerable
-                continue
-            self.current_file = java_file
-            self._check_for_implicit_intents(parsed_tree)
+        self.current_file = self.file_path
+        self._check_for_implicit_intents(self.java_ast)
 
     def _check_for_implicit_intents(self, parsed_tree):
         """

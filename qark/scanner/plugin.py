@@ -4,6 +4,9 @@ import logging
 from xml.dom import minidom
 
 from pluginbase import PluginBase
+import javalang
+from qark.utils import is_java_file
+from qark.plugins.manifest_helpers import get_min_sdk, get_target_sdk, get_package_from_manifest
 
 log = logging.getLogger(__name__)
 
@@ -25,7 +28,7 @@ def get_plugin_source(category=None):
         path = os.path.join(path, category)
 
     try:
-        return plugin_base.make_plugin_source(searchpath=[path])
+        return plugin_base.make_plugin_source(searchpath=[path], persist=True)
     except Exception:
         log.exception("Failed to get all plugins. Is the file path to plugins %s correct?", path)
         raise SystemExit("Failed to get all plugins. Is the file path correct?")
@@ -47,7 +50,7 @@ def get_plugins(category=None):
 class BasePlugin(object):
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, category=None, name=None, description=None, **kwargs):
+    def __init__(self, name, category, description=None, **kwargs):
         self.category = category
         self.name = name
         self.description = description
@@ -57,7 +60,7 @@ class BasePlugin(object):
         self.issues = []
 
     @abc.abstractmethod
-    def run(self, files, apk_constants=None):
+    def run(self):
         """
         Method to be called for each plugin to add issues.
 
@@ -68,30 +71,128 @@ class BasePlugin(object):
         pass
 
 
+class PluginObserver(BasePlugin):
+    __metaclass__ = abc.ABCMeta
+
+    @abc.abstractmethod
+    def update(self, *args, **kwargs):
+        """For plugins to implement."""
+
+    @abc.abstractmethod
+    def reset(self):
+        """Clear any class attributes that were set for the file."""
+
+
+class FilePathPlugin(PluginObserver):
+    """Subclass this plugin if your plugin needs action based on a new file path."""
+    __metaclass__ = abc.ABCMeta
+
+    file_path = None
+    has_been_set = False
+
+    def update(self, file_path, call_run=False):
+        """
+        :param str file_path:
+        :param bool call_run: Whether or not `self.run()` should be called. Prevents `run()` being called multiple times
+        """
+        if not file_path:
+            FilePathPlugin.file_path = None
+            return
+
+        if not self.has_been_set:
+            FilePathPlugin.file_path = file_path
+            FilePathPlugin.has_been_set = True
+
+        if call_run:
+            self.run()
+
+    @classmethod
+    def reset(cls):
+        FilePathPlugin.file_path = None
+        FilePathPlugin.has_been_set = False
+
+
+class FileContentsPlugin(FilePathPlugin):
+    """Subclass this plugin if your plugin needs to operate on file contents and no other plugin type suffices."""
+    __metaclass__ = abc.ABCMeta
+
+    file_contents = None
+    readable = True
+
+    def update(self, file_path, call_run=False):
+        """
+        If `file_contents` is None, then the file has not been read yet, and we must set it.
+        If the file is not able to be read then we set a flag telling other plugins to not try to operate on it.
+        """
+        if not self.readable:
+            return
+
+        if self.file_contents is None:
+            # Make sure the file path has been set.
+            super(FileContentsPlugin, self).update(file_path)
+
+            try:
+                with open(self.file_path, "r") as f:
+                    FileContentsPlugin.file_contents = f.read()
+            except IOError:
+                log.debug("Unable to operate on file %s for reading", self.file_path)
+                FileContentsPlugin.readable = False
+                FileContentsPlugin.file_contents = None
+                return
+
+        if call_run and self.file_contents is not None:
+            self.run()
+
+    @classmethod
+    def reset(cls):
+        FileContentsPlugin.file_contents = None
+        FileContentsPlugin.readable = True
+
+        super(FileContentsPlugin, cls).reset()
+
+
+class JavaASTPlugin(FileContentsPlugin):
+    __metaclass__ = abc.ABCMeta
+
+    java_ast = None
+    parseable = True
+
+    def update(self, file_path, call_run=False):
+        if not self.parseable:
+            return
+
+        if self.java_ast is None:
+            # Make sure the file contents have been set
+            super(JavaASTPlugin, self).update(file_path, call_run=False)
+
+            if self.file_contents and is_java_file(self.file_path):
+                try:
+                    JavaASTPlugin.java_ast = javalang.parse.parse(self.file_contents)
+                except (javalang.parser.JavaSyntaxError, IndexError):
+                    log.debug("Unable to parse AST for file %s", self.file_path)
+                    JavaASTPlugin.java_ast = None
+                    JavaASTPlugin.parseable = False
+                    return
+
+        if call_run and self.java_ast is not None:
+            self.run()
+
+    @classmethod
+    def reset(cls):
+        JavaASTPlugin.java_ast = None
+        JavaASTPlugin.parseable = True
+
+        super(JavaASTPlugin, cls).reset()
+
+
 class ManifestPlugin(BasePlugin):
+    __metaclass__ = abc.ABCMeta
+
     manifest_xml = None
     manifest_path = None
-
-    def __init__(self, manifest_path=None, manifest_xml=None, **kwargs):
-        if self.manifest_path is None:
-            self.manifest_path = manifest_path
-
-        if self.manifest_xml is None:
-            try:
-                # If the user passed the parsed minidom XML content then we don't have to parse anything
-                self.manifest_xml = manifest_xml
-
-            except KeyError:
-
-                # Otherwise we have to get the manifest path and parse it
-                try:
-                    self.manifest_xml = minidom.parse(self.manifest_path)
-
-                except Exception:
-                    log.debug("Failed to parse the XML file, resetting manifest_path")
-                    self.manifest_path = None
-
-        super(ManifestPlugin, self).__init__(**kwargs)
+    min_sdk = -1
+    target_sdk = -1
+    package_name = "PACKAGE_NOT_FOUND"
 
     @classmethod
     def update_manifest(cls, path_to_manifest):
@@ -102,7 +203,21 @@ class ManifestPlugin(BasePlugin):
         except Exception:
             # path_to_manifest is None or has bad XML
             cls.manifest_xml = None
+            log.debug("Failed to update manifest for file %s", path_to_manifest)
+            return
+
+        try:
+            cls.min_sdk = get_min_sdk(cls.manifest_path)
+            cls.target_sdk = get_target_sdk(cls.manifest_path)
+        except AttributeError:
+            # manifest path is not set, assume min_sdk and target_sdk
+            cls.min_sdk = cls.target_sdk = 1
+
+        try:
+            cls.package_name = get_package_from_manifest(cls.manifest_path)
+        except IOError:
+            cls.package_name = "PACKAGE_NOT_FOUND"
 
     @abc.abstractmethod
-    def run(self, files, apk_constants=None):
+    def run(self):
         """User should define how their plugin runs"""

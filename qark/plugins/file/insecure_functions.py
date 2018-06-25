@@ -4,8 +4,7 @@ import javalang
 from javalang.tree import ClassDeclaration, MethodDeclaration
 
 from qark.issue import Severity, Issue
-from qark.plugins.helpers import java_files_from_files
-from qark.scanner.plugin import BasePlugin
+from qark.scanner.plugin import JavaASTPlugin
 
 log = logging.getLogger(__name__)
 
@@ -20,39 +19,21 @@ INSECURE_FUNCTIONS_DESCRIPTION = (
 INSECURE_FUNCTIONS_NAMES = ("call",)
 
 
-class InsecureFunctions(BasePlugin):
+class InsecureFunctions(JavaASTPlugin):
     def __init__(self):
-        BasePlugin.__init__(self, category="file", name="Insecure functions found",
-                            description=INSECURE_FUNCTIONS_DESCRIPTION)
+        super(InsecureFunctions, self).__init__(category="file", name="Insecure functions found",
+                                                description=INSECURE_FUNCTIONS_DESCRIPTION)
         self.severity = Severity.WARNING
 
-    def run(self, files, apk_constants=None):
-        java_files = java_files_from_files(files)
-
-        for java_file in java_files:
-            self._process(java_file)
-
-    def _process(self, java_file):
-        try:
-            with open(java_file, "r") as java_file_to_read:
-                file_contents = java_file_to_read.read()
-        except IOError:
-            log.debug("File does not exist %s, continuing", java_file)
-            return
-
-        try:
-            tree = javalang.parse.parse(file_contents)
-        except (javalang.parser.JavaSyntaxError, IndexError):
-            log.debug("Error parsing file %s, continuing", java_file)
-            return
-
-        for _, class_declaration in tree.filter(ClassDeclaration):
+    def run(self):
+        for _, class_declaration in self.java_ast.filter(ClassDeclaration):
             for _, method_declaration_in_class in class_declaration.filter(MethodDeclaration):
+
                 if method_declaration_in_class.name in INSECURE_FUNCTIONS_NAMES:
                     self.issues.append(Issue(
                         category=self.category, severity=self.severity, name=self.name,
                         description=self.description,
-                        file_object=java_file,
+                        file_object=self.file_path,
                         line_number=method_declaration_in_class.position)
                     )
 

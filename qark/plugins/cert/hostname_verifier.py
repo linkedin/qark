@@ -4,8 +4,7 @@ import javalang
 from javalang.tree import ClassCreator, MemberReference, MethodInvocation
 
 from qark.issue import Issue, Severity
-from qark.scanner.plugin import BasePlugin
-from qark.plugins.helpers import java_files_from_files
+from qark.scanner.plugin import JavaASTPlugin
 
 log = logging.getLogger(__name__)
 
@@ -25,33 +24,19 @@ ALLOW_ALL_HOSTNAME_VERIFIER_DESC = ("This can allow for impromper x.509 certific
                                     "https://developer.android.com/training/articles/security-ssl.html")
 
 
-class HostnameVerifier(BasePlugin):
+class HostnameVerifier(JavaASTPlugin):
     """
     This plugin checks if:
      1. `AllowAllHostnameVerifier` is instantiated
      2. `setHostnameVerifier` is called with a value of `.ALLOW_ALL_HOSTNAME_VERIFIERS`
     """
     def __init__(self):
-        BasePlugin.__init__(self, category="cert")
+        super(HostnameVerifier, self).__init__(category="cert", name="Hostname Verifier")
         self.severity = Severity.WARNING
 
-    def _process_file(self, filepath):
-        try:
-            with open(filepath, 'r') as f:
-                file_contents = f.read()
-        except IOError:
-            log.debug("Unable to read file")
-            return
-
-        try:
-            tree = javalang.parse.parse(file_contents)
-        except (javalang.parser.JavaSyntaxError, IndexError):
-            log.debug("Couldn't parse the java file: %s", filepath)
-            return
-
-        current_file = filepath
-        self._allow_all_hostname_verifier_created(tree, current_file)
-        self._set_hostname_verifier_allow_all(tree, current_file)
+    def run(self):
+        self._allow_all_hostname_verifier_created(self.java_ast, self.file_path)
+        self._set_hostname_verifier_allow_all(self.java_ast, self.file_path)
 
     def _allow_all_hostname_verifier_created(self, tree, current_file):
         """
@@ -80,11 +65,6 @@ class HostnameVerifier(BasePlugin):
             self.issues.append(Issue(category=self.category, name="setHostnameVerifier set to ALLOW_ALL",
                                      severity=Severity.WARNING, description=ALLOW_ALL_HOSTNAME_VERIFIER_DESC,
                                      file_object=current_file, line_number=set_hostname_verifier.position))
-
-    def run(self, files, apk_constants=None):
-        relevant_files = java_files_from_files(files)
-        for file_path in relevant_files:
-            self._process_file(file_path)
 
 
 plugin = HostnameVerifier()

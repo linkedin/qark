@@ -4,8 +4,7 @@ import javalang
 from javalang.tree import MethodDeclaration, MethodInvocation, ReturnStatement, StatementExpression
 
 from qark.issue import Issue, Severity
-from qark.scanner.plugin import BasePlugin
-from qark.plugins.helpers import java_files_from_files
+from qark.scanner.plugin import JavaASTPlugin
 
 log = logging.getLogger(__name__)
 
@@ -28,36 +27,24 @@ MITM_DESCRIPTION = ("This means this application is likely "
                     "https://developer.android.com/training/articles/security-ssl.html")
 
 
-class CertValidation(BasePlugin):
+class CertValidation(JavaASTPlugin):
     """
     This plugin checks if a method in `CERT_METHODS` is overriden with an insecure version that usually does not verify
     SSL connections.
     """
     def __init__(self):
-        BasePlugin.__init__(self, category="cert")
+        super(CertValidation, self).__init__(category="cert", name="Certification Validation")
         self.severity = Severity.WARNING
 
-    def _process_file(self, filepath):
-        try:
-            with open(filepath, 'r') as f:
-                file_contents = f.read()
-        except IOError:
-            log.debug("Unable to read file")
-            return
-
-        try:
-            tree = javalang.parse.parse(file_contents)
-        except (javalang.parser.JavaSyntaxError, IndexError):
-            log.debug("Couldn't parse the java file: %s", filepath)
-            return
-        current_file = filepath
-        cert_methods = (method_declaration for _, method_declaration in tree.filter(MethodDeclaration)
+    def run(self):
+        cert_methods = (method_declaration for _, method_declaration in self.java_ast.filter(MethodDeclaration)
                         if method_declaration.name in CERT_METHODS)
+
         for cert_method in cert_methods:
             if cert_method.name == "checkServerTrusted":
-                self._check_server_trusted(cert_method, current_file)
+                self._check_server_trusted(cert_method, self.file_path)
             elif cert_method.name == "onReceivedSslError":
-                self._on_received_ssl_error(cert_method, current_file)
+                self._on_received_ssl_error(cert_method, self.file_path)
 
     def _check_server_trusted(self, cert_method, current_file):
         """
@@ -90,11 +77,6 @@ class CertValidation(BasePlugin):
                                              description=ON_RECEIVED_SSL_DESC,
                                              file_object=current_file,
                                              line_number=method_invocation.position))
-
-    def run(self, files, apk_constants=None):
-        relevant_files = java_files_from_files(files)
-        for file_path in relevant_files:
-            self._process_file(file_path)
 
 
 plugin = CertValidation()

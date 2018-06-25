@@ -6,7 +6,7 @@ from javalang.tree import MethodInvocation
 from qark.issue import Severity, Issue
 from qark.plugins.helpers import java_files_from_files
 from qark.plugins.webview.helpers import valid_set_method_bool
-from qark.scanner.plugin import BasePlugin
+from qark.scanner.plugin import JavaASTPlugin
 
 log = logging.getLogger(__name__)
 
@@ -20,36 +20,18 @@ JAVASCRIPT_ENABLED_DESCRIPTION = (
 )
 
 
-class JavascriptEnabled(BasePlugin):
+class JavascriptEnabled(JavaASTPlugin):
     """This plugin checks if the `setJavaScriptEnabled` method is called with a value of `true`"""
     def __init__(self):
-        BasePlugin.__init__(self, category="webview", name="Javascript enabled in Webview",
-                            description=JAVASCRIPT_ENABLED_DESCRIPTION)
+        super(JavascriptEnabled, self).__init__(category="webview", name="Javascript enabled in Webview",
+                                                description=JAVASCRIPT_ENABLED_DESCRIPTION)
 
-    def _process(self, java_file):
-        try:
-            with open(java_file, "r") as java_file_to_read:
-                file_contents = java_file_to_read.read()
-        except IOError:
-            log.debug("File does not exist %s, continuing", java_file)
-            return
-
-        try:
-            tree = javalang.parse.parse(file_contents)
-        except (javalang.parser.JavaSyntaxError, IndexError):
-            log.debug("Error parsing file %s, continuing", java_file)
-            return
-
-        for _, method_invocation in tree.filter(MethodInvocation):
+    def run(self):
+        for _, method_invocation in self.java_ast.filter(MethodInvocation):
             if valid_set_method_bool(method_invocation, str_bool="true", method_name="setJavaScriptEnabled"):
                 self.issues.append(Issue(category=self.category, name=self.name, severity=Severity.WARNING,
                                          description=self.description, line_number=method_invocation.position,
-                                         file_object=java_file))
-
-    def run(self, files, apk_constants=None):
-        java_files = java_files_from_files(files)
-        for java_file in java_files:
-            self._process(java_file)
+                                         file_object=self.file_path))
 
 
 plugin = JavascriptEnabled()

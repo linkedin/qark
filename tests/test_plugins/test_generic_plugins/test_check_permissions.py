@@ -5,6 +5,8 @@ import os
 
 def test_check_permissions(test_java_files):
     plugin = CheckPermissions()
-    plugin.run([os.path.join(test_java_files,
-                             "check_permissions.java")])
+    path = os.path.join(test_java_files,
+                        "check_permissions.java")
+    plugin.update(file_path=path)
+    plugin.run()
     assert 2 == len(plugin.issues)

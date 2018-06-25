@@ -202,30 +202,22 @@ TAG_INFO = {"receiver": Receiver, "provider": Provider, "activity": Activity,
 
 
 class ExportedTags(ManifestPlugin):
-    def __init__(self, **kwargs):
-        kwargs.update(dict(category="manifest", name=EXPORTED_TAGS_ISSUE_NAME))
+    all_files = None  # Put here to not break Liskov Substitution with the other ManifestPlugins
+    # This plugin is VERY abnormal from the other manifest plugins as it needs to search
+    #   java files in order to create the exploit APK. Be very careful around here.
 
-        super(ExportedTags, self).__init__(**kwargs)
+    def __init__(self):
+        super(ExportedTags, self).__init__(category="manifest", name=EXPORTED_TAGS_ISSUE_NAME)
 
         self.bad_exported_tags = ("activity", "activity-alias", "service", "receiver", "provider")
-        self.min_sdk = None
-        self.target_sdk = None
-        self.package_name = None
 
-    def run(self, files, apk_constants=None):
-        if not self.manifest_xml:
-            return
-
-        self.min_sdk = apk_constants["min_sdk"] if "min_sdk" in apk_constants else get_min_sdk(self.manifest_xml)
-        self.target_sdk = apk_constants["target_sdk"] if "target_sdk" in apk_constants else get_target_sdk(self.manifest_xml)
-        self.package_name = apk_constants["package_name"] if "package_name" in apk_constants else get_package_from_manifest(self.manifest_path)
-
+    def run(self):
         for tag in self.bad_exported_tags:
             all_tags_of_type_tag = self.manifest_xml.getElementsByTagName(tag)
             for possibly_vulnerable_tag in all_tags_of_type_tag:
                 self._check_manifest_issues(possibly_vulnerable_tag, tag, self.manifest_path)
 
-        self._add_exported_tags_arguments_to_issue(list(java_files_from_files(files)))
+        self._add_exported_tags_arguments_to_issue(list(java_files_from_files(self.all_files)))
 
     def _check_manifest_issues(self, possibly_vulnerable_tag, tag, file_object):
         """
@@ -321,6 +313,7 @@ class ExportedTags(ManifestPlugin):
             self._get_arguments_for_method_from_file(java_files, issue, name_to_search_for=file_name)
 
     def _get_arguments_for_method_from_file(self, java_files, issue, name_to_search_for):
+        """Confusing code ported over from QARK v1. Used to get arguments for QARK's exploit APK."""
         added = False
         for java_file in java_files:
             if name_to_search_for not in java_file:

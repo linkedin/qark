@@ -1,12 +1,8 @@
-from qark.plugins.helpers import java_files_from_files
-from qark.plugins.manifest_helpers import get_min_sdk
-from qark.scanner.plugin import BasePlugin
+from qark.scanner.plugin import JavaASTPlugin, ManifestPlugin
 from qark.issue import Severity, Issue
 
 import logging
-import os
 import re
-from xml.dom import minidom
 
 import javalang
 from javalang.tree import MethodInvocation
@@ -61,49 +57,27 @@ STICKY_BROADCAST = (
 )
 
 
-class SendBroadcastReceiverPermission(BasePlugin):
+class SendBroadcastReceiverPermission(JavaASTPlugin, ManifestPlugin):
     """
     This plugin checks certain broadcast methods to see if they are using an insecure version,
     based on number of arguments.
     """
     def __init__(self):
-        BasePlugin.__init__(self, category="broadcast")
+        super(SendBroadcastReceiverPermission, self).__init__(category="broadcast",
+                                                              name="Send Broadcast Receiver Permission")
         self.severity = Severity.WARNING
         self.current_file = None
         self.manifest_xml = None
         self.below_min_sdk_21 = False
 
-    def run(self, files, apk_constants=None):
-        try:
-            self.below_min_sdk_21 = apk_constants["min_sdk"] < 21
-        except (KeyError, TypeError):
-            for decompiled_file in files:
-                if decompiled_file.lower().endswith("{separator}androidmanifest.xml".format(separator=os.sep)):
-                    self.below_min_sdk_21 = get_min_sdk(manifest_xml=minidom.parse(decompiled_file)) < 21
-                else:
-                    self.below_min_sdk_21 = False
+    def run(self):
+        self.below_min_sdk_21 = self.min_sdk < 21
+        self.current_file = self.file_path
+        if not re.search("({broadcasts})".format(broadcasts="|".join(BROADCAST_METHODS)), self.file_contents):
+            return
 
-        java_files = java_files_from_files(files)
-        for java_file in java_files:
-            try:
-                with open(java_file, "r") as java_file_to_read:
-                    file_contents = java_file_to_read.read()
-
-                    # really simple check to see if the file has the methods we are interested in before parsing the AST
-                    if not re.search("({broadcasts})".format(broadcasts="|".join(BROADCAST_METHODS)), file_contents):
-                        continue
-            except IOError:
-                log.debug("File does not exist %s, continuing", java_file)
-                continue
-
-            try:
-                parsed_tree = javalang.parse.parse(file_contents)
-            except (javalang.parser.JavaSyntaxError, IndexError):
-                log.debug("Error parsing file %s, continuing", java_file)
-                continue
-            self.current_file = java_file
-            for _, method_invocation in parsed_tree.filter(MethodInvocation):
-                self._check_method_invocation(method_invocation, parsed_tree.imports)
+        for _, method_invocation in self.java_ast.filter(MethodInvocation):
+            self._check_method_invocation(method_invocation, self.java_ast.imports)
 
     def _check_method_invocation(self, method_invocation, imports):
         """
@@ -196,7 +170,7 @@ def has_local_broadcast_imported(import_tree):
     :return: True if import tree has broadcast import, else False
     :rtype: bool
     """
-    return any([import_declaration.path in LOCAL_BROADCAST_IMPORTS for import_declaration in import_tree])
+    return any(import_declaration.path in LOCAL_BROADCAST_IMPORTS for import_declaration in import_tree)
 
 
 plugin = SendBroadcastReceiverPermission()

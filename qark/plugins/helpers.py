@@ -5,6 +5,7 @@ import shutil
 
 from javalang.tree import MethodInvocation
 from qark.plugins.manifest_helpers import get_min_sdk
+from qark.utils import is_java_file
 
 log = logging.getLogger(__name__)
 
@@ -48,7 +49,7 @@ def java_files_from_files(files):
     :param list files:
     :return: generator of file paths
     """
-    return (file_path for file_path in files if os.path.splitext(file_path.lower())[1] == '.java')
+    return (file_path for file_path in files if is_java_file(file_path))
 
 
 def remove_dict_entry_by_value(dictionary, value):

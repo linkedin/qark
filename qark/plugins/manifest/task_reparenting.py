@@ -13,16 +13,12 @@ TASK_REPARENTING_DESCRIPTION = (
 
 
 class TaskReparenting(ManifestPlugin):
-    def __init__(self, **kwargs):
-        kwargs.update(category="manifest", name="android:allowTaskReparenting='true' found",
-                      description=TASK_REPARENTING_DESCRIPTION)
-        super(TaskReparenting, self).__init__(**kwargs)
+    def __init__(self):
+        super(TaskReparenting, self).__init__(category="manifest", name="android:allowTaskReparenting='true' found",
+                                              description=TASK_REPARENTING_DESCRIPTION)
         self.severity = Severity.WARNING
 
-    def run(self, files, apk_constants=None):
-        if not self.manifest_path:
-            return
-
+    def run(self):
         with open(self.manifest_path, "r") as manifest_file:
             for line_number, line in enumerate(manifest_file):
                 if 'android:allowTaskReparenting="true"' in line:

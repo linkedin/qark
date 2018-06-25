@@ -12,7 +12,7 @@ from multiprocessing.pool import ThreadPool
 import requests
 
 from qark.decompiler.external_decompiler import DECOMPILERS
-from qark.utils import create_directories_to_path
+from qark.utils import create_directories_to_path, is_java_file
 
 log = logging.getLogger(__name__)
 
@@ -70,7 +70,7 @@ class Decompiler(object):
                                                                                                             ".apk"):
             raise ValueError("Invalid path, path must be to an APK, directory, or a Java file")
 
-        if os.path.isdir(path_to_source) or os.path.splitext(path_to_source.lower())[1] == ".java":
+        if os.path.isdir(path_to_source) or is_java_file(path_to_source):
             self.source_code = True
             self.manifest_path = None
             log.debug("Decompiler got directory to run on, assuming Java source code")
