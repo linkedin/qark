@@ -134,11 +134,25 @@ class FileContentsPlugin(FilePathPlugin):
             try:
                 with open(self.file_path, "r") as f:
                     FileContentsPlugin.file_contents = f.read()
+
             except IOError:
                 log.debug("Unable to operate on file %s for reading", self.file_path)
                 FileContentsPlugin.readable = False
                 FileContentsPlugin.file_contents = None
                 return
+
+            except UnicodeDecodeError:
+                # Try to read file in ISO-8859-1 encoding, used for png, xml, webp, some other resource files etc
+                try:
+                    with open(self.file_path, "r", encoding="ISO-8859-1") as f:
+                        FileContentsPlugin.file_contents = f.read()
+
+                except Exception:
+                    # Give up on the file
+                    log.debug("Unable to operate on file %s", self.file_path)
+                    FileContentsPlugin.readable = False
+                    FileContentsPlugin.file_contents = None
+                    return
 
         if call_run and self.file_contents is not None:
             self.run()
@@ -161,11 +175,11 @@ class JavaASTPlugin(FileContentsPlugin):
         if not self.parseable:
             return
 
-        if self.java_ast is None:
+        if self.java_ast is None and is_java_file(file_path):
             # Make sure the file contents have been set
             super(JavaASTPlugin, self).update(file_path, call_run=False)
 
-            if self.file_contents and is_java_file(self.file_path):
+            if self.file_contents:
                 try:
                     JavaASTPlugin.java_ast = javalang.parse.parse(self.file_contents)
                 except (javalang.parser.JavaSyntaxError, IndexError):
