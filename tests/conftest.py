@@ -9,6 +9,9 @@ from qark.scanner.scanner import Scanner
 from qark.scanner.plugin import JavaASTPlugin, ManifestPlugin
 
 
+DECOMPILER_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "qark", "lib", "decompilers")
+
+
 @pytest.fixture(scope="session")
 def path_to_source():
     return os.path.join(os.path.dirname(os.path.abspath(__file__)), "goatdroid.apk")
@@ -37,19 +40,17 @@ def scanner(decompiler):
 
 @pytest.fixture(scope="session")
 def cfr_path():
-    return os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "lib", "decompilers", "cfr_0_124.jar")
+    return os.path.join(DECOMPILER_PATH, "cfr_0_124.jar")
 
 
 @pytest.fixture(scope="session")
 def jdcore_path():
-    return os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "lib",
-                        "decompilers", "jd-core-java-1.2.jar")
+    return os.path.join(DECOMPILER_PATH, "jd-core-java-1.2.jar")
 
 
 @pytest.fixture(scope="session")
 def procyon_path():
-    return os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "lib",
-                        "decompilers", "procyon-decompiler-0.5.30.jar")
+    return os.path.join(DECOMPILER_PATH, "procyon-decompiler-0.5.30.jar")
 
 
 @pytest.fixture(scope="session")
