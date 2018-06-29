@@ -34,7 +34,11 @@ def test_dedup():
 
 
 def test_initialize_logger():
-    assert logging.WARNING == qark.modules.common.logger.level
+    # The logging module at this point has been tampered with, so we reset it
+    root = logging.getLogger()
+    map(root.removeHandler, root.handlers[:])
+    map(root.removeFilter, root.filters[:])
+
     qark.modules.common.rootDir = "."
     qark.modules.common.initialize_logger()
     assert logging.INFO == qark.modules.common.logger.level
