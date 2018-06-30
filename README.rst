@@ -12,7 +12,7 @@ With pip (no security checks on requirements)
 #############################################
 ::
 
-  ~ pip install qark
+  ~ pip install qark --user
   ~ qark --help
 
 
@@ -23,7 +23,7 @@ With `requirements.txt` (security checks on requirements)
 
   ~ wget https://raw.githubusercontent.com/linkedin/qark/v2/requirements.txt
   ~ pip install -r requirements.txt
-  ~ pip install .
+  ~ pip install . --user
   ~ qark --help
 
 
