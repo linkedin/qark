@@ -11,14 +11,13 @@ from multiprocessing.pool import ThreadPool
 
 import requests
 
-from qark.decompiler.external_decompiler import DECOMPILERS
+from qark.decompiler.external_decompiler import DECOMPILERS, LIB_PATH
 from qark.utils import create_directories_to_path, is_java_file
 
 log = logging.getLogger(__name__)
 
 OS = platform.system()
 JAVA_VERSION_REGEX = '"(\d+\.\d+\..+)\"'
-LIB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "lib")
 APK_TOOL_PATH = os.path.join(LIB_PATH, "apktool")
 
 DEX2JAR_URL = "https://downloads.sourceforge.net/project/dex2jar/dex2jar-2.0.zip"

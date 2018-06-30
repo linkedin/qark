@@ -1,7 +1,8 @@
 import abc
 import os
 
-PATH_TO_DECOMPILERS = os.path.join(os.path.abspath(os.path.dirname(__file__)), "..", "..", "lib", "decompilers")
+LIB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "lib")
+PATH_TO_DECOMPILERS = os.path.join(LIB_PATH, "decompilers")
 
 
 class ExternalDecompiler(object):
