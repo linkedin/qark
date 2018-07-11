@@ -126,10 +126,11 @@ class Decompiler(object):
         try:
             retcode = subprocess.call(shlex.split(decompiler_command))
         except Exception:
-            log.exception("%s failed to finish decompiling, continuing", decompiler)
+            log.exception("%s failed to finish decompiling, continuing", decompiler.name)
         else:
             if retcode != 0:
-                log.info("Error running %s, continuing", decompiler)
+                log.info("Error running %s", decompiler.name)
+                log.debug("Decompiler failed with command %s", decompiler_command)
 
     def run_apktool(self):
         """
