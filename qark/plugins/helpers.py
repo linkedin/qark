@@ -93,6 +93,7 @@ def get_min_sdk_from_files(files, apk_constants=None):
 
 
 def copy_directory_to_location(directory_to_copy, destination):
+    log.debug("Copying from %s to %s", directory_to_copy, destination)
     try:
         shutil.copytree(src=directory_to_copy, dst=destination)
     except Exception:

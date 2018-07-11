@@ -22,7 +22,8 @@ logger = logging.getLogger(__name__)
 @click.command()
 @click.option("--sdk-path", type=click.Path(exists=True, file_okay=False, resolve_path=True),
               help="Path to the downloaded SDK directory if already downloaded. "
-                   "Only necessary if --exploit-apk is passed.")
+                   "Only necessary if --exploit-apk is passed. If --exploit-apk is passed and this flag is not passed,"
+                   "QARK will attempt to use the ANDROID_HOME or the ANDROID_SDK_ROOT environment variables for a path")
 @click.option("--build-path", type=click.Path(resolve_path=True, file_okay=False),
               help="Path to place decompiled files and exploit APK", default="build", show_default=True)
 @click.option("--debug/--no-debug", default=False, help="Show debugging statements (helpful for issues)",
@@ -45,9 +46,20 @@ def cli(ctx, sdk_path, build_path, debug, source, report_type, exploit_apk):
         click.secho(ctx.get_help())
         return
 
-    if exploit_apk and not sdk_path:
-        click.secho("Please provide path to android SDK if building exploit APK.")
-        return
+    if exploit_apk:
+
+        if not sdk_path:
+            # Try to set the SDK from environment variables if they exist
+            # Follows the guidelines from https://developer.android.com/studio/command-line/variables
+            if "ANDROID_HOME" in os.environ and os.path.exists(os.environ["ANDROID_HOME"]):
+                sdk_path = os.environ["ANDROID_HOME"]
+
+            elif "ANDROID_SDK_ROOT" in os.environ and os.path.exists(os.environ["ANDROID_SDK_ROOT"]):
+                sdk_path = os.environ["ANDROID_SDK_ROOT"]
+
+            else:
+                click.secho("Please provide path to android SDK if building exploit APK.")
+                return
 
     # Debug controls the output to stderr, debug logs are ALWAYS stored in `qark_debug.log`
     if debug:

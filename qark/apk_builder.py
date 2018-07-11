@@ -104,6 +104,7 @@ class APKBuilder(object):
             write_key_value_to_xml(key=new_key, value=package_name + tag_name, path=self.strings_xml_path)
 
     def _build_apk(self):
+        log.debug("Building apk...")
         current_directory = os.getcwd()
         try:
             os.chdir(self.exploit_apk_path)
