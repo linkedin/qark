@@ -1,12 +1,6 @@
 from setuptools import setup, find_packages
 import os
 
-# Get relative path to template files so they can be included as a `data_file`
-TEMPLATE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "qark", "templates")
-template_files = [os.path.join("qark", "templates", template)
-                  for template in os.listdir(TEMPLATE_DIR) if os.path.splitext(template)[1] == ".jinja"]
-
-
 QARK_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "qark")
 LIB_DIR = os.path.join(QARK_DIR, "lib")
 DECOMPILERS_DIR = os.path.join(LIB_DIR, "decompilers")
@@ -26,7 +20,8 @@ setup(
     name="qark",
     version="2.0",
     packages=find_packages(),
-    package_data={"qark": jar_files + exploit_apk_files},  # include the jd_core.jar file
+    package_data={"qark": jar_files + exploit_apk_files,  # include the jd_core.jar file
+                  "": ["*.jinja"]},  # include all report files
     include_package_data=True,  # includes template files in qark/templates
     install_requires=required,
     # metadata for upload to PyPI
