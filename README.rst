@@ -2,17 +2,20 @@ Downloading the v2 branch
 #########################
 ::
 
-  ~ git clone -b v2 https://github.com/linkedin/qark
+  ~ git clone https://github.com/linkedin/qark
 
 
 Installation
 ############
+We are working getting qark uploaded to PyPi, in the meantime you can install it manually the following ways.
+
 
 With pip (no security checks on requirements)
 #############################################
 ::
-
-  ~ pip install qark --user
+  ~ git clone https://github.com/linkedin/qark
+  ~ cd qark
+  ~ pip install . --user
   ~ qark --help
 
 
@@ -20,8 +23,8 @@ With `requirements.txt` (security checks on requirements)
 #########################################################
 
 ::
-
-  ~ wget https://raw.githubusercontent.com/linkedin/qark/v2/requirements.txt
+  ~ git clone https://github.com/linkedin/qark
+  ~ cd qark
   ~ pip install -r requirements.txt
   ~ pip install . --user
   ~ qark --help
