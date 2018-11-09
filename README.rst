@@ -1,10 +1,3 @@
-Downloading the v2 branch
-#########################
-::
-
-  ~ git clone https://github.com/linkedin/qark
-
-
 Installation
 ############
 We are working getting qark uploaded to PyPi, in the meantime you can install it manually the following ways.
