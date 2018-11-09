@@ -6,6 +6,7 @@ We are working getting qark uploaded to PyPi, in the meantime you can install it
 With pip (no security checks on requirements)
 #############################################
 ::
+
   ~ git clone https://github.com/linkedin/qark
   ~ cd qark
   ~ pip install . --user
@@ -16,6 +17,7 @@ With `requirements.txt` (security checks on requirements)
 #########################################################
 
 ::
+
   ~ git clone https://github.com/linkedin/qark
   ~ cd qark
   ~ pip install -r requirements.txt
