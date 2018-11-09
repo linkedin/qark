@@ -1,10 +1,47 @@
+QARK
+####
+.. image:: https://travis-ci.org/linkedin/qark.svg?branch=master
+    :target: https://travis-ci.org/linkedin/qark
+
+**Q**uick **A**ndroid **R**eview **K**it
+
+This tool is designed to look for several security related Android application vulnerabilities, either in source code or packaged APKs. The tool is also capable of creating "Proof-of-Concept" deployable APKs and/or ADB commands, capable of exploiting many of the vulnerabilities it finds. There is no need to root the test device, as this tool focuses on vulnerabilities that can be exploited under otherwise secure conditions.
+
+
+Requirements
+############
+- Tested on Python 2.7.13 and 3.6
+- Tested on OSX, Linux, and Windows
+
+Usage
+#####
+For more options please see the ``--help`` command.
+
+APK
+===
+::
+
+  ~ qark --apk path/to/my.apk
+
+Java source code files
+======================
+::
+
+  ~ qark --java path/to/parent/java/folder
+  ~ qark --java path/to/specific/java/file.java
+
+
+Results
+#######
+A report is generated in JSON and can be built into other format types, to change the report type please use the ``--report-type`` flag.
+
 Installation
 ############
-We are working getting qark uploaded to PyPi, in the meantime you can install it manually the following ways.
+We are working getting qark uploaded to PyPi, in the meantime you can install it manually the following ways:
 
 
 With pip (no security checks on requirements)
-#############################################
+=============================================
 ::
 
   ~ git clone https://github.com/linkedin/qark
@@ -14,7 +51,7 @@ With pip (no security checks on requirements)
 
 
 With `requirements.txt` (security checks on requirements)
-#########################################################
+=========================================================
 
 ::
 
@@ -36,3 +73,27 @@ To generate the exploit APK there are a few steps to follow. You need to have th
 3. Go into the new directory and generate the licenses with `bin/sdkmanager --licenses`
 4. Make sure the generated licenses are in the android SDK directory.
 5. Install the SDK and the proper build-tools version: `bin/sdkmanager --install "platforms;android-21" "sources;android-21" "build-tools;21.1.2"`
+
+Checks
+######
+QARK is an easy to use tool capable of finding common security vulnerabilities in Android applications. Unlike commercial products, it is 100% free to use. QARK features educational information allowing security reviewers to locate precise, in-depth explanations of the vulnerabilities. QARK automates the use of multiple decompilers, leveraging their combined outputs, to produce superior results, when decompiling APKs. Finally, the major advantage QARK has over traditional tools, that just point you to possible vulnerabilities, is that it can produce ADB commands, or even fully functional APKs, that turn hypothetical vulnerabilities into working "POC" exploits.
+
+Included in the types of security vulnerabilities this tool attempts to find are:
+
+- Inadvertently exported components
+- Improperly protected exported components
+- Intents which are vulnerable to interception or eavesdropping
+- Improper x.509 certificate validation
+- Creation of world-readable or world-writeable files
+- Activities which may leak data
+- The use of Sticky Intents
+- Insecurely created Pending Intents
+- Sending of insecure Broadcast Intents
+- Private keys embedded in the source
+- Weak or improper cryptography use 
+- Potentially exploitable WebView configurations
+- Exported Preference Activities
+- Tapjacking
+- Apps which enable backups
+- Apps which are debuggable
+- Apps supporting outdated API versions, with known vulnerabilities
