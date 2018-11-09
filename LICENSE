@@ -1,0 +1,27 @@
+ Copyright 2015 LinkedIn Corp.  All rights reserved.
+
+ Copyright 2015 LinkedIn Corp. Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.  You may obtain a copy of the License at http://www.apache.org/         licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS,  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+
+ ==============================================================================
+ Copyrights and Licenses for Third Party Software Distributed with QARK:
+ ==============================================================================
+ The QARK software also contains code written by third parties. Such software will
+ have its own individual LICENSE.TXT file in the directory in which it appears, or
+ at the top of the files in case the LICENSE.TXT is not present. This file will
+ describe the copyrights, license, and restrictions which apply to that code.
+
+ The following pieces of software have additional or alternate copyrights,
+ licenses, and/or restrictions:
+
+ Program                     Type
+ -------                     ----
+ six                         MIT
+ pluginbase                  BSD
+ requests[security]          Apache Software License (Apache 2.0)
+ jinja2                      BSD
+ enum34                      BSD
+ jd-core                     GPLv3
+ javalang                    MIT
+ click                       BSD
