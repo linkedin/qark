@@ -44,7 +44,7 @@ With pip (no security checks on requirements)
 
   ~ git clone https://github.com/linkedin/qark
   ~ cd qark
-  ~ pip install . --user
+  ~ pip install . --user  # --user is only needed if not using a virtualenv
   ~ qark --help
 
 
@@ -56,7 +56,7 @@ With `requirements.txt` (security checks on requirements)
   ~ git clone https://github.com/linkedin/qark
   ~ cd qark
   ~ pip install -r requirements.txt
-  ~ pip install . --user
+  ~ pip install . --user  # --user is only needed if not using a virtualenv
   ~ qark --help
 
 
