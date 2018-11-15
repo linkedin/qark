@@ -17,3 +17,14 @@ def file_has_extension(extension, file_path):
 
 
 is_java_file = partial(file_has_extension, ".java")
+
+
+def environ_path_variable_exists(variable_name):
+    """Determines if the os.environ variable exists and is a valid path.
+
+    :rtype: bool
+    """
+    try:
+        return os.path.exists(os.environ[variable_name])
+    except KeyError:
+        return False
