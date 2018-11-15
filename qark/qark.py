@@ -12,9 +12,15 @@ from qark.apk_builder import APKBuilder
 from qark.decompiler.decompiler import Decompiler
 from qark.report import Report
 from qark.scanner.scanner import Scanner
+from qark.utils import environ_path_variable_exists
 
 DEBUG_LOG_PATH = os.path.join(os.getcwd(),
                               "qark_debug.log")
+
+# Environment variable names for the SDK
+ANDROID_SDK_HOME = "ANDROID_SDK_HOME"
+ANDROID_HOME = "ANDROID_HOME"
+ANDROID_SDK_ROOT = "ANDROID_SDK_ROOT"
 
 logger = logging.getLogger(__name__)
 
@@ -23,21 +29,22 @@ logger = logging.getLogger(__name__)
 @click.option("--sdk-path", type=click.Path(exists=True, file_okay=False, resolve_path=True),
               help="Path to the downloaded SDK directory if already downloaded. "
                    "Only necessary if --exploit-apk is passed. If --exploit-apk is passed and this flag is not passed,"
-                   "QARK will attempt to use the ANDROID_HOME or the ANDROID_SDK_ROOT environment variables for a path")
+                   "QARK will attempt to use the ANDROID_SDK_HOME, ANDROID_HOME, ANDROID_SDK_ROOT "
+                   "environment variables (in that order) for a path.")
 @click.option("--build-path", type=click.Path(resolve_path=True, file_okay=False),
-              help="Path to place decompiled files and exploit APK", default="build", show_default=True)
-@click.option("--debug/--no-debug", default=False, help="Show debugging statements (helpful for issues)",
+              help="Path to place decompiled files and exploit APK.", default="build", show_default=True)
+@click.option("--debug/--no-debug", default=False, help="Show debugging statements (helpful for issues).",
               show_default=True)
 @click.option("--apk", "source", help="APK to decompile and run static analysis. If passed, "
-                                      "the --java option is not used",
+                                      "the --java option is not used.",
               type=click.Path(exists=True, resolve_path=True, file_okay=True, dir_okay=True))
 @click.option("--java", "source", type=click.Path(exists=True, resolve_path=True, file_okay=True, dir_okay=True),
               help="A directory containing Java code, or a Java file, to run static analysis. If passed,"
-                   "the --apk option is not used")
+                   "the --apk option is not used.")
 @click.option("--report-type", type=click.Choice(["html", "xml", "json", "csv"]),
-              help="Type of report to generate along with terminal output", default="html", show_default=True)
+              help="Type of report to generate along with terminal output.", default="html", show_default=True)
 @click.option("--exploit-apk/--no-exploit-apk", default=False,
-              help="Create an exploit APK targetting a few vulnerabilities", show_default=True)
+              help="Create an exploit APK targetting a few vulnerabilities.", show_default=True)
 @click.version_option()
 @click.pass_context
 def cli(ctx, sdk_path, build_path, debug, source, report_type, exploit_apk):
@@ -51,11 +58,14 @@ def cli(ctx, sdk_path, build_path, debug, source, report_type, exploit_apk):
         if not sdk_path:
             # Try to set the SDK from environment variables if they exist
             # Follows the guidelines from https://developer.android.com/studio/command-line/variables
-            if "ANDROID_HOME" in os.environ and os.path.exists(os.environ["ANDROID_HOME"]):
-                sdk_path = os.environ["ANDROID_HOME"]
+            if environ_path_variable_exists(ANDROID_SDK_HOME):
+                sdk_path = os.environ[ANDROID_SDK_HOME]
 
-            elif "ANDROID_SDK_ROOT" in os.environ and os.path.exists(os.environ["ANDROID_SDK_ROOT"]):
-                sdk_path = os.environ["ANDROID_SDK_ROOT"]
+            elif environ_path_variable_exists(ANDROID_HOME):
+                sdk_path = os.environ[ANDROID_HOME]
+
+            elif environ_path_variable_exists(ANDROID_SDK_ROOT):
+                sdk_path = os.environ[ANDROID_SDK_ROOT]
 
             else:
                 click.secho("Please provide path to android SDK if building exploit APK.")
