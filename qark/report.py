@@ -7,7 +7,7 @@ from jinja2 import Environment, PackageLoader, select_autoescape, Template
 from qark.issue import (Issue, Severity, issue_json)  # noqa:F401 These are expected to be used later.
 from qark.utils import create_directories_to_path
 
-DEFAULT_REPORT_PATH = path.join(path.dirname(path.realpath(__file__)), '..', 'report', '')
+DEFAULT_REPORT_PATH = path.join(path.dirname(path.realpath(__file__)), 'report', '')
 
 
 jinja_env = Environment(
