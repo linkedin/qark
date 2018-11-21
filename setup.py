@@ -2,20 +2,13 @@ from setuptools import setup, find_packages
 import os
 import io
 
-QARK_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "qark")
+QARK_DIR = "qark"
 LIB_DIR = os.path.join(QARK_DIR, "lib")
-DECOMPILERS_DIR = os.path.join(LIB_DIR, "decompilers")
-jar_files = [os.path.join(DECOMPILERS_DIR, jar_file)
-             for jar_file in os.listdir(DECOMPILERS_DIR) if os.path.splitext(jar_file)[1] == ".jar"]
 
 
-exploit_apk_files = [os.path.join(dir_path, filename)
+exploit_apk_files = [os.path.join(dir_path, filename).replace(os.path.join(QARK_DIR, ""), "")
                      for dir_path, _, files in os.walk(os.path.join(QARK_DIR, "exploit_apk"))
                      for filename in files]
-
-with open('requirements.txt') as f:
-    all_lines = f.read().splitlines()
-    required = [requirement.split(' ')[0] for requirement in all_lines if not requirement.startswith(' ')]
 
 
 with io.open('README.rst', 'rt', encoding='utf8') as f:
@@ -23,12 +16,24 @@ with io.open('README.rst', 'rt', encoding='utf8') as f:
 
 setup(
     name="qark",
-    version="2.1.0",
-    packages=find_packages(),
-    package_data={"qark": jar_files + exploit_apk_files,  # include the jd_core.jar file
-                  "": ["*.jinja"]},  # include all report files
-    include_package_data=True,  # includes template files in qark/templates
-    install_requires=required,
+    version="2.2.0",
+    packages=find_packages(exclude=["tests*"]),
+    package_dir={QARK_DIR: QARK_DIR},
+    package_data={
+        QARK_DIR: [
+            os.path.join("lib", "decompilers", "*.jar"),  # include any decompiler jar files
+            os.path.join("templates", "*.jinja"),  # include the reporting template files
+        ] + exploit_apk_files,  # include all the java files required for creating an exploit APK
+    },
+    install_requires=[
+        "requests[security]",
+        "pluginbase",
+        "jinja2",
+        "enum34; python_version < '3.4'",
+        "javalang",
+        "click",
+        "six",
+    ],
     # metadata for upload to PyPI
     author="Tushar Dalvi & Tony Trummer",
     author_email="tushardalvi@gmail.com, tonytrummer@hotmail.com",
