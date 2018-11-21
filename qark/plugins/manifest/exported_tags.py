@@ -252,7 +252,7 @@ class ExportedTags(ManifestPlugin):
                 # exported tag with permission
                 self.issues.append(Issue(category="Manifest", name=self.name,
                                          severity=Severity.INFO,
-                                         description=EXPORTED_AND_PERMISSION_TAG.format(tag=tag),
+                                         description=EXPORTED_AND_PERMISSION_TAG.format(tag=tag, tag_name=tag_name),
                                          file_object=file_object, apk_exploit_dict={"exported_enum": info_enum,
                                                                                     "tag_name": tag_name,
                                                                                     "package_name": self.package_name}))
