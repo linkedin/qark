@@ -68,13 +68,17 @@ class Scanner(object):
     def _run_checks(self, plugins):
         """Run all the plugins (besides manifest) on every file."""
         current_file_subject = Subject()
-        for plugin in (observer_plugin for observer_plugin in plugins if isinstance(observer_plugin, PluginObserver)):
+        plugins = (observer_plugin for observer_plugin in plugins if isinstance(observer_plugin, PluginObserver))
+        for plugin in plugins:
             current_file_subject.register(plugin)
 
         for filepath in self.files:
             current_file_subject.notify(filepath)  # All the plugins will be running now
             # reset the plugin file data to None
             current_file_subject.reset()
+
+        for plugin in plugins:
+            self.issues.extend(plugin.issues)
 
         #     ast = None
         #
