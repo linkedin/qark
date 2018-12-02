@@ -35,7 +35,7 @@ def module_decompiler(path_to_source, build_directory):
 
 @pytest.fixture()
 def scanner(decompiler):
-    return Scanner(decompiler.manifest_path, decompiler.path_to_source, decompiler.build_directory)
+    return Scanner(decompiler.manifest_path, decompiler.build_directory)
 
 
 @pytest.fixture(scope="session")
