@@ -37,6 +37,7 @@ class HostnameVerifier(JavaASTPlugin):
     def run(self):
         self._allow_all_hostname_verifier_created(self.java_ast, self.file_path)
         self._set_hostname_verifier_allow_all(self.java_ast, self.file_path)
+        self._null_hostname_verifier(self.java_ast, self.file_path)
 
     def _allow_all_hostname_verifier_created(self, tree, current_file):
         """
@@ -65,6 +66,20 @@ class HostnameVerifier(JavaASTPlugin):
             self.issues.append(Issue(category=self.category, name="setHostnameVerifier set to ALLOW_ALL",
                                      severity=Severity.WARNING, description=ALLOW_ALL_HOSTNAME_VERIFIER_DESC,
                                      file_object=current_file, line_number=set_hostname_verifier.position))
+
+    def _null_hostname_verifier(self, tree, current_file):
+        """
+        Checks for a class creation of `NullHostNameVerifier` or `NullHostnameVerifier`.
+
+        :param tree: javalang parsed tree
+        """
+        hostname_verifiers = [hostname_verifier for _, hostname_verifier in tree.filter(ClassCreator)
+                              if hostname_verifier.type.name == "NullHostNameVerifier"
+                              or hostname_verifier.type.name == "NullHostnameVerifier"]
+        if hostname_verifiers:
+            self.issues.append(Issue(category=self.category, name="Allow all hostname verifier used",
+                                     severity=Severity.WARNING, description=ALLOW_ALL_HOSTNAME_VERIFIER_DESC,
+                                     file_object=current_file))
 
 
 plugin = HostnameVerifier()
