@@ -84,8 +84,10 @@ def cli(ctx, sdk_path, build_path, debug, source, report_type, exploit_apk):
     decompiler.run()
 
     click.secho("Running scans...")
-    scanner = Scanner(manifest_path=decompiler.manifest_path, path_to_source=decompiler.path_to_source,
-                      build_directory=decompiler.build_directory)
+    if decompiler.source_code:
+        scanner = Scanner(manifest_path=decompiler.manifest_path, path_to_source=decompiler.path_to_source)
+    else:
+        scanner = Scanner(manifest_path=decompiler.manifest_path, path_to_source=decompiler.build_directory)
     scanner.run()
     click.secho("Finish scans...")
 

@@ -20,20 +20,18 @@ PLUGIN_CATEGORIES = ("manifest", "broadcast", "file", "crypto", "intent", "cert"
 
 class Scanner(object):
 
-    def __init__(self, manifest_path, path_to_source, build_directory):
+    def __init__(self, manifest_path, path_to_source):
         """
         Creates the scanner.
 
         :param str manifest_path: the path to the manifest file
         :param str path_to_source: the path to the source code
-        :param str build_directory: the path to the build directory
         """
         self.files = set()
         self.issues = []
         self.manifest_path = manifest_path
 
         self.path_to_source = path_to_source
-        self.build_directory = build_directory
 
         self._gather_files()
 
@@ -107,7 +105,7 @@ class Scanner(object):
         #     self.issues.extend(plugin.issues)
 
     def _gather_files(self):
-        """Walks the `Decompiler.build_directory` and updates the `self.files` set with new files."""
+        """Walks the `path_to_source` and updates the `self.files` set with new files."""
         if is_java_file(self.path_to_source):
             self.files.add(self.path_to_source)
             log.debug("Added single java file to scanner")
@@ -115,7 +113,7 @@ class Scanner(object):
 
         log.debug("Adding files to scanner...")
         try:
-            for (dir_path, _, file_names) in walk(self.build_directory):
+            for (dir_path, _, file_names) in walk(self.path_to_source):
                 for file_name in file_names:
                     self.files.add(path.join(dir_path, file_name))
         except AttributeError:
