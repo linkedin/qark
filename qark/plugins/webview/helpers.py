@@ -22,9 +22,7 @@ def valid_set_method_bool(method_invocation, str_bool, method_name="setAllowFile
     :return: Whether the MethodInvocation matches the method name and has the `str_bool` value as its first argument.
     :rtype: bool
     """
-    if len(method_invocation.arguments) == 0:
-        return False
-    if not isinstance(method_invocation.arguments[0], Literal):
+    if not method_invocation.arguments or not isinstance(method_invocation.arguments[0], Literal):
         return False
     return (valid_method_invocation(method_invocation, method_name, num_arguments=1)
             and method_invocation.arguments[0].value == str_bool)
