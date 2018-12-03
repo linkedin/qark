@@ -1,7 +1,7 @@
 import logging
 from copy import deepcopy
 
-from javalang.tree import MethodInvocation, MethodDeclaration, VariableDeclaration, Type
+from javalang.tree import MethodInvocation, MethodDeclaration, VariableDeclaration, Type, Literal
 
 from qark.issue import Issue, Severity
 from qark.plugins.helpers import valid_method_invocation, remove_dict_entry_by_value
@@ -22,6 +22,8 @@ def valid_set_method_bool(method_invocation, str_bool, method_name="setAllowFile
     :return: Whether the MethodInvocation matches the method name and has the `str_bool` value as its first argument.
     :rtype: bool
     """
+    if not method_invocation.arguments or not isinstance(method_invocation.arguments[0], Literal):
+        return False
     return (valid_method_invocation(method_invocation, method_name, num_arguments=1)
             and method_invocation.arguments[0].value == str_bool)
 
