@@ -1,10 +1,9 @@
-import os
 import logging
 
 import javalang
 
-from qark.scanner.plugin import JavaASTPlugin
 from qark.issue import Severity, Issue
+from qark.scanner.plugin import JavaASTPlugin
 
 log = logging.getLogger(__name__)
 
@@ -27,13 +26,17 @@ class SeedWithSecureRandom(JavaASTPlugin):
         """Checks if a tree imports java.security.SecureRandom, and returns True if the import exists"""
         return any(imp.path == "java.security.SecureRandom" for imp in tree.imports)
 
-    def run(self):
-        if not self._imports_secure_seed(self.java_ast):  # doesn't import the insecure function
-            return
+    def can_run_coroutine(self):
+        return self._imports_secure_seed(self.java_ast)
 
-        method_invocations = self.java_ast.filter(javalang.tree.MethodInvocation)
-        for _, method_invocation_node in method_invocations:
-            if method_invocation_node.member in SeedWithSecureRandom.INSECURE_FUNCTIONS:
+    def run_coroutine(self):
+        while True:
+            _, method_invocation = (yield)
+
+            if not isinstance(method_invocation, javalang.tree.MethodInvocation):
+                continue
+
+            if method_invocation.member in SeedWithSecureRandom.INSECURE_FUNCTIONS:
                 self.issues.append(Issue(self.category, self.name, self.severity, self.description,
                                          file_object=self.file_path))
 

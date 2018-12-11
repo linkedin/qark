@@ -1,6 +1,5 @@
 import logging
 
-import javalang
 from javalang.tree import MethodInvocation
 
 from qark.issue import Severity, Issue
@@ -18,8 +17,12 @@ class RemoteDebugging(JavaASTPlugin):
     def __init__(self):
         super(RemoteDebugging, self).__init__(category="webview", name="Remote debugging enabled in Webview",
                                               description=JAVASCRIPT_REMOTE_DEBUGGING)
-    def run(self):
-        for _, method_invocation in self.java_ast.filter(MethodInvocation):
+
+    def run_coroutine(self):
+        while True:
+            _, method_invocation = (yield)
+            if not isinstance(method_invocation, MethodInvocation):
+                continue
             if valid_set_method_bool(method_invocation, str_bool="true", method_name="setWebContentsDebuggingEnabled"):
                 self.issues.append(Issue(category=self.category, name=self.name, severity=Severity.WARNING,
                                          description=self.description, line_number=method_invocation.position,

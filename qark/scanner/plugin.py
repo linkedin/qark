@@ -1,12 +1,13 @@
 import abc
-import os
 import logging
+import os
 from xml.dom import minidom
 
-from pluginbase import PluginBase
 import javalang
-from qark.utils import is_java_file
+from pluginbase import PluginBase
+
 from qark.plugins.manifest_helpers import get_min_sdk, get_target_sdk, get_package_from_manifest
+from qark.utils import is_java_file
 
 log = logging.getLogger(__name__)
 
@@ -68,7 +69,7 @@ class BasePlugin(object):
         :param dict apk_constants: dictionary containing extra information
                                     that some plugins can use (min_sdk, target_sdk)
         """
-        pass
+        raise NotImplementedError()
 
 
 class PluginObserver(BasePlugin):
@@ -171,6 +172,9 @@ class JavaASTPlugin(FileContentsPlugin):
     java_ast = None
     parseable = True
 
+    def can_run_coroutine(self):
+        return True
+
     def update(self, file_path, call_run=False):
         if not self.parseable:
             return
@@ -189,7 +193,10 @@ class JavaASTPlugin(FileContentsPlugin):
                     return
 
         if call_run and self.java_ast is not None:
-            self.run()
+            try:
+                self.run()
+            except Exception:
+                pass
 
     @classmethod
     def reset(cls):

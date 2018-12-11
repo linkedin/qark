@@ -6,11 +6,10 @@ from os import (
     path
 )
 
+from qark.scanner.plugin import JavaASTPlugin
+from qark.scanner.plugin import ManifestPlugin
 from qark.scanner.plugin import PluginObserver
 from qark.scanner.plugin import get_plugin_source, get_plugins
-from qark.scanner.plugin import ManifestPlugin
-from qark.plugins.manifest.exported_tags import ExportedTags
-from qark.xml_helpers import get_manifest_out_of_files
 from qark.utils import is_java_file
 
 log = logging.getLogger(__name__)
@@ -67,42 +66,35 @@ class Scanner(object):
         """Run all the plugins (besides manifest) on every file."""
         current_file_subject = Subject()
         plugins = list(observer_plugin for observer_plugin in plugins if isinstance(observer_plugin, PluginObserver))
+        coroutine_plugins = []
+
         for plugin in plugins:
             current_file_subject.register(plugin)
+            if hasattr(plugin, "run_coroutine"):
+                coroutine_plugins.append(plugin)
 
         for filepath in self.files:
             current_file_subject.notify(filepath)  # All the plugins will be running now
+
+            if JavaASTPlugin.java_ast is not None:
+                coroutines_to_run = []
+
+                # Prime coroutines that can run
+                for plugin in coroutine_plugins:
+                    if plugin.can_run_coroutine():
+                        coroutine = plugin.run_coroutine()
+                        next(coroutine)
+                        coroutines_to_run.append(coroutine)
+
+                for path, node in JavaASTPlugin.java_ast:
+                    for coroutine in coroutines_to_run:
+                        coroutine.send((path, node))
+
             # reset the plugin file data to None
             current_file_subject.reset()
 
         for plugin in plugins:
             self.issues.extend(plugin.issues)
-
-        #     ast = None
-        #
-        #     try:
-        #         with open(filepath, 'r') as f:
-        #             file_contents = f.read()
-        #     except Exception:
-        #         log.exception("Unable to read file %s", filepath)
-        #         file_contents = None
-        #
-        #     if file_contents and is_java_file(filepath):
-        #         try:
-        #             ast = javalang.parse.parse(file_contents)
-        #         except (javalang.parser.JavaSyntaxError, IndexError):
-        #             log.debug("Unable to parse AST for file %s", filepath)
-        #
-        #     for plugin in plugins:
-        #         log.debug("Running plugin %s", plugin.name)
-        #         plugin.run(filepath,
-        #                    apk_constants=self.apk_constants,
-        #                    java_ast=ast,
-        #                    file_contents=file_contents,
-        #                    all_files=self.files)
-        #
-        # for plugin in plugins:
-        #     self.issues.extend(plugin.issues)
 
     def _gather_files(self):
         """Walks the `path_to_source` and updates the `self.files` set with new files."""
