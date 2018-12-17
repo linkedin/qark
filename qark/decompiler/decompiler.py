@@ -9,10 +9,8 @@ import subprocess
 import zipfile
 from multiprocessing.pool import ThreadPool
 
-import requests
-
 from qark.decompiler.external_decompiler import DECOMPILERS, LIB_PATH
-from qark.utils import create_directories_to_path, is_java_file
+from qark.utils import is_java_file
 
 log = logging.getLogger(__name__)
 
@@ -20,8 +18,7 @@ OS = platform.system()
 JAVA_VERSION_REGEX = '"(\d+\.\d+\..+)\"'
 APK_TOOL_PATH = os.path.join(LIB_PATH, "apktool")
 
-DEX2JAR_URL = "https://downloads.sourceforge.net/project/dex2jar/dex2jar-2.0.zip"
-DEX2JAR_NAME = DEX2JAR_URL.replace("/download", "").split("/")[-1].rsplit(".zip")[0]
+DEX2JAR_NAME = "dex2jar-2.0"
 DEX2JAR_PATH = os.path.join(LIB_PATH, DEX2JAR_NAME)
 DEX2JAR_EXTENSION = "sh" if OS != "Windows" else "bat"
 DEX2JAR_EXECUTABLE = "d2j-dex2jar.{extension}".format(extension=DEX2JAR_EXTENSION)
@@ -83,13 +80,6 @@ class Decompiler(object):
         self.manifest_path = self.run_apktool()
 
         self.decompilers = DECOMPILERS
-        for decompiler in self.decompilers:
-            if decompiler.name == "procyon":
-                log.debug("Downloading %s...", decompiler.name)
-                download_procyon()
-            elif decompiler.name == "cfr":
-                log.debug("Downloading %s...", decompiler.name)
-                download_cfr()
 
     def run(self):
         """Top-level function which runs each decompiler and waits for them to finish decompilation."""
@@ -106,6 +96,9 @@ class Decompiler(object):
 
         decompiler_pool.close()
         decompiler_pool.join()
+
+        jar_name = os.path.split(self.jar_path)[-1]
+        unpack_fernflower_jar(self.build_directory, jar_name)
 
     def _decompiler_function(self, decompiler):
         """
@@ -150,16 +143,9 @@ class Decompiler(object):
         if user_os not in ("linux", "windows", "darwin"):
             raise SystemExit("OS %s is not supported, please use Linux, Windows, or Mac OSX", user_os)
 
-        download_apktool()
-        log.debug("APKTool downloaded")
+        configure_apktool()
 
-        try:
-            apktool_path = os.path.join(APK_TOOL_PATH, user_os)
-        except Exception:
-            log.exception("Failed to create path to apktool, is the directory structure correct?")
-            raise SystemExit("Failed to create path to apktool")
-
-        custom_apktool_command = escape_windows_path(APK_TOOL_COMMAND.format(apktool_path=apktool_path,
+        custom_apktool_command = escape_windows_path(APK_TOOL_COMMAND.format(apktool_path=APK_TOOL_PATH,
                                                                              path_to_source=self.path_to_source,
                                                                              build_directory=os.path.join(
                                                                                  self.build_directory, "apktool")))
@@ -187,6 +173,7 @@ class Decompiler(object):
     def _unpack_apk(self):
         """
         Unpacks an APK and extracts its contents.
+
         :return: location for `self.dex_path` to use
         :rtype: os.path object
         """
@@ -197,13 +184,15 @@ class Decompiler(object):
 
     def _run_dex2jar(self):
         """Runs dex2jar in the lib on the dex file.
-        If `self.dex_path` is None or empty it will run `_unpack_apk` to get a value for it."""
+
+        If `self.dex_path` is None or empty it will run `_unpack_apk` to get a value for it.
+        """
         # dex_path should always be set if being called through run
         if not self.dex_path:
             log.debug("Path to .dex file not found, unpacking APK")
             self.dex_path = self._unpack_apk()
 
-        download_dex2jar()
+        configure_dex2jar()
 
         dex2jar_command = escape_windows_path(DEX2JAR_COMMAND.format(dex2jar_path=os.path.join(DEX2JAR_PATH,
                                                                                                "d2j-dex2jar.{extension}".format(
@@ -245,6 +234,7 @@ def unzip_file(file_to_unzip, destination_to_unzip="unzip_apk"):
 def get_java_version():
     """
     Run `java -version` and return its output
+
     :return: String of the version like '1.7.0' or '1.6.0_36'
     :rtype: str
     :raise: Exception if `java -version` fails to run properly
@@ -265,83 +255,12 @@ def get_java_version():
         raise SystemExit("Java version %s doesn't match regex search of %s", full_version, JAVA_VERSION_REGEX)
 
 
-def download_apktool():
-    """Attempts to download apktool to lib/apktool/{operating_system}/, on error raises `SystemExit`."""
-    APK_TOOL_URL = "https://bitbucket.org/iBotPeaches/apktool/downloads/apktool_2.3.1.jar"
-    OS_TO_FILE_NAME = {"linux": "apktool", "windows": "apktool.bat", "darwin": "apktool"}
-    OS_TO_WRAPPER = {"linux": "https://raw.githubusercontent.com/iBotPeaches/Apktool/master/scripts/linux/apktool",
-                     "darwin": "https://raw.githubusercontent.com/iBotPeaches/Apktool/master/scripts/osx/apktool",
-                     "windows": "https://raw.githubusercontent.com/iBotPeaches/Apktool/master/scripts/windows/apktool.bat"}
-
-    user_os = platform.system().lower()
-    if user_os not in OS_TO_FILE_NAME:
-        raise SystemExit("OS %s is not supported, please use Linux, Windows, or Mac OSX", user_os)
-
-    # create directory for operating system
-    log.debug("Creating directory to store apktool files")
-    apktool_path = os.path.join(APK_TOOL_PATH, user_os)
-
-    if not os.path.exists(apktool_path):
-        log.debug("Directory at %s does not exist, creating one", apktool_path)
-        os.makedirs(apktool_path)
-
-    else:
-        log.debug("Directory already exists")
-        if (os.path.isfile(os.path.join(apktool_path, OS_TO_FILE_NAME[user_os]))
-                and os.path.isfile(os.path.join(apktool_path, "apktool.jar"))):
-            # files for download already exist on file system, don't download them again
-            log.debug("Files already exist, not downloading APKTool")
-            return
-
-    # download the APKTool wrapper for operating system specific
-    log.debug("Starting download for APKTool wrapper")
+def configure_apktool():
+    """Attempts to make apktool in lib/apktool/{operating_system}/ executable."""
     try:
-        download_file(url=OS_TO_WRAPPER[user_os], download_path=os.path.join(apktool_path, OS_TO_FILE_NAME[user_os]))
+        make_executable(os.path.join(APK_TOOL_PATH, "apktool.jar"))
     except Exception:
-        log.exception("Failed to download APKTool wrapper")
-        raise SystemExit("Failed to download APKTool wrapper")
-
-    # download the APKTool jar
-    log.debug("Starting download for APKTool jar")
-    try:
-        download_file(url=APK_TOOL_URL, download_path=os.path.join(apktool_path, "apktool.jar"))
-    except Exception:
-        raise SystemExit("Failed to download APKTool")
-
-    # make downloaded files executable
-    log.debug("Attempting to make downloaded files executable")
-    for downloaded_file_path in (os.path.join(apktool_path, "apktool.jar"),
-                                 os.path.join(apktool_path, OS_TO_FILE_NAME[user_os])):
-        try:
-            make_executable(downloaded_file_path)
-        except Exception:
-            log.exception("Failed to make downloaded APKTool files executable, continuing")
-
-
-def download_file(url, download_path):
-    """
-    Helper that sends a GET to the URL and then writes its contents in the download path
-
-    :param url:
-    :param download_path: file system path to place contents of url
-    """
-    try:
-        response = requests.get(url)
-    except Exception:
-        log.exception("Unable to download file from %s to %s", url, download_path)
-        raise
-
-    create_directories_to_path(download_path)
-
-    # ensure output directory exists
-    try:
-        os.makedirs(os.path.dirname(download_path))
-    except Exception:
-        # Directory already exists, continue
-        log.debug("Directory %s already exists for file download %s", download_path, url)
-
-    with open(download_path, "wb") as download_path_file:
-        download_path_file.write(response.content)
+        log.exception("Failed to make APKTool files executable, continuing")
 
 
 def make_executable(file_path):
@@ -356,45 +275,27 @@ def make_executable(file_path):
         st = os.stat(file_path)
         os.chmod(file_path, st.st_mode | stat.S_IEXEC)
     except Exception:
-        log.exception("Failed to make downloaded APKTool files executable, continuing")
+        log.exception("Failed to make files executable, continuing")
         raise
 
 
-def download_cfr():
-    CFR_URL = "http://www.benf.org/other/cfr/cfr_0_124.jar"
-    file_name = CFR_URL.split("/")[-1]
-    if os.path.isfile(os.path.join(DECOMPILERS_PATH, file_name)):
-        return
-
-    try:
-        download_file(CFR_URL, os.path.join(DECOMPILERS_PATH, file_name))
-    except Exception:
-        raise SystemExit("Failed to download CFR jar")
-
-
-def download_procyon():
-    PROCYON_URL = "https://bitbucket.org/mstrobel/procyon/downloads/procyon-decompiler-0.5.30.jar"
-    file_name = PROCYON_URL.split("/")[-1]
-    if os.path.isfile(os.path.join(DECOMPILERS_PATH, file_name)):
-        return
-
-    try:
-        download_file(PROCYON_URL, os.path.join(DECOMPILERS_PATH, file_name))
-    except Exception:
-        raise SystemExit("Failed to download Procyon jar")
-
-
-def download_dex2jar():
-    if os.path.isfile(os.path.join(DEX2JAR_PATH, DEX2JAR_EXECUTABLE)):
-        return
-
-    try:
-        download_file(DEX2JAR_URL, os.path.join(LIB_PATH, "temp_dex2jar.zip"))
-    except Exception:
-        log.exception("Failed to download dex2jar jar")
-        raise SystemExit("Failed to download dex2jar jar")
-
-    unzip_file(os.path.join(LIB_PATH, "temp_dex2jar.zip"), destination_to_unzip=LIB_PATH)
-    os.remove(os.path.join(LIB_PATH, "temp_dex2jar.zip"))
+def configure_dex2jar():
     make_executable(os.path.join(DEX2JAR_PATH, DEX2JAR_EXECUTABLE))
     make_executable(os.path.join(DEX2JAR_PATH, DEX2JAR_INVOKE))
+
+
+def unpack_fernflower_jar(build_directory, jar_name):
+    """Fernflower puts its decompiled code back into a jar so we need to unpack it."""
+    previous_dir = os.getcwd()
+    command = ["jar", "xf", jar_name]
+
+    try:
+        os.chdir(os.path.join(build_directory, "fernflower"))
+        retcode = subprocess.call(command)
+    except Exception:
+        log.exception("Failed to extract fernflower jar with command '%s'", " ".join(command))
+    else:
+        if retcode != 0:
+            log.error("Failed to extract fernflower jar with command '%s'", " ".join(command))
+    finally:
+        os.chdir(previous_dir)

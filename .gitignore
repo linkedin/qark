@@ -20,3 +20,7 @@ qark/test/testData/*
 *.iml
 lib/
 .cache/
+dist/
+qark.egg-info/
+venv/
+qark_debug.log

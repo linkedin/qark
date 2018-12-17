@@ -39,21 +39,6 @@ def scanner(decompiler):
 
 
 @pytest.fixture(scope="session")
-def cfr_path():
-    return os.path.join(DECOMPILER_PATH, "cfr_0_124.jar")
-
-
-@pytest.fixture(scope="session")
-def jdcore_path():
-    return os.path.join(DECOMPILER_PATH, "jd-core-java-1.2.jar")
-
-
-@pytest.fixture(scope="session")
-def procyon_path():
-    return os.path.join(DECOMPILER_PATH, "procyon-decompiler-0.5.30.jar")
-
-
-@pytest.fixture(scope="session")
 def vulnerable_manifest_path():
     return os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_xml_files",
                         "test_androidmanifest.xml")

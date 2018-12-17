@@ -16,12 +16,15 @@ with io.open('README.rst', 'rt', encoding='utf8') as f:
 
 setup(
     name="qark",
-    version="2.2.0",
+    version="3.0.0",
     packages=find_packages(exclude=["tests*"]),
     package_dir={QARK_DIR: QARK_DIR},
     package_data={
         QARK_DIR: [
             os.path.join("lib", "decompilers", "*.jar"),  # include any decompiler jar files
+            os.path.join("lib", "apktool", "*.jar"),  # include apktool
+            os.path.join("lib", "dex2jar-2.0", "*"),  # include dex2jar
+            os.path.join("lib", "dex2jar-2.0", "lib", "*"),  # include dex2jar
             os.path.join("templates", "*.jinja"),  # include the reporting template files
         ] + exploit_apk_files,  # include all the java files required for creating an exploit APK
     },

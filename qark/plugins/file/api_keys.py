@@ -11,6 +11,7 @@ log = logging.getLogger(__name__)
 
 API_KEY_REGEX = re.compile(r'(?=.{20,})(?=.+\d)(?=.+[a-z])(?=.+[A-Z])(?=.+[-_])')
 SPECIAL_CHARACTER_REGEX = re.compile(r'(?=.+[!$%^&*()_+|~=`{}\[\]:<>?,./])')
+BLACKLISTED_EXTENSIONS = (".apk", ".dex", ".png", ".jar")
 
 API_KEY_DESCRIPTION = "Please confirm and investigate the API key to determine its severity."
 
@@ -22,6 +23,9 @@ class JavaAPIKeys(FileContentsPlugin):
         self.severity = Severity.INFO
 
     def run(self):
+        if any(self.file_path.endswith(extension) for extension in BLACKLISTED_EXTENSIONS):
+            return
+
         for line_number, line in enumerate(self.file_contents.split("\n")):
             for word in line.split():
                 if re.search(API_KEY_REGEX, word) and not re.search(SPECIAL_CHARACTER_REGEX, word):
