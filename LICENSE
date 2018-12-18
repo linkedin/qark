@@ -22,6 +22,10 @@
  requests[security]          Apache Software License (Apache 2.0)
  jinja2                      BSD
  enum34                      BSD
- jd-core                     GPLv3
  javalang                    MIT
  click                       BSD
+ apktool                     Apache Software License (Apache 2.0)     qark/qark/lib/apktool
+ dex2jar                     Apache Software License (Apache 2.0)     qark/qark/lib/dex2jar-2.0
+ procyon                     Apache Software License (Apache 2.0)     qark/qark/lib/decompilers/procyon-decompiler-1.0.jar
+ cfr                         MIT                                      qark/qark/lib/decompilers/cfr_0_124.jar
+ fernflower                  Apache Software License (Apache 2.0)     qark/qark/lib/decompilers/fernflower.jar

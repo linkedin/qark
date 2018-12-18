@@ -14,14 +14,6 @@ class ExternalDecompiler(object):
         self.command = command
 
 
-class JDCore(ExternalDecompiler):
-    def __init__(self):
-        ExternalDecompiler.__init__(self,
-                                    name="jdcore",
-                                    path_to_decompiler=os.path.join(PATH_TO_DECOMPILERS, "jd-core-java-1.2.jar"),
-                                    command="java -jar {path_to_decompiler} {jar} {build_directory}/jdcore")
-
-
 class CFR(ExternalDecompiler):
     def __init__(self):
         ExternalDecompiler.__init__(self,
@@ -35,8 +27,17 @@ class Procyon(ExternalDecompiler):
         ExternalDecompiler.__init__(self,
                                     name="procyon",
                                     path_to_decompiler=os.path.join(PATH_TO_DECOMPILERS,
-                                                                    "procyon-decompiler-0.5.30.jar"),
+                                                                    "procyon-decompiler-1.0.jar"),
                                     command="java -jar {path_to_decompiler} {jar} -o {build_directory}/procyon")
 
 
-DECOMPILERS = (JDCore(), CFR(), Procyon())
+class Fernflower(ExternalDecompiler):
+    def __init__(self):
+        ExternalDecompiler.__init__(self,
+                                    name="fernflower",
+                                    path_to_decompiler=os.path.join(PATH_TO_DECOMPILERS,
+                                                                    "fernflower.jar"),
+                                    command="java -jar {path_to_decompiler} -ren=1 {jar} {build_directory}/fernflower")
+
+
+DECOMPILERS = (CFR(), Procyon(), Fernflower())
