@@ -69,7 +69,7 @@ class CertValidation(JavaASTPlugin):
         Determines if the `onReceivedSslError` method is overriden with a body of `handler.proceed()` which will
         drop SSL errors.
         """
-        if len(cert_method.body) == 1 and type(cert_method.body[0]) is StatementExpression:
+        if cert_method.body and len(cert_method.body) == 1 and type(cert_method.body[0]) is StatementExpression:
             for _, method_invocation in cert_method.filter(MethodInvocation):
                 if method_invocation.member == "proceed":
                     self.issues.append(Issue(category=self.category, name="Unsafe implementation of onReceivedSslError",
