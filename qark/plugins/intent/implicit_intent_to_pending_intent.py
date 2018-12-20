@@ -1,10 +1,10 @@
-from qark.scanner.plugin import JavaASTPlugin
-from qark.issue import Severity, Issue
-
 import logging
 import re
 
 from javalang.tree import MethodInvocation, ClassCreator, ReferenceType
+
+from qark.issue import Severity, Issue
+from qark.scanner.plugin import JavaASTPlugin
 
 log = logging.getLogger(__name__)
 
@@ -36,31 +36,25 @@ class ImplicitIntentToPendingIntent(JavaASTPlugin):
         self.severity = Severity.VULNERABILITY
         self.current_file = None
 
-    def run(self):
+    def can_run_coroutine(self):
         # simple search to avoid files that are not vulnerable
         if re.search("new Intent", self.file_contents) is None or re.search(PENDING_INTENT_REGEX, self.file_contents) is None:
-            return
+            return False
 
         if not any("PendingIntent" in imported_declaration.path for imported_declaration in self.java_ast.imports):
             # if PendingIntent is never imported the file is not vulnerable
-            return
+            return False
 
-        self.current_file = self.file_path
-        self._check_for_implicit_intents(self.java_ast)
+        return True
 
-    def _check_for_implicit_intents(self, parsed_tree):
-        """
-        Checks for an invocation of one of the methods in `PENDING_INTENT_METHODS` and checks to see if an implicit
-        Intent is passed to it.
+    def run_coroutine(self):
+        while True:
+            _, pending_intent_invocation = (yield)
 
-        :param parsed_tree: `javalang.tree.parse` object
-        """
-        # get all method invocations that are in PENDING_INTENT_METHODS
-        pending_intent_invocations = (method_invocation for _, method_invocation
-                                      in parsed_tree.filter(MethodInvocation)
-                                      if method_invocation.member in PENDING_INTENT_METHODS)
+            if not isinstance(pending_intent_invocation,
+                              MethodInvocation) or pending_intent_invocation.member not in PENDING_INTENT_METHODS:
+                continue
 
-        for pending_intent_invocation in pending_intent_invocations:
             # iterate over every argument in the pending intent call, looking for a "new Intent()"
             for method_argument in pending_intent_invocation.arguments:
                 for _, creation in method_argument.filter(ClassCreator):
@@ -69,7 +63,7 @@ class ImplicitIntentToPendingIntent(JavaASTPlugin):
                             if reference_declaration.name == "Intent":
                                 self.issues.append(Issue(category=self.category, severity=self.severity,
                                                          name=self.name, description=self.description,
-                                                         file_object=self.current_file))
+                                                         file_object=self.file_path))
 
 
 plugin = ImplicitIntentToPendingIntent()

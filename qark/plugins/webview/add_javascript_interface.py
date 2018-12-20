@@ -1,7 +1,5 @@
 import logging
 
-from javalang.tree import MethodInvocation
-
 from qark.issue import Issue, Severity
 from qark.plugins.helpers import valid_method_invocation
 from qark.scanner.plugin import JavaASTPlugin, ManifestPlugin
@@ -27,9 +25,12 @@ class AddJavascriptInterface(JavaASTPlugin, ManifestPlugin):
         self.severity = Severity.WARNING
         self.java_method_name = "addJavascriptInterface"
 
-    def run(self):
-        if self.min_sdk <= 16:
-            for _, method_invocation in self.java_ast.filter(MethodInvocation):
+    def can_run_coroutine(self):
+        return self.min_sdk <= 16
+
+    def run_coroutine(self):
+        while True:
+            _, method_invocation = (yield)
                 if valid_method_invocation(method_invocation, method_name=self.java_method_name, num_arguments=2):
                     self.issues.append(Issue(category=self.category, name=self.name, severity=self.severity,
                                              description=self.description, line_number=method_invocation.position,

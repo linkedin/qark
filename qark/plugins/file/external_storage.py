@@ -10,11 +10,9 @@ This plugin determines if the following methods are called:
 
 import logging
 
-import javalang
 from javalang.tree import MethodInvocation
 
 from qark.issue import Severity, Issue
-from qark.plugins.helpers import java_files_from_files
 from qark.scanner.plugin import JavaASTPlugin
 
 log = logging.getLogger(__name__)
@@ -38,8 +36,13 @@ class ExternalStorage(JavaASTPlugin):
                                               description=EXTERNAL_STORAGE_DESCRIPTION)
         self.severity = Severity.WARNING
 
-    def run(self):
-        for _, method_invocation in self.java_ast.filter(MethodInvocation):
+    def run_coroutine(self):
+        while True:
+            _, method_invocation = (yield)
+
+            if not isinstance(method_invocation, MethodInvocation):
+                continue
+
             storage_location = None
             if (method_invocation.member == EXTERNAL_FILES_DIR_METHOD
                     or method_invocation.member == EXTERNAL_FILES_DIRS_METHOD):

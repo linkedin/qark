@@ -26,17 +26,25 @@ class SetAllowUniversalAccessFromFileURLs(JavaASTPlugin, ManifestPlugin):
         self.severity = Severity.WARNING
         self.java_method_name = "setAllowUniversalAccessFromFileURLs"
 
-    def run(self):
+    def can_run_coroutine(self):
         if self.min_sdk <= 15:
             self.issues.extend(webview_default_vulnerable(self.java_ast, method_name=self.java_method_name,
                                                           issue_name=self.name, description=self.description,
                                                           file_object=self.file_path, severity=self.severity))
-        else:
-            for _, method_invocation in self.java_ast.filter(MethodInvocation):
-                if valid_set_method_bool(method_invocation, str_bool="true", method_name=self.java_method_name):
-                    self.issues.append(Issue(category=self.category, name=self.name, severity=self.severity,
-                                             description=self.description, line_number=method_invocation.position,
-                                             file_object=self.file_path))
+            return False
+
+        return True
+
+    def run_coroutine(self):
+        while True:
+            _, method_invocation = (yield)
+            if not isinstance(method_invocation, MethodInvocation):
+                continue
+
+            if valid_set_method_bool(method_invocation, str_bool="true", method_name=self.java_method_name):
+                self.issues.append(Issue(category=self.category, name=self.name, severity=self.severity,
+                                         description=self.description, line_number=method_invocation.position,
+                                         file_object=self.file_path))
 
 
 plugin = SetAllowUniversalAccessFromFileURLs()

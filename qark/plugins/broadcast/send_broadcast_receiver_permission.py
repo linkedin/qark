@@ -1,12 +1,11 @@
-from qark.scanner.plugin import JavaASTPlugin, ManifestPlugin
-from qark.issue import Severity, Issue
-
 import logging
 import re
 
 import javalang
 from javalang.tree import MethodInvocation
 
+from qark.issue import Severity, Issue
+from qark.scanner.plugin import JavaASTPlugin, ManifestPlugin
 
 log = logging.getLogger(__name__)
 
@@ -71,13 +70,19 @@ class SendBroadcastReceiverPermission(JavaASTPlugin, ManifestPlugin):
         self.below_min_sdk_21 = False
 
     def run(self):
+        while True:
+            _, method_invocation = (yield)
+
+            if not isinstance(method_invocation, javalang.tree.MethodInvocation):
+                continue
+
+            self._check_method_invocation(method_invocation, self.java_ast.imports)
+
+    def can_run_coroutine(self):
         self.below_min_sdk_21 = self.min_sdk < 21
         self.current_file = self.file_path
-        if not re.search("({broadcasts})".format(broadcasts="|".join(BROADCAST_METHODS)), self.file_contents):
-            return
-
-        for _, method_invocation in self.java_ast.filter(MethodInvocation):
-            self._check_method_invocation(method_invocation, self.java_ast.imports)
+        return re.search("({broadcasts})".format(broadcasts="|".join(BROADCAST_METHODS)),
+                         self.file_contents) is not None
 
     def _check_method_invocation(self, method_invocation, imports):
         """
