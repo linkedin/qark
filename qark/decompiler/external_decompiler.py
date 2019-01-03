@@ -19,7 +19,7 @@ class CFR(ExternalDecompiler):
         ExternalDecompiler.__init__(self,
                                     name="cfr",
                                     path_to_decompiler=os.path.join(PATH_TO_DECOMPILERS, "cfr_0_124.jar"),
-                                    command="java -jar {path_to_decompiler} {jar} --outputdir {build_directory}/cfr")
+                                    command="java -jar '{path_to_decompiler}' '{jar}' --outputdir '{build_directory}/cfr'")
 
 
 class Procyon(ExternalDecompiler):
@@ -28,7 +28,7 @@ class Procyon(ExternalDecompiler):
                                     name="procyon",
                                     path_to_decompiler=os.path.join(PATH_TO_DECOMPILERS,
                                                                     "procyon-decompiler-1.0.jar"),
-                                    command="java -jar {path_to_decompiler} {jar} -o {build_directory}/procyon")
+                                    command="java -jar '{path_to_decompiler}' '{jar}' -o '{build_directory}/procyon'")
 
 
 class Fernflower(ExternalDecompiler):
@@ -37,7 +37,7 @@ class Fernflower(ExternalDecompiler):
                                     name="fernflower",
                                     path_to_decompiler=os.path.join(PATH_TO_DECOMPILERS,
                                                                     "fernflower.jar"),
-                                    command="java -jar {path_to_decompiler} -ren=1 {jar} {build_directory}/fernflower")
+                                    command="java -jar '{path_to_decompiler}' -ren=1 '{jar}' '{build_directory}/fernflower'")
 
 
 DECOMPILERS = (CFR(), Procyon(), Fernflower())
