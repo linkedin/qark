@@ -26,9 +26,9 @@ DEX2JAR_INVOKE = "d2j_invoke.{extension}".format(extension=DEX2JAR_EXTENSION)
 
 DECOMPILERS_PATH = os.path.join(LIB_PATH, "decompilers")
 
-APK_TOOL_COMMAND = ("java -Djava.awt.headless=true -jar {apktool_path}/apktool.jar "
-                    "d {path_to_source} --no-src --force -m --output {build_directory}")
-DEX2JAR_COMMAND = "{dex2jar_path} {path_to_dex} -o {build_apk}.jar"
+APK_TOOL_COMMAND = ("java -Djava.awt.headless=true -jar '{apktool_path}/apktool.jar' "
+                    "d '{path_to_source}' --no-src --force -m --output '{build_directory}'")
+DEX2JAR_COMMAND = "'{dex2jar_path}' '{path_to_dex}' -o '{build_apk}.jar'"
 
 
 def escape_windows_path(path):
