@@ -3,7 +3,7 @@ import logging
 from javalang.tree import MethodInvocation
 
 from qark.issue import Severity, Issue
-from qark.scanner.plugin import JavaASTPlugin
+from qark.scanner.plugin import CoroutinePlugin
 
 log = logging.getLogger(__name__)
 
@@ -15,7 +15,7 @@ LOAD_DATA_WITH_BASE_URL_DESCRIPTION = (
 )
 
 
-class LoadDataWithBaseURL(JavaASTPlugin):
+class LoadDataWithBaseURL(CoroutinePlugin):
     """This plugin checks if the `loadDataWithBaseURL` method is called."""
     def __init__(self):
         super(LoadDataWithBaseURL, self).__init__(category="webview", name="BaseURL set for Webview",

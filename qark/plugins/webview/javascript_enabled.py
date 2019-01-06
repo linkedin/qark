@@ -4,7 +4,7 @@ from javalang.tree import MethodInvocation
 
 from qark.issue import Severity, Issue
 from qark.plugins.webview.helpers import valid_set_method_bool
-from qark.scanner.plugin import JavaASTPlugin
+from qark.scanner.plugin import CoroutinePlugin
 
 log = logging.getLogger(__name__)
 
@@ -18,7 +18,7 @@ JAVASCRIPT_ENABLED_DESCRIPTION = (
 )
 
 
-class JavascriptEnabled(JavaASTPlugin):
+class JavascriptEnabled(CoroutinePlugin):
     """This plugin checks if the `setJavaScriptEnabled` method is called with a value of `true`"""
     def __init__(self):
         super(JavascriptEnabled, self).__init__(category="webview", name="Javascript enabled in Webview",

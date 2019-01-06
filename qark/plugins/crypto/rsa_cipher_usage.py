@@ -4,12 +4,12 @@ import re
 import javalang
 
 from qark.issue import Severity, Issue
-from qark.scanner.plugin import JavaASTPlugin
+from qark.scanner.plugin import CoroutinePlugin
 
 log = logging.getLogger(__name__)
 
 
-class RSACipherCheck(JavaASTPlugin):
+class RSACipherCheck(CoroutinePlugin):
     def __init__(self):
 
         super(RSACipherCheck, self).__init__(category="crypto", name="RSA Cipher Usage",

@@ -6,6 +6,7 @@ from os import (
     path
 )
 
+from qark.scanner.plugin import CoroutinePlugin
 from qark.scanner.plugin import JavaASTPlugin
 from qark.scanner.plugin import ManifestPlugin
 from qark.scanner.plugin import PluginObserver
@@ -66,31 +67,20 @@ class Scanner(object):
         """Run all the plugins (besides manifest) on every file."""
         current_file_subject = Subject()
         plugins = list(observer_plugin for observer_plugin in plugins if isinstance(observer_plugin, PluginObserver))
-        coroutine_plugins = []
+        coroutine_plugins = list(coroutine_plugin for coroutine_plugin in plugins if isinstance(coroutine_plugin,
+                                                                                                CoroutinePlugin))
 
         for plugin in plugins:
             current_file_subject.register(plugin)
-            if hasattr(plugin, "run_coroutine"):
-                coroutine_plugins.append(plugin)
 
         for filepath in self.files:
-            current_file_subject.notify(filepath)  # All the plugins will be running now
+            # This call will run all non-coroutine plugins, and also update the shared class variables
+            current_file_subject.notify(filepath)
 
-            if JavaASTPlugin.java_ast is not None:
-                coroutines_to_run = []
+            # This will efficiently run all coroutine plugins
+            notify_coroutines(coroutine_plugins)
 
-                # Prime coroutines that can run
-                for plugin in coroutine_plugins:
-                    if plugin.can_run_coroutine():
-                        coroutine = plugin.run_coroutine()
-                        next(coroutine)
-                        coroutines_to_run.append(coroutine)
-
-                for path, node in JavaASTPlugin.java_ast:
-                    for coroutine in coroutines_to_run:
-                        coroutine.send((path, node))
-
-            # reset the plugin file data to None
+            # reset the plugin file data to None as we are done processing the file
             current_file_subject.reset()
 
         for plugin in plugins:
@@ -137,3 +127,23 @@ class Subject(object):
     def reset(self):
         for observer in self.observers:
             observer.reset()
+
+
+def notify_coroutines(coroutine_plugins):
+    """Prime and run the coroutine plugins that are passed in.
+
+    Coroutines run differently than normal plugins as they will all only iterate over the AST once. This is a much
+    more efficient way of running plugins in terms of speed, and memory.
+    """
+    # Run all coroutine plugins
+    if JavaASTPlugin.java_ast is not None:
+        coroutines_to_run = []
+
+        # Prime coroutines that can run
+        for plugin in coroutine_plugins:
+            if plugin.can_run_coroutine():
+                coroutines_to_run.append(plugin.prime_coroutine())
+
+        for path, node in JavaASTPlugin.java_ast:
+            for coroutine in coroutines_to_run:
+                coroutine.send((path, node))

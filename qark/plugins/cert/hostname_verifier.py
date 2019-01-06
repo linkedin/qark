@@ -3,7 +3,7 @@ import logging
 from javalang.tree import ClassCreator, MemberReference, MethodInvocation
 
 from qark.issue import Issue, Severity
-from qark.scanner.plugin import JavaASTPlugin
+from qark.scanner.plugin import CoroutinePlugin
 
 log = logging.getLogger(__name__)
 
@@ -23,7 +23,7 @@ ALLOW_ALL_HOSTNAME_VERIFIER_DESC = ("This can allow for impromper x.509 certific
                                     "https://developer.android.com/training/articles/security-ssl.html")
 
 
-class HostnameVerifier(JavaASTPlugin):
+class HostnameVerifier(CoroutinePlugin):
     """
     This plugin checks if:
      1. `AllowAllHostnameVerifier` is instantiated

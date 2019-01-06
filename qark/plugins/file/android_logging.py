@@ -15,7 +15,7 @@ import logging
 from javalang.tree import MethodInvocation
 
 from qark.issue import Severity, Issue
-from qark.scanner.plugin import JavaASTPlugin
+from qark.scanner.plugin import CoroutinePlugin
 
 log = logging.getLogger(__name__)
 
@@ -28,7 +28,7 @@ ANDROID_LOGGING_DESCRIPTION = (
 ANDROID_LOGGING_METHODS = ("v", "d", "i", "w", "e")
 
 
-class AndroidLogging(JavaASTPlugin):
+class AndroidLogging(CoroutinePlugin):
     def __init__(self):
         super(AndroidLogging, self).__init__(category="file", name="Logging found",
                                              description=ANDROID_LOGGING_DESCRIPTION)

@@ -7,7 +7,7 @@ import logging
 from javalang.tree import MethodInvocation
 
 from qark.issue import Issue, Severity
-from qark.scanner.plugin import JavaASTPlugin, ManifestPlugin
+from qark.scanner.plugin import CoroutinePlugin, ManifestPlugin
 
 log = logging.getLogger(__name__)
 
@@ -21,7 +21,7 @@ DYNAMIC_BROADCAST_RECEIVER_DESCRIPTION = (
 JAVA_DYNAMIC_BROADCAST_RECEIVER_METHOD = 'registerReceiver'
 
 
-class DynamicBroadcastReceiver(JavaASTPlugin, ManifestPlugin):
+class DynamicBroadcastReceiver(CoroutinePlugin, ManifestPlugin):
 
     def __init__(self):
         super(DynamicBroadcastReceiver, self).__init__(category="broadcast", name="Dynamic broadcast receiver found",

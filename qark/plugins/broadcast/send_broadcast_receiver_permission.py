@@ -5,7 +5,7 @@ import javalang
 from javalang.tree import MethodInvocation
 
 from qark.issue import Severity, Issue
-from qark.scanner.plugin import JavaASTPlugin, ManifestPlugin
+from qark.scanner.plugin import CoroutinePlugin, ManifestPlugin
 
 log = logging.getLogger(__name__)
 
@@ -56,7 +56,7 @@ STICKY_BROADCAST = (
 )
 
 
-class SendBroadcastReceiverPermission(JavaASTPlugin, ManifestPlugin):
+class SendBroadcastReceiverPermission(CoroutinePlugin, ManifestPlugin):
     """
     This plugin checks certain broadcast methods to see if they are using an insecure version,
     based on number of arguments.
@@ -69,7 +69,7 @@ class SendBroadcastReceiverPermission(JavaASTPlugin, ManifestPlugin):
         self.manifest_xml = None
         self.below_min_sdk_21 = False
 
-    def run(self):
+    def run_coroutine(self):
         while True:
             _, method_invocation = (yield)
 

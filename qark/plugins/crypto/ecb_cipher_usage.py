@@ -4,12 +4,12 @@ import re
 import javalang
 
 from qark.issue import Severity, Issue
-from qark.scanner.plugin import JavaASTPlugin
+from qark.scanner.plugin import CoroutinePlugin
 
 log = logging.getLogger(__name__)
 
 
-class ECBCipherCheck(JavaASTPlugin):
+class ECBCipherCheck(CoroutinePlugin):
     def __init__(self):
 
         super(ECBCipherCheck, self).__init__(category="crypto", name="ECB Cipher Usage",

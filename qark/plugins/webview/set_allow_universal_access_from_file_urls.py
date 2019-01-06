@@ -4,7 +4,7 @@ from javalang.tree import MethodInvocation
 
 from qark.issue import Issue, Severity
 from qark.plugins.webview.helpers import webview_default_vulnerable, valid_set_method_bool
-from qark.scanner.plugin import JavaASTPlugin, ManifestPlugin
+from qark.scanner.plugin import CoroutinePlugin, ManifestPlugin
 
 log = logging.getLogger(__name__)
 
@@ -16,7 +16,7 @@ SET_ALLOW_UNIVERSAL_ACCESS_FROM_FILE_URLS_DESCRIPTION = (
 )
 
 
-class SetAllowUniversalAccessFromFileURLs(JavaASTPlugin, ManifestPlugin):
+class SetAllowUniversalAccessFromFileURLs(CoroutinePlugin, ManifestPlugin):
     """This plugin checks if the `setAllowUniversalAccessFromFileURLs` method is called with a value of `true`, or
     if the default is vulnerable."""
     def __init__(self):

@@ -3,7 +3,7 @@ import logging
 from javalang.tree import MethodDeclaration, MethodInvocation, ReturnStatement, StatementExpression
 
 from qark.issue import Issue, Severity
-from qark.scanner.plugin import JavaASTPlugin
+from qark.scanner.plugin import CoroutinePlugin
 
 log = logging.getLogger(__name__)
 
@@ -26,7 +26,7 @@ MITM_DESCRIPTION = ("This means this application is likely "
                     "https://developer.android.com/training/articles/security-ssl.html")
 
 
-class CertValidation(JavaASTPlugin):
+class CertValidation(CoroutinePlugin):
     """
     This plugin checks if a method in `CERT_METHODS` is overriden with an insecure version that usually does not verify
     SSL connections.

@@ -4,9 +4,9 @@ from __future__ import absolute_import
 
 import logging
 import logging.config
+import os
 
 import click
-import os
 
 from qark.apk_builder import APKBuilder
 from qark.decompiler.decompiler import Decompiler
@@ -84,10 +84,9 @@ def cli(ctx, sdk_path, build_path, debug, source, report_type, exploit_apk):
     decompiler.run()
 
     click.secho("Running scans...")
-    if decompiler.source_code:
-        scanner = Scanner(manifest_path=decompiler.manifest_path, path_to_source=decompiler.path_to_source)
-    else:
-        scanner = Scanner(manifest_path=decompiler.manifest_path, path_to_source=decompiler.build_directory)
+    path_to_source = decompiler.path_to_source if decompiler.source_code else decompiler.build_directory
+
+    scanner = Scanner(manifest_path=decompiler.manifest_path, path_to_source=path_to_source)
     scanner.run()
     click.secho("Finish scans...")
 

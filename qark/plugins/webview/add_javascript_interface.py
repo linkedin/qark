@@ -2,7 +2,7 @@ import logging
 
 from qark.issue import Issue, Severity
 from qark.plugins.helpers import valid_method_invocation
-from qark.scanner.plugin import JavaASTPlugin, ManifestPlugin
+from qark.scanner.plugin import CoroutinePlugin, ManifestPlugin
 
 log = logging.getLogger(__name__)
 
@@ -16,7 +16,7 @@ ADD_JAVASCRIPT_INTERFACE_DESCRIPTION = (
 )
 
 
-class AddJavascriptInterface(JavaASTPlugin, ManifestPlugin):
+class AddJavascriptInterface(CoroutinePlugin, ManifestPlugin):
     """This plugin checks if the `addJavaScriptInterface` method is called with a min_sdk of below 17."""
     def __init__(self):
         super(AddJavascriptInterface, self).__init__(category="webview",
@@ -31,10 +31,10 @@ class AddJavascriptInterface(JavaASTPlugin, ManifestPlugin):
     def run_coroutine(self):
         while True:
             _, method_invocation = (yield)
-                if valid_method_invocation(method_invocation, method_name=self.java_method_name, num_arguments=2):
-                    self.issues.append(Issue(category=self.category, name=self.name, severity=self.severity,
-                                             description=self.description, line_number=method_invocation.position,
-                                             file_object=self.file_path))
+            if valid_method_invocation(method_invocation, method_name=self.java_method_name, num_arguments=2):
+                self.issues.append(Issue(category=self.category, name=self.name, severity=self.severity,
+                                         description=self.description, line_number=method_invocation.position,
+                                         file_object=self.file_path))
 
 
 plugin = AddJavascriptInterface()

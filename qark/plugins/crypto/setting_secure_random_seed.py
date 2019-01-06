@@ -3,12 +3,12 @@ import logging
 import javalang
 
 from qark.issue import Severity, Issue
-from qark.scanner.plugin import JavaASTPlugin
+from qark.scanner.plugin import CoroutinePlugin
 
 log = logging.getLogger(__name__)
 
 
-class SeedWithSecureRandom(JavaASTPlugin):
+class SeedWithSecureRandom(CoroutinePlugin):
 
     INSECURE_FUNCTIONS = ("setSeed", "generateSeed")
 

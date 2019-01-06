@@ -13,7 +13,7 @@ import logging
 from javalang.tree import MethodInvocation
 
 from qark.issue import Severity, Issue
-from qark.scanner.plugin import JavaASTPlugin
+from qark.scanner.plugin import CoroutinePlugin
 
 log = logging.getLogger(__name__)
 
@@ -30,7 +30,7 @@ EXTERNAL_MEDIA_DIR_METHOD = 'getExternalMediaDirs'
 EXTERNAL_STORAGE_PUBLIC_DIR_METHOD = 'getExternalStoragePublicDirectory'
 
 
-class ExternalStorage(JavaASTPlugin):
+class ExternalStorage(CoroutinePlugin):
     def __init__(self):
         super(ExternalStorage, self).__init__(category="file", name="External storage used",
                                               description=EXTERNAL_STORAGE_DESCRIPTION)

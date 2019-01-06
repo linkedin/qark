@@ -4,7 +4,7 @@ from javalang.tree import MethodInvocation
 
 from qark.issue import Issue, Severity
 from qark.plugins.webview.helpers import valid_set_method_bool
-from qark.scanner.plugin import JavaASTPlugin
+from qark.scanner.plugin import CoroutinePlugin
 
 log = logging.getLogger(__name__)
 
@@ -13,7 +13,7 @@ SET_DOM_STORAGE_ENABLED_DESCRIPTION = (
 )
 
 
-class SetDomStorageEnabled(JavaASTPlugin):
+class SetDomStorageEnabled(CoroutinePlugin):
     """This plugin checks if the `setDomStorageEnabled` method is called with a value of `true`."""
     def __init__(self):
         super(SetDomStorageEnabled, self).__init__(category="webview", name="Webview enables DOM Storage",

@@ -1,14 +1,17 @@
 import logging
+import re
 
-from qark.scanner.plugin import FileContentsPlugin
 from qark.issue import Severity, Issue
 from qark.plugins.helpers import run_regex
+from qark.scanner.plugin import FileContentsPlugin
 
 log = logging.getLogger(__name__)
 
 
 class PackagedPrivateKeys(FileContentsPlugin):
-    PRIVATE_KEY_REGEXES = (r'PRIVATE\sKEY',)
+    PRIVATE_KEY_REGEXES = (
+        re.compile(r'PRIVATE\sKEY'),
+    )
 
     def __init__(self):
         super(PackagedPrivateKeys, self).__init__(category="crypto",

@@ -4,7 +4,7 @@ import re
 from javalang.tree import MethodInvocation, ClassCreator, ReferenceType
 
 from qark.issue import Severity, Issue
-from qark.scanner.plugin import JavaASTPlugin
+from qark.scanner.plugin import CoroutinePlugin
 
 log = logging.getLogger(__name__)
 
@@ -18,7 +18,7 @@ PENDING_INTENT_REGEX = re.compile(
     "({pending_intent_method})".format(pending_intent_method="|".join(PENDING_INTENT_METHODS)))
 
 
-class ImplicitIntentToPendingIntent(JavaASTPlugin):
+class ImplicitIntentToPendingIntent(CoroutinePlugin):
     """
     This plugin checks if a `new Intent` is passed into any of the `PENDING_INTENT_METHODS`.
     If there is, a Vulnerability is created.
