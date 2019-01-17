@@ -26,9 +26,9 @@ class TaskAffinity(JavaASTPlugin):
             description = None
 
             if re.search(NEW_TASK_REGEX, self.file_contents):
-                description = TASK_AFFINITY_DESCRIPTION.format("NEW")
+                description = TASK_AFFINITY_DESCRIPTION.format(type="NEW")
             elif re.search(MULTIPLE_TASK_REGEX, self.file_contents):
-                description = TASK_AFFINITY_DESCRIPTION.format("MULTIPLE")
+                description = TASK_AFFINITY_DESCRIPTION.format(type="MULTIPLE")
 
             if description:
                 self.issues.append(Issue(category=self.category,
