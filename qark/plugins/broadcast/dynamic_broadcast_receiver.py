@@ -5,8 +5,9 @@ ICE_CREAM_SANDWICH properly registers receivers so anything >= API level 14 is n
 import logging
 
 from javalang.tree import MethodInvocation
+
 from qark.issue import Issue, Severity
-from qark.scanner.plugin import JavaASTPlugin, ManifestPlugin
+from qark.scanner.plugin import CoroutinePlugin, ManifestPlugin
 
 log = logging.getLogger(__name__)
 
@@ -20,25 +21,26 @@ DYNAMIC_BROADCAST_RECEIVER_DESCRIPTION = (
 JAVA_DYNAMIC_BROADCAST_RECEIVER_METHOD = 'registerReceiver'
 
 
-class DynamicBroadcastReceiver(JavaASTPlugin, ManifestPlugin):
+class DynamicBroadcastReceiver(CoroutinePlugin, ManifestPlugin):
 
     def __init__(self):
         super(DynamicBroadcastReceiver, self).__init__(category="broadcast", name="Dynamic broadcast receiver found",
                                                        description=DYNAMIC_BROADCAST_RECEIVER_DESCRIPTION)
         self.severity = Severity.VULNERABILITY
 
-    def _process(self, tree, java_file):
-        for _, method_invocation in tree.filter(MethodInvocation):
-                if method_invocation.member == JAVA_DYNAMIC_BROADCAST_RECEIVER_METHOD and self.min_sdk < 14:
-                    self.issues.append(Issue(
-                        category=self.category, severity=self.severity, name=self.name,
-                        description=DYNAMIC_BROADCAST_RECEIVER_DESCRIPTION,
-                        file_object=java_file,
-                        line_number=method_invocation.position)
-                    )
+    def run_coroutine(self):
+        while True:
+            _, method_invocation = (yield)
+            if not isinstance(method_invocation, MethodInvocation):
+                continue
 
-    def run(self):
-        self._process(tree=self.java_ast, java_file=self.file_path)
+            if method_invocation.member == JAVA_DYNAMIC_BROADCAST_RECEIVER_METHOD and self.min_sdk < 14:
+                self.issues.append(Issue(
+                    category=self.category, severity=self.severity, name=self.name,
+                    description=DYNAMIC_BROADCAST_RECEIVER_DESCRIPTION,
+                    file_object=self.file_path,
+                    line_number=method_invocation.position)
+                )
 
 
 plugin = DynamicBroadcastReceiver()

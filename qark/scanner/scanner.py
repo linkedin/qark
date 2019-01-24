@@ -6,11 +6,11 @@ from os import (
     path
 )
 
+from qark.scanner.plugin import CoroutinePlugin
+from qark.scanner.plugin import JavaASTPlugin
+from qark.scanner.plugin import ManifestPlugin
 from qark.scanner.plugin import PluginObserver
 from qark.scanner.plugin import get_plugin_source, get_plugins
-from qark.scanner.plugin import ManifestPlugin
-from qark.plugins.manifest.exported_tags import ExportedTags
-from qark.xml_helpers import get_manifest_out_of_files
 from qark.utils import is_java_file
 
 log = logging.getLogger(__name__)
@@ -67,42 +67,24 @@ class Scanner(object):
         """Run all the plugins (besides manifest) on every file."""
         current_file_subject = Subject()
         plugins = list(observer_plugin for observer_plugin in plugins if isinstance(observer_plugin, PluginObserver))
+        coroutine_plugins = list(coroutine_plugin for coroutine_plugin in plugins if isinstance(coroutine_plugin,
+                                                                                                CoroutinePlugin))
+
         for plugin in plugins:
             current_file_subject.register(plugin)
 
         for filepath in self.files:
-            current_file_subject.notify(filepath)  # All the plugins will be running now
-            # reset the plugin file data to None
+            # This call will run all non-coroutine plugins, and also update the shared class variables
+            current_file_subject.notify(filepath)
+
+            # This will efficiently run all coroutine plugins
+            notify_coroutines(coroutine_plugins)
+
+            # reset the plugin file data to None as we are done processing the file
             current_file_subject.reset()
 
         for plugin in plugins:
             self.issues.extend(plugin.issues)
-
-        #     ast = None
-        #
-        #     try:
-        #         with open(filepath, 'r') as f:
-        #             file_contents = f.read()
-        #     except Exception:
-        #         log.exception("Unable to read file %s", filepath)
-        #         file_contents = None
-        #
-        #     if file_contents and is_java_file(filepath):
-        #         try:
-        #             ast = javalang.parse.parse(file_contents)
-        #         except (javalang.parser.JavaSyntaxError, IndexError):
-        #             log.debug("Unable to parse AST for file %s", filepath)
-        #
-        #     for plugin in plugins:
-        #         log.debug("Running plugin %s", plugin.name)
-        #         plugin.run(filepath,
-        #                    apk_constants=self.apk_constants,
-        #                    java_ast=ast,
-        #                    file_contents=file_contents,
-        #                    all_files=self.files)
-        #
-        # for plugin in plugins:
-        #     self.issues.extend(plugin.issues)
 
     def _gather_files(self):
         """Walks the `path_to_source` and updates the `self.files` set with new files."""
@@ -145,3 +127,23 @@ class Subject(object):
     def reset(self):
         for observer in self.observers:
             observer.reset()
+
+
+def notify_coroutines(coroutine_plugins):
+    """Prime and run the coroutine plugins that are passed in.
+
+    Coroutines run differently than normal plugins as they will all only iterate over the AST once. This is a much
+    more efficient way of running plugins in terms of speed, and memory.
+    """
+    # Run all coroutine plugins
+    if JavaASTPlugin.java_ast is not None:
+        coroutines_to_run = []
+
+        # Prime coroutines that can run
+        for plugin in coroutine_plugins:
+            if plugin.can_run_coroutine():
+                coroutines_to_run.append(plugin.prime_coroutine())
+
+        for path, node in JavaASTPlugin.java_ast:
+            for coroutine in coroutines_to_run:
+                coroutine.send((path, node))

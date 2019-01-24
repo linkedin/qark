@@ -16,7 +16,7 @@ with io.open('README.rst', 'rt', encoding='utf8') as f:
 
 setup(
     name="qark",
-    version="3.0.0",
+    version="4.0.0",
     packages=find_packages(exclude=["tests*"]),
     package_dir={QARK_DIR: QARK_DIR},
     package_data={

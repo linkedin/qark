@@ -1,10 +1,9 @@
 import logging
 
-import javalang
 from javalang.tree import MethodDeclaration, MethodInvocation, ReturnStatement, StatementExpression
 
 from qark.issue import Issue, Severity
-from qark.scanner.plugin import JavaASTPlugin
+from qark.scanner.plugin import CoroutinePlugin
 
 log = logging.getLogger(__name__)
 
@@ -27,7 +26,7 @@ MITM_DESCRIPTION = ("This means this application is likely "
                     "https://developer.android.com/training/articles/security-ssl.html")
 
 
-class CertValidation(JavaASTPlugin):
+class CertValidation(CoroutinePlugin):
     """
     This plugin checks if a method in `CERT_METHODS` is overriden with an insecure version that usually does not verify
     SSL connections.
@@ -36,15 +35,17 @@ class CertValidation(JavaASTPlugin):
         super(CertValidation, self).__init__(category="cert", name="Certification Validation")
         self.severity = Severity.WARNING
 
-    def run(self):
-        cert_methods = (method_declaration for _, method_declaration in self.java_ast.filter(MethodDeclaration)
-                        if method_declaration.name in CERT_METHODS)
+    def run_coroutine(self):
+        while True:
+            _, method_declaration = (yield)
 
-        for cert_method in cert_methods:
-            if cert_method.name == "checkServerTrusted":
-                self._check_server_trusted(cert_method, self.file_path)
-            elif cert_method.name == "onReceivedSslError":
-                self._on_received_ssl_error(cert_method, self.file_path)
+            if not isinstance(method_declaration, MethodDeclaration) or method_declaration.name not in CERT_METHODS:
+                continue
+
+            if method_declaration.name == "checkServerTrusted":
+                self._check_server_trusted(method_declaration, self.file_path)
+            elif method_declaration.name == "onReceivedSslError":
+                self._on_received_ssl_error(method_declaration, self.file_path)
 
     def _check_server_trusted(self, cert_method, current_file):
         """

@@ -1,14 +1,14 @@
+import logging
+import re
+
+from qark.issue import Severity, Issue
 from qark.plugins.helpers import run_regex
 from qark.scanner.plugin import FileContentsPlugin
-from qark.issue import Severity, Issue
-
-import logging
 
 log = logging.getLogger(__name__)
 
-
-WORLD_READABLE = "MODE_WORLD_READABLE"
-WORLD_WRITEABLE = "MODE_WORLD_WRITEABLE"
+WORLD_READABLE = re.compile("MODE_WORLD_READABLE")
+WORLD_WRITEABLE = re.compile("MODE_WORLD_WRITEABLE")
 
 WORLD_READABLE_DESCRIPTION = "World readable file found. Any application or file browser can access and read this file"
 WORLD_WRITEABLE_DESCRIPTION = "World writeable file found. Any application or file browser can write to this file"

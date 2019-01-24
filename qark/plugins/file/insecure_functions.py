@@ -1,10 +1,9 @@
 import logging
 
-import javalang
-from javalang.tree import ClassDeclaration, MethodDeclaration
+from javalang.tree import MethodDeclaration
 
 from qark.issue import Severity, Issue
-from qark.scanner.plugin import JavaASTPlugin
+from qark.scanner.plugin import CoroutinePlugin
 
 log = logging.getLogger(__name__)
 
@@ -19,23 +18,23 @@ INSECURE_FUNCTIONS_DESCRIPTION = (
 INSECURE_FUNCTIONS_NAMES = ("call",)
 
 
-class InsecureFunctions(JavaASTPlugin):
+class InsecureFunctions(CoroutinePlugin):
     def __init__(self):
         super(InsecureFunctions, self).__init__(category="file", name="Insecure functions found",
                                                 description=INSECURE_FUNCTIONS_DESCRIPTION)
         self.severity = Severity.WARNING
 
-    def run(self):
-        for _, class_declaration in self.java_ast.filter(ClassDeclaration):
-            for _, method_declaration_in_class in class_declaration.filter(MethodDeclaration):
+    def run_coroutine(self):
+        while True:
+            _, node = (yield)
 
-                if method_declaration_in_class.name in INSECURE_FUNCTIONS_NAMES:
-                    self.issues.append(Issue(
-                        category=self.category, severity=self.severity, name=self.name,
-                        description=self.description,
-                        file_object=self.file_path,
-                        line_number=method_declaration_in_class.position)
-                    )
+            if isinstance(node, MethodDeclaration) and node.name in INSECURE_FUNCTIONS_NAMES:
+                self.issues.append(Issue(
+                    category=self.category, severity=self.severity, name=self.name,
+                    description=self.description,
+                    file_object=self.file_path,
+                    line_number=node.position)
+                )
 
 
 plugin = InsecureFunctions()

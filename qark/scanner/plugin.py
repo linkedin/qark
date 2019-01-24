@@ -1,12 +1,13 @@
 import abc
-import os
 import logging
+import os
 from xml.dom import minidom
 
-from pluginbase import PluginBase
 import javalang
-from qark.utils import is_java_file
+from pluginbase import PluginBase
+
 from qark.plugins.manifest_helpers import get_min_sdk, get_target_sdk, get_package_from_manifest
+from qark.utils import is_java_file
 
 log = logging.getLogger(__name__)
 
@@ -68,7 +69,7 @@ class BasePlugin(object):
         :param dict apk_constants: dictionary containing extra information
                                     that some plugins can use (min_sdk, target_sdk)
         """
-        pass
+        raise NotImplementedError()
 
 
 class PluginObserver(BasePlugin):
@@ -189,7 +190,10 @@ class JavaASTPlugin(FileContentsPlugin):
                     return
 
         if call_run and self.java_ast is not None:
-            self.run()
+            try:
+                self.run()
+            except Exception:
+                log.exception("Unable to run plugin")
 
     @classmethod
     def reset(cls):
@@ -197,6 +201,42 @@ class JavaASTPlugin(FileContentsPlugin):
         JavaASTPlugin.parseable = True
 
         super(JavaASTPlugin, cls).reset()
+
+
+class CoroutinePlugin(JavaASTPlugin):
+    """A JavaASTPlugin that runs as a coroutine.
+
+    Much more efficient than normal JavaASTPlugins.
+    """
+
+    def can_run_coroutine(self):
+        """Whether or not the coroutine should run."""
+        return True
+
+    def run(self):
+        """Method to run a given coroutine against the AST.
+
+        Used for testing plugins individually and should not be run with multiple plugins (sequentially).
+        Included as a backwards-compatiable way to run plugins without breaking Liskov substitution.
+        """
+        if self.can_run_coroutine():
+            coroutine = self.prime_coroutine()
+            for path, node in self.java_ast:
+                coroutine.send((path, node))
+
+    def prime_coroutine(self):
+        """Return the primed coroutine if available."""
+        coroutine = self.run_coroutine()
+        next(coroutine)
+        return coroutine
+
+    @abc.abstractmethod
+    def run_coroutine(self):
+        """User should define how their plugin runs"""
+
+    def update(self, file_path, call_run=False):
+        """Updates the AST information but does not attempt to run since that is handled by the scanner."""
+        super(CoroutinePlugin, self).update(file_path)
 
 
 class ManifestPlugin(BasePlugin):

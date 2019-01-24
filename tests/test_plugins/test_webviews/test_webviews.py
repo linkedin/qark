@@ -1,9 +1,9 @@
 import os
 
 import pytest
-import javalang
 
 from qark.issue import Severity
+from qark.plugins.webview.add_javascript_interface import AddJavascriptInterface, ADD_JAVASCRIPT_INTERFACE_DESCRIPTION
 from qark.plugins.webview.javascript_enabled import JavascriptEnabled, JAVASCRIPT_ENABLED_DESCRIPTION
 from qark.plugins.webview.load_data_with_base_url import LoadDataWithBaseURL, LOAD_DATA_WITH_BASE_URL_DESCRIPTION
 from qark.plugins.webview.set_allow_content_access import SetAllowContentAccess, SET_ALLOW_CONTENT_ACCESS_DESCRIPTION
@@ -12,7 +12,6 @@ from qark.plugins.webview.set_allow_universal_access_from_file_urls import (
     SetAllowUniversalAccessFromFileURLs,
     SET_ALLOW_UNIVERSAL_ACCESS_FROM_FILE_URLS_DESCRIPTION,
 )
-from qark.plugins.webview.add_javascript_interface import AddJavascriptInterface, ADD_JAVASCRIPT_INTERFACE_DESCRIPTION
 from qark.plugins.webview.set_dom_storage_enabled import SetDomStorageEnabled, SET_DOM_STORAGE_ENABLED_DESCRIPTION
 from qark.scanner.plugin import ManifestPlugin
 

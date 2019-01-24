@@ -2,8 +2,10 @@ import logging
 import os
 import re
 import shutil
+from io import open
 
 from javalang.tree import MethodInvocation
+
 from qark.plugins.manifest_helpers import get_min_sdk
 from qark.utils import is_java_file
 
@@ -18,16 +20,17 @@ EXCLUDE_REGEXES = (r'^\s*(//|/\*)',
 EXCLUSION_REGEX = re.compile("|".join(EXCLUDE_REGEXES))
 
 
-def run_regex(filename, rex):
+def run_regex(filename, rex, encoding="utf-8"):
     """
     Read a file line by line, run a regular expression against the content and return list of things that require inspection
 
     :param str filename: path to file
-    :param rex: can be a compiled regex or a string of the regex to search
+    :param Union[re.Pattern, str, bytes] rex: can be a compiled regex or a string/bytes of the regex to search
+    :param str encoding: encoding to read the files
     """
     things_to_inspect = []
     try:
-        with open(filename) as f:
+        with open(filename, encoding=encoding) as f:
             for curr_line in f:
                 if re.search(rex, curr_line):
                     # exclude everything in EXCLUDE_REGEXES
@@ -36,7 +39,7 @@ def run_regex(filename, rex):
     except IOError:
         log.debug("Unable to open file: %s results will be inaccurate", filename)
     except UnicodeDecodeError:
-        log.debug("Error reading file: %s most likely it is of an invalid type", filename)
+        pass  # Since the user passes in the encoding we eat this error - any occurrences of this are expected
     except Exception:
         log.exception("Failed to read file: %s", filename)
     return things_to_inspect

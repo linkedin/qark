@@ -4,8 +4,6 @@ from qark.plugins.crypto.ecb_cipher_usage import ECBCipherCheck
 from qark.plugins.crypto.packaged_private_keys import PackagedPrivateKeys
 from qark.plugins.crypto.setting_secure_random_seed import SeedWithSecureRandom
 
-import javalang
-
 curr_dir = os.path.dirname(__file__)
 java_dir = os.path.join(curr_dir, 'java_files')
 
@@ -38,7 +36,8 @@ def test_seeding_secure_random():
         curr_file = os.path.join(java_dir, curr_file)
 
         assert i == len(plugin.issues)
-        plugin.update(file_path=curr_file, call_run=True)
+        plugin.update(file_path=curr_file)
+        plugin.run()
         assert i + 1 == len(plugin.issues)
 
 
@@ -52,12 +51,14 @@ def test_packaged_private_keys():
         absolute_path = os.path.join(key_dir, file_path)
         assert i == len(plugin.issues)
         plugin.reset()
-        plugin.update(file_path=absolute_path, call_run=True)
+        plugin.update(file_path=absolute_path)
+        plugin.run()
         assert i + 1 == len(plugin.issues)
 
     public_key_files = [path + '.pub' for path in private_key_files]
     num_issues = len(plugin.issues)
     for file_path in public_key_files:
         plugin.reset()
-        plugin.update(file_path=os.path.join(key_dir, file_path), call_run=True)
+        plugin.update(file_path=os.path.join(key_dir, file_path))
+        plugin.run()
         assert num_issues == len(plugin.issues)

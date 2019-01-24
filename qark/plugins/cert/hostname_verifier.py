@@ -1,10 +1,9 @@
 import logging
 
-import javalang
 from javalang.tree import ClassCreator, MemberReference, MethodInvocation
 
 from qark.issue import Issue, Severity
-from qark.scanner.plugin import JavaASTPlugin
+from qark.scanner.plugin import CoroutinePlugin
 
 log = logging.getLogger(__name__)
 
@@ -24,7 +23,7 @@ ALLOW_ALL_HOSTNAME_VERIFIER_DESC = ("This can allow for impromper x.509 certific
                                     "https://developer.android.com/training/articles/security-ssl.html")
 
 
-class HostnameVerifier(JavaASTPlugin):
+class HostnameVerifier(CoroutinePlugin):
     """
     This plugin checks if:
      1. `AllowAllHostnameVerifier` is instantiated
@@ -34,52 +33,29 @@ class HostnameVerifier(JavaASTPlugin):
         super(HostnameVerifier, self).__init__(category="cert", name="Hostname Verifier")
         self.severity = Severity.WARNING
 
-    def run(self):
-        self._allow_all_hostname_verifier_created(self.java_ast, self.file_path)
-        self._set_hostname_verifier_allow_all(self.java_ast, self.file_path)
-        self._null_hostname_verifier(self.java_ast, self.file_path)
+    def run_coroutine(self):
+        while True:
+            _, class_ = (yield)
 
-    def _allow_all_hostname_verifier_created(self, tree, current_file):
-        """
-        Checks for a class creation of `AllowAllHostnameVerifier`.
+            if isinstance(class_, ClassCreator):
+                if class_.type.name == "AllowAllHostnameVerifier":
+                    self.issues.append(Issue(category=self.category, name="Allow all hostname verifier used",
+                                             severity=Severity.WARNING, description=ALLOW_ALL_HOSTNAME_VERIFIER_DESC,
+                                             file_object=self.file_path))
 
-        :param tree: javalang parsed tree
-        """
-        hostname_verifiers = [hostname_verifier for _, hostname_verifier in tree.filter(ClassCreator)
-                              if hostname_verifier.type.name == "AllowAllHostnameVerifier"]
-        if hostname_verifiers:
-            self.issues.append(Issue(category=self.category, name="Allow all hostname verifier used",
-                                     severity=Severity.WARNING, description=ALLOW_ALL_HOSTNAME_VERIFIER_DESC,
-                                     file_object=current_file))
+                elif class_.type.name == "NullHostNameVerifier" or class_.type.name == "NullHostnameVerifier":
+                    self.issues.append(Issue(category=self.category, name="Allow all hostname verifier used",
+                                             severity=Severity.WARNING, description=ALLOW_ALL_HOSTNAME_VERIFIER_DESC,
+                                             file_object=self.file_path))
 
-    def _set_hostname_verifier_allow_all(self, tree, current_file):
-        """Check for setHostnameVerifier with argument ALLOW_ALL_HOSTNAME_VERIFIER
-
-        :param tree: javalang parsed tree
-        """
-        set_hostname_verifiers = (allow_all_verifier for _, allow_all_verifier in tree.filter(MethodInvocation)
-                                  if allow_all_verifier.member == "setHostnameVerifier"
-                                  and len(allow_all_verifier.arguments) == 1
-                                  and type(allow_all_verifier.arguments[0]) is MemberReference
-                                  and allow_all_verifier.arguments[0].member == "ALLOW_ALL_HOSTNAME_VERIFIER")
-        for set_hostname_verifier in set_hostname_verifiers:
-            self.issues.append(Issue(category=self.category, name="setHostnameVerifier set to ALLOW_ALL",
-                                     severity=Severity.WARNING, description=ALLOW_ALL_HOSTNAME_VERIFIER_DESC,
-                                     file_object=current_file, line_number=set_hostname_verifier.position))
-
-    def _null_hostname_verifier(self, tree, current_file):
-        """
-        Checks for a class creation of `NullHostNameVerifier` or `NullHostnameVerifier`.
-
-        :param tree: javalang parsed tree
-        """
-        hostname_verifiers = [hostname_verifier for _, hostname_verifier in tree.filter(ClassCreator)
-                              if hostname_verifier.type.name == "NullHostNameVerifier"
-                              or hostname_verifier.type.name == "NullHostnameVerifier"]
-        if hostname_verifiers:
-            self.issues.append(Issue(category=self.category, name="Allow all hostname verifier used",
-                                     severity=Severity.WARNING, description=ALLOW_ALL_HOSTNAME_VERIFIER_DESC,
-                                     file_object=current_file))
+            elif isinstance(class_, MethodInvocation):
+                if (class_.member == "setHostnameVerifier"
+                        and len(class_.arguments) == 1
+                        and type(class_.arguments[0]) is MemberReference
+                        and class_.arguments[0].member == "ALLOW_ALL_HOSTNAME_VERIFIER"):
+                    self.issues.append(Issue(category=self.category, name="setHostnameVerifier set to ALLOW_ALL",
+                                             severity=Severity.WARNING, description=ALLOW_ALL_HOSTNAME_VERIFIER_DESC,
+                                             file_object=self.file_path, line_number=class_.position))
 
 
 plugin = HostnameVerifier()

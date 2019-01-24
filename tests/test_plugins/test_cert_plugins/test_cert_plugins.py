@@ -1,18 +1,16 @@
-from qark.plugins.cert.cert_validation_methods_overriden import CertValidation
-from qark.plugins.cert.hostname_verifier import HostnameVerifier, ALLOW_ALL_HOSTNAME_VERIFIER_DESC
-
-import javalang
+import os
 
 from qark.issue import Severity
-
-import os
+from qark.plugins.cert.cert_validation_methods_overriden import CertValidation
+from qark.plugins.cert.hostname_verifier import HostnameVerifier, ALLOW_ALL_HOSTNAME_VERIFIER_DESC
 
 
 def test_cert_validation_methods():
     path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "testCertMethodsFile.java")
 
     plugin = CertValidation()
-    plugin.update(path, call_run=True)
+    plugin.update(path)
+    plugin.run()
     assert 3 == len(plugin.issues)
 
 
@@ -20,7 +18,8 @@ def test_hostname_verifier():
     plugin = HostnameVerifier()
     path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "testHostnameVerifier.java")
 
-    plugin.update(path, call_run=True)
+    plugin.update(path)
+    plugin.run()
     assert 2 == len(plugin.issues)
     assert "Allow all hostname verifier used" == plugin.issues[0].name
     assert "setHostnameVerifier set to ALLOW_ALL" == plugin.issues[1].name

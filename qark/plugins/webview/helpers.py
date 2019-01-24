@@ -48,37 +48,39 @@ def webview_default_vulnerable(tree, method_name, issue_name, description, file_
         webviews = {}
         webview_name = None
 
-        # webviews are vulnerable by default, get all created webviews
-        for _, webview in method_declaration.filter(VariableDeclaration):
-            # create a dictionary of webview and websettings objects keyed by their variable name to the
-            #  AST parsed declaration
-            webviews = add_webview_to_dict(webviews, webview, "WebView")
+        for _, node in method_declaration:
 
-        # find if the webviews are vulnerable
-        for _, method_invocation in method_declaration.filter(MethodInvocation):
+            if ast_type_equals(node, VariableDeclaration):
+                webview = node
+                # webviews are vulnerable by default
+                # create a dictionary of webview and websettings objects keyed by their variable name to the
+                #  AST parsed declaration
+                webviews = add_webview_to_dict(webviews, webview, "WebView")
 
-            # check if method_name was called like
-            # webview.getSettings().method_name("false"), which makes it not vulnerable
-            if method_invocation.member == "getSettings":
-                webview_name = method_invocation.qualifier
+            elif ast_type_equals(node, MethodInvocation):
+                method_invocation = node
+                # check if method_name was called like
+                # webview.getSettings().method_name("false"), which makes it not vulnerable
+                if method_invocation.member == "getSettings":
+                    webview_name = method_invocation.qualifier
 
-                # selectors are the .operators after the function, in this case `setAllowFileAccess`
-                if method_invocation.selectors is None:
-                    continue
+                    # selectors are the .operators after the function, in this case `setAllowFileAccess`
+                    if method_invocation.selectors is None:
+                        continue
 
-                for selector in method_invocation.selectors:
-                    if valid_set_method_bool(method_invocation=selector, str_bool="false", method_name=method_name):
+                    for selector in method_invocation.selectors:
+                        if valid_set_method_bool(method_invocation=selector, str_bool="false", method_name=method_name):
 
-                        # remove all instances of that webview from the dictionary as they are not vulnerable
-                        if webviews.get(webview_name):
-                            webviews = remove_dict_entry_by_value(webviews, webview_name)
+                            # remove all instances of that webview from the dictionary as they are not vulnerable
+                            if webviews.get(webview_name):
+                                webviews = remove_dict_entry_by_value(webviews, webview_name)
 
-            # check if method_name was called like
-            # web_settings.method_name("false"), which makes it not vulnerable
-            if (valid_set_method_bool(method_invocation=method_invocation, str_bool="false", method_name=method_name)
-                  and webviews.get(webview_name)):
-                webviews = remove_dict_entry_by_value(webviews, webview_name)
-
+                # check if method_name was called like
+                # web_settings.method_name("false"), which makes it not vulnerable
+                if (valid_set_method_bool(method_invocation=method_invocation, str_bool="false",
+                                          method_name=method_name)
+                        and webviews.get(webview_name)):
+                    webviews = remove_dict_entry_by_value(webviews, webview_name)
 
         # any webview left in the dictionary is vulnerable,
         # and since there can be many variables for a single webview,
@@ -108,3 +110,8 @@ def add_webview_to_dict(webviews, webview, java_type):
             webviews_return[declaration.name] = webview
 
     return webviews_return
+
+
+def ast_type_equals(node, pattern):
+    """Small helper around how Javalang does its type checking for nodes."""
+    return node == pattern or (isinstance(pattern, type) and isinstance(node, pattern))
