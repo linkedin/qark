@@ -15,7 +15,7 @@ from qark.utils import is_java_file
 log = logging.getLogger(__name__)
 
 OS = platform.system()
-JAVA_VERSION_REGEX = '"(\d+\.\d+\..+)\"'
+JAVA_VERSION_REGEX = '((\d+\.\d+)(\.\d+)?)'
 APK_TOOL_PATH = os.path.join(LIB_PATH, "apktool")
 
 DEX2JAR_NAME = "dex2jar-2.0"
