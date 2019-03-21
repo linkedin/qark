@@ -8,6 +8,7 @@ from qark.issue import (Issue, Severity, issue_json)  # noqa:F401 These are expe
 from qark.utils import create_directories_to_path
 
 DEFAULT_REPORT_PATH = path.join(path.dirname(path.realpath(__file__)), 'report', '')
+DEFAULT_REPORT_NAME = "report"
 
 
 jinja_env = Environment(
@@ -29,13 +30,13 @@ class Report(object):
     # http://python-3-patterns-idioms-test.readthedocs.io/en/latest/Singleton.html#the-singleton
     __instance = None
 
-    def __new__(cls, issues=None, report_path=None):
+    def __new__(cls, issues=None, report_path=None, report_name=None):
         if Report.__instance is None:
             Report.__instance = object.__new__(cls)
 
         return Report.__instance
 
-    def __init__(self, issues=None, report_path=None):
+    def __init__(self, issues=None, report_path=None, report_name=None):
         """This will give you an instance of a report, with a default report path which is local
         to where QARK is on the file system.
 
@@ -45,6 +46,7 @@ class Report(object):
         """
         self.issues = issues if issues else []
         self.report_path = report_path or DEFAULT_REPORT_PATH
+        self.report_name = report_name or DEFAULT_REPORT_NAME
 
     def generate(self, file_type='html', template_file=None):
         """This method uses Jinja2 to generate a standalone HTML version of the report.
@@ -56,7 +58,7 @@ class Report(object):
         """
         create_directories_to_path(self.report_path)
 
-        full_report_path = path.join(self.report_path, 'report.{file_type}'.format(file_type=file_type))
+        full_report_path = path.join(self.report_path, '{file_name}.{file_type}'.format(file_name=self.report_name, file_type=file_type))
 
         with open(full_report_path, mode='w') as report_file:
             if not template_file:
