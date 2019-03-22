@@ -45,8 +45,8 @@ logger = logging.getLogger(__name__)
               help="Type of report to generate along with terminal output.", default="html", show_default=True)
 @click.option("--exploit-apk/--no-exploit-apk", default=False,
               help="Create an exploit APK targetting a few vulnerabilities.", show_default=True)
-@click.option("--report-path",default=None, help="Change the output directory for the report")
-@click.option("--report-name",default=None, help="Change the filename of the report")
+@click.option("--report-path", default=None, help="Change the output directory for the report")
+@click.option("--report-name", default=None, help="Change the filename of the report")
 @click.version_option()
 @click.pass_context
 def cli(ctx, sdk_path, build_path, debug, source, report_type, exploit_apk, report_path, report_name):
@@ -93,13 +93,7 @@ def cli(ctx, sdk_path, build_path, debug, source, report_type, exploit_apk, repo
     click.secho("Finish scans...")
 
     click.secho("Writing report...")
-    if report_path is not None:
-        if report_name is not None:
-            report = Report(issues=set(scanner.issues), report_path=report_path, report_name=report_name)
-        else:
-            report = Report(issues=set(scanner.issues), report_path=report_path)
-    else:
-        report = Report(issues=set(scanner.issues))
+    report = Report(issues=set(scanner.issues), report_path=report_path, report_name=report_name)
     report_path = report.generate(file_type=report_type)
     click.secho("Finish writing report to {report_path} ...".format(report_path=report_path))
 
