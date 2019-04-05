@@ -29,13 +29,13 @@ class Report(object):
     # http://python-3-patterns-idioms-test.readthedocs.io/en/latest/Singleton.html#the-singleton
     __instance = None
 
-    def __new__(cls, issues=None, report_path=None):
+    def __new__(cls, issues=None, report_path=None, keep_report=False):
         if Report.__instance is None:
             Report.__instance = object.__new__(cls)
 
         return Report.__instance
 
-    def __init__(self, issues=None, report_path=None):
+    def __init__(self, issues=None, report_path=None, keep_report=False):
         """This will give you an instance of a report, with a default report path which is local
         to where QARK is on the file system.
 
@@ -45,6 +45,7 @@ class Report(object):
         """
         self.issues = issues if issues else []
         self.report_path = report_path or DEFAULT_REPORT_PATH
+        self.keep_report = keep_report
 
     def generate(self, file_type='html', template_file=None):
         """This method uses Jinja2 to generate a standalone HTML version of the report.
@@ -58,11 +59,15 @@ class Report(object):
 
         full_report_path = path.join(self.report_path, 'report.{file_type}'.format(file_type=file_type))
 
-        with open(full_report_path, mode='w') as report_file:
+        open_flag = 'w'
+        if self.keep_report:
+            open_flag = 'a'
+        with open(full_report_path, mode=open_flag) as report_file:
             if not template_file:
                 template = jinja_env.get_template('{file_type}_report.jinja'.format(file_type=file_type))
             else:
                 template = Template(template_file)
             report_file.write(template.render(issues=list(self.issues)))
+            report_file.write('\n')
 
         return full_report_path
