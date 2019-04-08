@@ -51,9 +51,11 @@ logger = logging.getLogger(__name__)
               help="Append to final report file.", show_default=True)
 @click.option("--log-level", default=0,
               help="Minimum issue output log level, default INFO(0), can be [0(INFO), 1(WARNING), 2(ERROR), 3(VULNERABILITY)].")
+@click.option("--disable-plugins", default=None,
+              help="Disable plugins seperated by commas.")
 @click.version_option()
 @click.pass_context
-def cli(ctx, sdk_path, build_path, debug, source, report_type, exploit_apk, report_path, keep_report, log_level):
+def cli(ctx, sdk_path, build_path, debug, source, report_type, exploit_apk, report_path, keep_report, log_level, disable_plugins):
     if not source:
         click.secho("Please pass a source for scanning through either --java or --apk")
         click.secho(ctx.get_help())
@@ -92,7 +94,7 @@ def cli(ctx, sdk_path, build_path, debug, source, report_type, exploit_apk, repo
     click.secho("Running scans...")
     path_to_source = decompiler.path_to_source if decompiler.source_code else decompiler.build_directory
 
-    scanner = Scanner(manifest_path=decompiler.manifest_path, path_to_source=path_to_source)
+    scanner = Scanner(manifest_path=decompiler.manifest_path, path_to_source=path_to_source, disable_plugins=disable_plugins.split(","))
     scanner.run()
     click.secho("Finish scans...")
 

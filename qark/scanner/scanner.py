@@ -20,7 +20,7 @@ PLUGIN_CATEGORIES = ("manifest", "broadcast", "file", "crypto", "intent", "cert"
 
 class Scanner(object):
 
-    def __init__(self, manifest_path, path_to_source):
+    def __init__(self, manifest_path, path_to_source, disable_plugins=None):
         """
         Creates the scanner.
 
@@ -34,6 +34,8 @@ class Scanner(object):
         self.path_to_source = path_to_source
 
         self._gather_files()
+
+        self.disable_plugins = disable_plugins
 
     def run(self):
         """
@@ -59,6 +61,8 @@ class Scanner(object):
                     continue
 
             for plugin_name in get_plugins(category):
+                if plugin_name in self.disable_plugins:
+                    continue
                 plugins.append(plugin_source.load_plugin(plugin_name).plugin)
 
         self._run_checks(plugins)
