@@ -29,7 +29,7 @@ class Scanner(object):
         """
         self.files = set()
         self.issues = []
-        self.manifest_path = manifest_path
+        self.manifest_path = manifest_path if manifest_path else path_to_source + '/AndroidManifest.xml'
 
         self.path_to_source = path_to_source
 
