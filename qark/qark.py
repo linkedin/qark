@@ -49,9 +49,11 @@ logger = logging.getLogger(__name__)
               help="report output path.", show_default=True)
 @click.option("--keep-report/--no-keep-report", default=False,
               help="Append to final report file.", show_default=True)
+@click.option("--log-level", default=0,
+              help="Minimum issue output log level, default INFO(0), can be [0(INFO), 1(WARNING), 2(ERROR), 3(VULNERABILITY)].")
 @click.version_option()
 @click.pass_context
-def cli(ctx, sdk_path, build_path, debug, source, report_type, exploit_apk, report_path, keep_report):
+def cli(ctx, sdk_path, build_path, debug, source, report_type, exploit_apk, report_path, keep_report, log_level):
     if not source:
         click.secho("Please pass a source for scanning through either --java or --apk")
         click.secho(ctx.get_help())
@@ -96,7 +98,7 @@ def cli(ctx, sdk_path, build_path, debug, source, report_type, exploit_apk, repo
 
     click.secho("Writing report...")
     report = Report(issues=set(scanner.issues), report_path=report_path, keep_report=keep_report)
-    report_path = report.generate(file_type=report_type)
+    report_path = report.generate(file_type=report_type, log_level=log_level)
     click.secho("Finish writing report to {report_path} ...".format(report_path=report_path))
 
     if exploit_apk:

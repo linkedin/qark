@@ -47,7 +47,7 @@ class Report(object):
         self.report_path = report_path or DEFAULT_REPORT_PATH
         self.keep_report = keep_report
 
-    def generate(self, file_type='html', template_file=None):
+    def generate(self, file_type='html', template_file=None, log_level=0):
         """This method uses Jinja2 to generate a standalone HTML version of the report.
 
         :param str file_type:     The type of file for the report. Defaults to 'html'.
@@ -67,7 +67,7 @@ class Report(object):
                 template = jinja_env.get_template('{file_type}_report.jinja'.format(file_type=file_type))
             else:
                 template = Template(template_file)
-            report_file.write(template.render(issues=list(self.issues)))
+            report_file.write(template.render(issues=[x for x in list(self.issues) if x.severity._value_ >= log_level]))
             report_file.write('\n')
 
         return full_report_path
