@@ -51,7 +51,7 @@ logger = logging.getLogger(__name__)
               help="Append to final report file.", show_default=True)
 @click.option("--log-level", default=0,
               help="Minimum issue output log level, default INFO(0), can be [0(INFO), 1(WARNING), 2(ERROR), 3(VULNERABILITY)].")
-@click.option("--disable-plugins", default=None,
+@click.option("--disable-plugins", default='',
               help="Disable plugins seperated by commas.")
 @click.version_option()
 @click.pass_context

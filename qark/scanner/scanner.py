@@ -20,7 +20,7 @@ PLUGIN_CATEGORIES = ("manifest", "broadcast", "file", "crypto", "intent", "cert"
 
 class Scanner(object):
 
-    def __init__(self, manifest_path, path_to_source, disable_plugins=None):
+    def __init__(self, manifest_path, path_to_source, disable_plugins=['']):
         """
         Creates the scanner.
 
