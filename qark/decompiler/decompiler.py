@@ -68,7 +68,11 @@ class Decompiler(object):
 
         if os.path.isdir(path_to_source) or is_java_file(path_to_source):
             self.source_code = True
-            self.manifest_path = None
+            if os.path.isdir(path_to_source):
+                self.manifest_path = os.path.join(path_to_source, 'AndroidManifest.xml')
+            else:
+                self.manifest_path = None
+            self.apk_name = os.path.splitext(os.path.basename(path_to_source))[0].split('/')[-1]
             log.debug("Decompiler got directory to run on, assuming Java source code")
             return
 
