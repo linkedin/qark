@@ -53,9 +53,11 @@ logger = logging.getLogger(__name__)
               help="Minimum issue output log level, default INFO(0), can be [0(INFO), 1(WARNING), 2(ERROR), 3(VULNERABILITY)].")
 @click.option("--disable-plugins", default='',
               help="Disable plugins seperated by commas.")
+@click.option("--min-sdk", default=None,
+              help="Override min-sdk which getting from AndroidManifest.xml.")
 @click.version_option()
 @click.pass_context
-def cli(ctx, sdk_path, build_path, debug, source, report_type, exploit_apk, report_path, keep_report, log_level, disable_plugins):
+def cli(ctx, sdk_path, build_path, debug, source, report_type, exploit_apk, report_path, keep_report, log_level, disable_plugins, min_sdk):
     if not source:
         click.secho("Please pass a source for scanning through either --java or --apk")
         click.secho(ctx.get_help())
@@ -94,7 +96,7 @@ def cli(ctx, sdk_path, build_path, debug, source, report_type, exploit_apk, repo
     click.secho("Running scans...")
     path_to_source = decompiler.path_to_source if decompiler.source_code else decompiler.build_directory
 
-    scanner = Scanner(manifest_path=decompiler.manifest_path, path_to_source=path_to_source, disable_plugins=disable_plugins.split(","))
+    scanner = Scanner(manifest_path=decompiler.manifest_path, path_to_source=path_to_source, disable_plugins=disable_plugins.split(","), min_sdk=min_sdk)
     scanner.run()
     click.secho("Finish scans...")
 

@@ -20,7 +20,7 @@ PLUGIN_CATEGORIES = ("manifest", "broadcast", "file", "crypto", "intent", "cert"
 
 class Scanner(object):
 
-    def __init__(self, manifest_path, path_to_source, disable_plugins=['']):
+    def __init__(self, manifest_path, path_to_source, disable_plugins=[''], min_sdk=None):
         """
         Creates the scanner.
 
@@ -37,6 +37,8 @@ class Scanner(object):
 
         self.disable_plugins = disable_plugins
 
+        self.min_sdk = min_sdk
+
     def run(self):
         """
         Runs all the plugin checks by category.
@@ -48,7 +50,7 @@ class Scanner(object):
             if category == "manifest":
                 # Manifest plugins only need to run once, so we run them and continue
                 manifest_plugins = get_plugins(category)
-                ManifestPlugin.update_manifest(self.manifest_path)
+                ManifestPlugin.update_manifest(self.manifest_path, self.min_sdk)
                 if ManifestPlugin.manifest_xml is not None:
 
                     for plugin in [plugin_source.load_plugin(plugin_name).plugin for plugin_name in manifest_plugins]:

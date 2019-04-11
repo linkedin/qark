@@ -75,7 +75,7 @@ def valid_method_invocation(method_invocation, method_name, num_arguments):
             and len(method_invocation.arguments) == num_arguments)
 
 
-def get_min_sdk_from_files(files, apk_constants=None):
+def get_min_sdk_from_files(files, apk_constants=None, min_sdk=None):
     """
     Get the min_sdk from either the `apk_constants` if it exists, or the manifest file in `files` if it exists. If
     neither exists, return 1 as the default minimum SDK
@@ -91,7 +91,7 @@ def get_min_sdk_from_files(files, apk_constants=None):
     except (KeyError, TypeError):
         for decompiled_file in files:
             if decompiled_file.lower().endswith("{separator}androidmanifest.xml".format(separator=os.sep)):
-                return get_min_sdk(decompiled_file)
+                return get_min_sdk(decompiled_file, min_sdk=min_sdk)
     return 1
 
 

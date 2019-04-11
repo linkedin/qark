@@ -22,7 +22,7 @@ def get_package_from_manifest(manifest_path):
     return manifest_xml.getroot().attrib.get("package")
 
 
-def get_min_sdk(manifest_xml, files=None):
+def get_min_sdk(manifest_xml, files=None, min_sdk=None):
     """
     Given the manifest as a `minidom.parse`'d object or path to manifest,
     try to get the minimum SDK the manifest specifies.
@@ -31,6 +31,8 @@ def get_min_sdk(manifest_xml, files=None):
     :param Set[str] files: list of files received from Scanner
     :return: int of the version if it exists, else 1 (the default)
     """
+    if min_sdk:
+        return int(min_sdk)
     if manifest_xml is None and files:
         manifest_xml = get_manifest_out_of_files(files)
 
