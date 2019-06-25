@@ -11,7 +11,7 @@ log = logging.getLogger(__name__)
 
 API_KEY_REGEX = re.compile(r'(?=.{20,})(?=.+\d)(?=.+[a-z])(?=.+[A-Z])(?=.+[-_])')
 SPECIAL_CHARACTER_REGEX = re.compile(r'(?=.+[!$%^&*()_+|~=`{}\[\]:<>?,./])')
-BLACKLISTED_EXTENSIONS = (".apk", ".dex", ".png", ".jar")
+BLACKLISTED_EXTENSIONS = (".apk", ".dex", ".png", ".jar", ".jpg")
 
 API_KEY_DESCRIPTION = "Please confirm and investigate the API key to determine its severity."
 

@@ -110,7 +110,7 @@ class APKBuilder(object):
             os.chdir(self.exploit_apk_path)
             write_key_value_to_xml('packageName', self.package_name, self.strings_xml_path)
             self._write_properties_file({"sdk.dir": self.sdk_path})
-            command = "./gradlew assembleDebug"
+            command = "sh -x ./gradlew assembleDebug"
             try:
                 subprocess.call(shlex.split(command))
             except Exception:
