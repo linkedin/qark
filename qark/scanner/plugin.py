@@ -249,7 +249,7 @@ class ManifestPlugin(BasePlugin):
     package_name = "PACKAGE_NOT_FOUND"
 
     @classmethod
-    def update_manifest(cls, path_to_manifest):
+    def update_manifest(cls, path_to_manifest, min_sdk):
         """Users of this class should call this method instead of changing class attributes directly"""
         cls.manifest_path = path_to_manifest
         try:
@@ -261,7 +261,7 @@ class ManifestPlugin(BasePlugin):
             return
 
         try:
-            cls.min_sdk = get_min_sdk(cls.manifest_path)
+            cls.min_sdk = get_min_sdk(cls.manifest_path, min_sdk=min_sdk)
             cls.target_sdk = get_target_sdk(cls.manifest_path)
         except AttributeError:
             # manifest path is not set, assume min_sdk and target_sdk

@@ -68,7 +68,11 @@ class Decompiler(object):
 
         if os.path.isdir(path_to_source) or is_java_file(path_to_source):
             self.source_code = True
-            self.manifest_path = None
+            if os.path.isdir(path_to_source):
+                self.manifest_path = os.path.join(path_to_source, 'AndroidManifest.xml')
+            else:
+                self.manifest_path = None
+            self.apk_name = os.path.splitext(os.path.basename(path_to_source))[0].split('/')[-1]
             log.debug("Decompiler got directory to run on, assuming Java source code")
             return
 
@@ -159,13 +163,13 @@ class Decompiler(object):
 
         log.debug("APKTool finish executing, trying to move manifest into proper location")
         # copy valid XML file to correct location
-        shutil.move(os.path.join(self.build_directory, "apktool", "AndroidManifest.xml"),
-                    os.path.join(self.build_directory, "AndroidManifest.xml"))
+#        shutil.move(os.path.join(self.build_directory, "apktool", "AndroidManifest.xml"),
+#                    os.path.join(self.build_directory, "AndroidManifest.xml"))
         log.debug("Manifest moved successfully")
 
         log.debug("Removing apktool subdirectory of build")
         # remove the apktool generated files (only needed manifest file)
-        shutil.rmtree(os.path.join(self.build_directory, "apktool"))
+#        shutil.rmtree(os.path.join(self.build_directory, "apktool"))
         log.debug("Removed apktool directory")
 
         return os.path.join(self.build_directory, "AndroidManifest.xml")

@@ -20,7 +20,7 @@ PLUGIN_CATEGORIES = ("manifest", "broadcast", "file", "crypto", "intent", "cert"
 
 class Scanner(object):
 
-    def __init__(self, manifest_path, path_to_source):
+    def __init__(self, manifest_path, path_to_source, disable_plugins=[''], min_sdk=None):
         """
         Creates the scanner.
 
@@ -29,11 +29,15 @@ class Scanner(object):
         """
         self.files = set()
         self.issues = []
-        self.manifest_path = manifest_path
+        self.manifest_path = manifest_path if manifest_path else path_to_source + '/AndroidManifest.xml'
 
         self.path_to_source = path_to_source
 
         self._gather_files()
+
+        self.disable_plugins = disable_plugins
+
+        self.min_sdk = min_sdk
 
     def run(self):
         """
@@ -46,7 +50,7 @@ class Scanner(object):
             if category == "manifest":
                 # Manifest plugins only need to run once, so we run them and continue
                 manifest_plugins = get_plugins(category)
-                ManifestPlugin.update_manifest(self.manifest_path)
+                ManifestPlugin.update_manifest(self.manifest_path, self.min_sdk)
                 if ManifestPlugin.manifest_xml is not None:
 
                     for plugin in [plugin_source.load_plugin(plugin_name).plugin for plugin_name in manifest_plugins]:
@@ -59,6 +63,8 @@ class Scanner(object):
                     continue
 
             for plugin_name in get_plugins(category):
+                if plugin_name in self.disable_plugins:
+                    continue
                 plugins.append(plugin_source.load_plugin(plugin_name).plugin)
 
         self._run_checks(plugins)
