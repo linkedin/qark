@@ -117,7 +117,7 @@ class Decompiler(object):
                                       build_directory=self.build_directory))
 
         try:
-            retcode = subprocess.call(shlex.split(decompiler_command))
+            retcode = subprocess.call(shlex.split(decompiler_command.decode(encoding="utf-8")))
         except Exception:
             log.exception("%s failed to finish decompiling, continuing", decompiler.name)
         else:
@@ -152,7 +152,7 @@ class Decompiler(object):
         log.debug("Calling APKTool with following command")
         log.debug(custom_apktool_command)
         try:
-            subprocess.call(shlex.split(custom_apktool_command))
+            subprocess.call(shlex.split(custom_apktool_command.decode(encoding="utf-8")))
         except Exception:
             log.exception("Failed to run APKTool with command: %s", custom_apktool_command)
             raise SystemExit("Failed to run APKTool")
@@ -203,7 +203,7 @@ class Decompiler(object):
 
         log.debug("Running dex2jar with command %s", dex2jar_command)
         try:
-            ret_code = subprocess.call(shlex.split(dex2jar_command))
+            ret_code = subprocess.call(shlex.split(dex2jar_command.decode(encoding="utf-8")))
             if ret_code != 0:
                 log.critical("Error running dex2jar command: %s", dex2jar_command)
                 raise SystemExit("Error running dex2jar")
