@@ -82,7 +82,7 @@ Included in the types of security vulnerabilities this tool attempts to find are
 
 Notice
 ======
-Note: QARK decompiles Android applications back to raw source code. Please do not use this tool if this may be considered illegal in your juristdiction. If you are unsure, seek legal counsel.
+Note: QARK decompiles Android applications back to raw source code. Please do not use this tool if this may be considered illegal in your jurisdiction. If you are unsure, seek legal counsel.
 
 If you run into issues on OSX, especially relating to the outbound call to the Play Store, or the downloading of the SDK, it is
 likely due to your Python/OpenSSL configuration and the fact that recent changes in OSX impacted Python installed via brew. Nuking your
