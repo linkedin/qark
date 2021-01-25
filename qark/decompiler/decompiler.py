@@ -26,9 +26,9 @@ DEX2JAR_INVOKE = "d2j_invoke.{extension}".format(extension=DEX2JAR_EXTENSION)
 
 DECOMPILERS_PATH = os.path.join(LIB_PATH, "decompilers")
 
-APK_TOOL_COMMAND = ("java -Djava.awt.headless=true -jar {apktool_path}/apktool.jar "
-                    "d {path_to_source} --no-src --force -m --output {build_directory}")
-DEX2JAR_COMMAND = "{dex2jar_path} {path_to_dex} -o {build_apk}.jar"
+APK_TOOL_COMMAND = ("java -Djava.awt.headless=true -jar \"{apktool_path}/apktool.jar\" "
+                    "d \"{path_to_source}\" --no-src --force -m --output \"{build_directory}\"")
+DEX2JAR_COMMAND = "{dex2jar_path} \"{path_to_dex}\" -o \"{build_apk}.jar\""
 
 
 def escape_windows_path(path):
@@ -111,13 +111,12 @@ class Decompiler(object):
             log.debug(".jar file path not found, trying to create dex file.")
             self.jar_path = self._run_dex2jar()
 
-        decompiler_command = escape_windows_path(
-            decompiler.command.format(path_to_decompiler=decompiler.path_to_decompiler,
-                                      jar=self.jar_path,
-                                      build_directory=self.build_directory))
+        decompiler_command = decompiler.command.format(path_to_decompiler=decompiler.path_to_decompiler,
+                                                       jar=self.jar_path,
+                                                       build_directory=self.build_directory)
 
         try:
-            retcode = subprocess.call(shlex.split(decompiler_command))
+            retcode = subprocess.call(decompiler_command,shell=True)
         except Exception:
             log.exception("%s failed to finish decompiling, continuing", decompiler.name)
         else:
@@ -145,14 +144,14 @@ class Decompiler(object):
 
         configure_apktool()
 
-        custom_apktool_command = escape_windows_path(APK_TOOL_COMMAND.format(apktool_path=APK_TOOL_PATH,
-                                                                             path_to_source=self.path_to_source,
-                                                                             build_directory=os.path.join(
-                                                                                 self.build_directory, "apktool")))
+        custom_apktool_command = APK_TOOL_COMMAND.format(apktool_path=APK_TOOL_PATH,
+                                                         path_to_source=self.path_to_source,
+                                                         build_directory=os.path.join(
+                                                             self.build_directory, "apktool"))
         log.debug("Calling APKTool with following command")
         log.debug(custom_apktool_command)
         try:
-            subprocess.call(shlex.split(custom_apktool_command))
+            subprocess.call(custom_apktool_command,shell=True)
         except Exception:
             log.exception("Failed to run APKTool with command: %s", custom_apktool_command)
             raise SystemExit("Failed to run APKTool")
@@ -194,16 +193,16 @@ class Decompiler(object):
 
         configure_dex2jar()
 
-        dex2jar_command = escape_windows_path(DEX2JAR_COMMAND.format(dex2jar_path=os.path.join(DEX2JAR_PATH,
-                                                                                               "d2j-dex2jar.{extension}".format(
-                                                                                                   extension=DEX2JAR_EXTENSION)),
-                                                                     path_to_dex=self.dex_path,
-                                                                     build_apk=os.path.join(self.build_directory,
-                                                                                            self.apk_name)))
+        dex2jar_command = DEX2JAR_COMMAND.format(dex2jar_path=os.path.join(DEX2JAR_PATH,
+                                                                           "d2j-dex2jar.{extension}".format(
+                                                                               extension=DEX2JAR_EXTENSION)),
+                                                 path_to_dex=self.dex_path,
+                                                 build_apk=os.path.join(self.build_directory,
+                                                                        self.apk_name))
 
         log.debug("Running dex2jar with command %s", dex2jar_command)
         try:
-            ret_code = subprocess.call(shlex.split(dex2jar_command))
+            ret_code = subprocess.call(dex2jar_command,shell=True)
             if ret_code != 0:
                 log.critical("Error running dex2jar command: %s", dex2jar_command)
                 raise SystemExit("Error running dex2jar")
