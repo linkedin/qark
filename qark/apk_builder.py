@@ -2,9 +2,9 @@ from __future__ import absolute_import
 
 import logging
 import os
-import shlex
 import shutil
 import subprocess
+import platform
 
 from six import StringIO
 from six.moves import configparser
@@ -25,6 +25,9 @@ COMPONENT_ENTRIES = {"activity": ("onCreate", "onStart"),
 
 EXPLOIT_APK_TEMPLATE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "exploit_apk")
 
+OS = platform.system()
+
+GRADLEW_NAME = "./gradlew" if OS != "Windows" else "gradlew.bat"
 
 class APKBuilder(object):
     __instance = None
@@ -44,12 +47,13 @@ class APKBuilder(object):
         :param str apk_name: name of the examined APK
         """
         self.exploit_apk_path = os.path.join(exploit_apk_path, "{apk_name}_exploit_apk".format(apk_name=apk_name))
-
+        log.debug("Exploit APK Path")
+        log.debug(self.exploit_apk_path)
         # need to remove directory if it exists otherwise shutil.copytree will error from helper
         if os.path.isdir(self.exploit_apk_path):
             shutil.rmtree(self.exploit_apk_path)
 
-        # copy template exploit APK to exploit location
+        # copy template exploit APK to exploit location+
         try:
             copy_directory_to_location(directory_to_copy=EXPLOIT_APK_TEMPLATE_PATH, destination=self.exploit_apk_path)
         except Exception:
@@ -110,11 +114,11 @@ class APKBuilder(object):
             os.chdir(self.exploit_apk_path)
             write_key_value_to_xml('packageName', self.package_name, self.strings_xml_path)
             self._write_properties_file({"sdk.dir": self.sdk_path})
-            command = "./gradlew assembleDebug"
+            command = "{} assembleDebug".format(GRADLEW_NAME)
             try:
-                subprocess.call(shlex.split(command))
+                subprocess.call(command,shell=True)
             except Exception:
-                log.exception("Error running command %s")
+                log.exception("Error running command {}".format(command))
                 raise  # raise here as we can still make the report for the user
         except Exception:
             raise

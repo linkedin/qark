@@ -49,9 +49,13 @@ logger = logging.getLogger(__name__)
               help="report output path.", show_default=True)
 @click.option("--keep-report/--no-keep-report", default=False,
               help="Append to final report file.", show_default=True)
+@click.option("--bypass-decompile/--no-bypass-decompile", default=False,
+              help="Resume after the decompilation", show_default=True)
+@click.option("--report/--no-report", default=False,
+              help="Resume after the decompilation", show_default=True)
 @click.version_option()
 @click.pass_context
-def cli(ctx, sdk_path, build_path, debug, source, report_type, exploit_apk, report_path, keep_report):
+def cli(ctx, sdk_path, build_path, debug, source, report_type, exploit_apk, report_path, keep_report, bypass_decompile,report):
     if not source:
         click.secho("Please pass a source for scanning through either --java or --apk")
         click.secho(ctx.get_help())
@@ -74,6 +78,7 @@ def cli(ctx, sdk_path, build_path, debug, source, report_type, exploit_apk, repo
             else:
                 click.secho("Please provide path to android SDK if building exploit APK.")
                 return
+            sdk_path = sdk_path.replace("\\","\\\\") #Test for build
 
     # Debug controls the output to stderr, debug logs are ALWAYS stored in `qark_debug.log`
     if debug:
@@ -83,9 +88,12 @@ def cli(ctx, sdk_path, build_path, debug, source, report_type, exploit_apk, repo
 
     initialize_logging(level)
 
-    click.secho("Decompiling...")
     decompiler = Decompiler(path_to_source=source, build_directory=build_path)
-    decompiler.run()
+    if  bypass_decompile:
+        click.secho("Skipping decompilation...")
+    else:
+        click.secho("Decompiling...")
+        decompiler.run()
 
     click.secho("Running scans...")
     path_to_source = decompiler.path_to_source if decompiler.source_code else decompiler.build_directory
@@ -94,10 +102,11 @@ def cli(ctx, sdk_path, build_path, debug, source, report_type, exploit_apk, repo
     scanner.run()
     click.secho("Finish scans...")
 
-    click.secho("Writing report...")
-    report = Report(issues=set(scanner.issues), report_path=report_path, keep_report=keep_report)
-    report_path = report.generate(file_type=report_type)
-    click.secho("Finish writing report to {report_path} ...".format(report_path=report_path))
+    if report:
+        click.secho("Writing report...")
+        report = Report(issues=set(scanner.issues), report_path=report_path, keep_report=keep_report)
+        report_path = report.generate(file_type=report_type)
+        click.secho("Finish writing report to {report_path} ...".format(report_path=report_path))
 
     if exploit_apk:
         click.secho("Building exploit APK...")
