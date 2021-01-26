@@ -78,7 +78,7 @@ def cli(ctx, sdk_path, build_path, debug, source, report_type, exploit_apk, repo
             else:
                 click.secho("Please provide path to android SDK if building exploit APK.")
                 return
-            sdk_path.replace("\\","\\\\").replace("\\\\:","\\:") #Hugly patch for Windows build
+            sdk_path = sdk_path.replace("\\","\\\\") #Test for build
 
     # Debug controls the output to stderr, debug logs are ALWAYS stored in `qark_debug.log`
     if debug:
