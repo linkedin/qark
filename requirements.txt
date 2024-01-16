@@ -2,7 +2,7 @@ asn1crypto==0.24.0 \
     --hash=sha256:2f1adbb7546ed199e3c90ef23ec95c5cf3585bac7d11fb7eb562a3fe89c64e87 \
     --hash=sha256:9d5c20441baf0cb60a4ac34cc447c6c189024b6b4c6cd7877034f4965c464e49 \
     # via cryptography
-certifi==2018.1.18 \
+certifi==2023.7.22 \
     --hash=sha256:14131608ad2fd56836d33a71ee60fa1c82bc9d2c8d98b7bdbc631fe1b3cd1296 \
     --hash=sha256:edbc3f203427eef571f79a7692bb160a2b0f7ccaa31953e99bd17e307cf63f7d \
     # via requests
@@ -42,7 +42,7 @@ chardet==3.0.4 \
 click==6.7 \
     --hash=sha256:29f99fc6125fbc931b758dc053b3114e55c77a6e4c6c3a2674a2dc986016381d \
     --hash=sha256:f15516df478d5a56180fbf80e68f206010e6d160fc39fa508b65e035fd75130b
-cryptography==2.2.1 \
+cryptography==41.0.5 \
     --hash=sha256:0f61273eccc681dc5a77dcd517cc2cb74078d1b00adb2b273d0a010153ae43c7 \
     --hash=sha256:27dd18e180608c512433c843ad2d62396399608a0f3603c4d805500caeeec3d6 \
     --hash=sha256:2893ee1d67dace6178732c9ea8c176fedf5b6a6463f72f1378b779cdba8a0ea5 \
@@ -75,7 +75,7 @@ ipaddress==1.0.19 \
     # via cryptography
 javalang==0.11.0 \
     --hash=sha256:3fcab8c0d4a1c51512bc7de1f4aaf9de8fb582833746b572478da6c0ac318a0b
-jinja2==2.10 \
+jinja2==3.1.3 \
     --hash=sha256:74c935a1b8bb9a3947c50a54766a969d4846290e1e788ea44c1392163723c3bd \
     --hash=sha256:f84be1bb0040caca4cea721fcbbbbd61f9be9464ca236387158b0feea01914a4
 markupsafe==1.0 \
@@ -96,7 +96,8 @@ requests[security]==2.18.4 \
 six==1.11.0 \
     --hash=sha256:70e8a77beed4562e7f14fe23a786b54f6296e34344c23bc42f07b15018ff98e9 \
     --hash=sha256:832dc0e10feb1aa2c68dcc57dbb658f1c7e65b9b61af69048abc87a2db00a0eb
-urllib3==1.22 \
+urllib3==1.26.18 \
     --hash=sha256:06330f386d6e4b195fbfc736b297f58c5a892e4440e54d294d7004e3a9bbea1b \
     --hash=sha256:cc44da8e1145637334317feebd728bd869a35285b93cbb4cca2577da7e62db4f \
     # via requests
+requests>=2.31.0 # not directly required, pinned by Snyk to avoid a vulnerability
